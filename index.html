@@ -1,0 +1,431 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+  <meta charset="UTF-8" />
+  <meta http-equiv="X-UA-Compatible" content="IE=edge" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <meta property="og:title" content="Personal Portfolio of Mayur Caariappa" />
+  <meta name="description"
+    content="Portfolio of Mayur Caariappa, a Software Engineer specializing in Java, SpringBoot, and MERN stack development.">
+  <title>Personal Portfolio</title>
+
+  <link rel="stylesheet" href="./css/lightstyle.css" />
+  <!-- <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0-beta3/css/all.min.css" rel="stylesheet"> -->
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.2.1/css/all.min.css">
+  <link rel="preconnect" href="https://fonts.googleapis.com" />
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+  <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;500;600&display=swap" rel="stylesheet" />
+</head>
+
+<body>
+  <!-- Dark Mode Toggle -->
+  <div class="mode-container">
+    <input type="checkbox" class="checkbox" id="checkbox" aria-label="Toggle dark mode" role="switch">
+    <label for="checkbox" class="checkbox-label">
+      <i class="fa-solid fa-sun" style="color: #ffca0a;"></i>
+      <i class="fa-solid fa-moon" style="color: #ecdb22;"></i>
+      <span class="ball"></span>
+    </label>
+  </div>
+
+  <main>
+    <!--- Sidebar -->
+    <aside class="sidebar" data-sidebar>
+      <div class="sidebar-info">
+        <figure class="avatar-box">
+          <img src="./images/mayurcaariappa.png" alt="Mayur_Caariappa" width="80" />
+        </figure>
+
+        <div class="info-content">
+          <h1 class="name" title="Mayur Caariappa">Mayur Caariappa</h1>
+          <p class="title">Software Engineer</p>
+        </div>
+
+        <button class="info_more-btn" data-sidebar-btn>
+          <span>Show Contacts</span>
+          <ion-icon name="chevron-down"></ion-icon>
+        </button>
+      </div>
+
+      <div class="sidebar-info_more">
+        <div class="separator"></div>
+
+        <ul class="contacts-list">
+          <li class="contact-item">
+            <div class="icon-box">
+              <ion-icon name="mail-outline"></ion-icon>
+            </div>
+            <div class="contact-info">
+              <p class="contact-title">Email</p>
+              <a href="mailto:mayurcaariappa10@gmail.com" class="contact-link">mayurcaariappa10@gmail.com</a>
+            </div>
+          </li>
+          <li class="contact-item">
+            <div class="icon-box">
+              <ion-icon name="location-outline"></ion-icon>
+            </div>
+            <div class="contact-info">
+              <p class="contact-title">Location</p>
+              <address>Bangalore, India</address>
+            </div>
+          </li>
+        </ul>
+
+        <div class="separator"></div>
+
+        <ul class="social-list">
+          <li class="social-item">
+            <a href="https://www.linkedin.com/in/mayurcaariappa/" target="_blank" class="social-link"
+              rel="noopener noreferrer" aria-label="Visit LinkedIn profile">
+              <i class="fab fa-linkedin"></i>
+            </a>
+          </li>
+
+          <li class="social-item">
+            <a href="https://x.com/mayurcaariappa" target="_blank" class="social-link" rel="noopener noreferrer"
+              aria-label="Visit X profile">
+              <i class="fab fa-twitter"></i>
+              <!-- <i class="fa-brands fa-x-twitter"></i> -->
+            </a>
+          </li>
+
+          <li class="social-item">
+            <a href="https://github.com/mayurcaariappa" target="_blank" class="social-link" rel="noopener noreferrer"
+              aria-label="Visit GitHub profile">
+              <i class="fab fa-github"></i>
+            </a>
+          </li>
+        </ul>
+
+      </div>
+    </aside>
+
+    <div class="main-content">
+      <!-- Navbar -->
+      <nav class="navbar">
+        <ul class="navbar-list">
+          <li class="navbar-item"><button class="navbar-link active" data-nav-link>About</button></li>
+          <li class="navbar-item"><button class="navbar-link" data-nav-link>Skills</button></li>
+          <li class="navbar-item"><button class="navbar-link" data-nav-link>Resume</button></li>
+          <li class="navbar-item"><button class="navbar-link" data-nav-link>Projects</button></li>
+        </ul>
+      </nav>
+
+      <!-- About Section -->
+      <article class="about active" data-page="about">
+        <header>
+          <h2 class="h2 article-title">About me</h2>
+        </header>
+
+        <section class="about-text">
+          <p>
+            As a Software Engineer with a diverse skill set across Java, Spring Boot, and the MERN stack,
+            I am passionate about building impactful software solutions. I bring a proven track record of
+            delivering complex projects, such as secure email automation and digital signature services,
+            that enhance both user experience and system performance.
+          </p>
+          <p>
+            Driven by continuous learning, I thrive in environments that challenge me to grow professionally,
+            contributing to team goals and innovating with a user-centric mindset. Currently, I’m exploring
+            opportunities that align with my skills and commitment to impactful development.
+          </p>
+        </section>
+
+        <section class="service">
+          <h3 class="h3 service-title">What I Do</h3>
+          <ul class="service-list">
+            <li class="service-item">
+              <div class="service-content-box">
+                <h4 class="h4 service-item-title">Full Stack Web Development</h4>
+                <p class="service-item-text">
+                  I specialize in building scalable web applications with the MERN stack (MongoDB, Express.js, React,
+                  Node.js).
+                </p>
+              </div>
+            </li>
+
+            <li class="service-item">
+              <div class="service-content-box">
+                <h4 class="h4 service-item-title">
+                  Data Structures and Algorithms</h4>
+                <p class="service-item-text">
+                  I am building a solid understanding of DSA, which enables me to write more efficient and optimized code.
+                </p>
+              </div>
+            </li>
+          </ul>
+        </section>
+
+        <div class="modal-container" data-modal-container>
+          <div class="overlay" data-overlay></div>
+
+          <section class="testimonials-modal">
+            <button type="button" class="modal-close-btn" data-modal-close-btn aria-label="Close modal">
+              <ion-icon name="close-outline"></ion-icon>
+            </button>
+        </div>
+      </article>
+
+      <!-- Skills Section -->
+      <section>
+        <article class="skills" data-page="skills">
+          <header>
+            <h2 class="h2 article-title">Skills</h2>
+          </header>
+          <section>
+            <section>
+              <div class="skill-icons">
+                <img src="https://skillicons.dev/icons?i=java" alt="Java" class="skill-icon" />
+                <img src="https://skillicons.dev/icons?i=spring" alt="Spring" class="skill-icon" />
+                <img src="https://skillicons.dev/icons?i=nodejs" alt="Node.js" class="skill-icon" />
+                <img src="https://skillicons.dev/icons?i=express" alt="Express.js" class="skill-icon" />
+                <img src="https://skillicons.dev/icons?i=mongodb" alt="MongoDB" class="skill-icon" />
+                <img src="https://skillicons.dev/icons?i=mysql" alt="MySQL" class="skill-icon" />
+                <img src="https://skillicons.dev/icons?i=hibernate" alt="Hibernate" class="skill-icon" />
+                <img src="https://skillicons.dev/icons?i=cs" alt="CSharp" class="skill-icon" />
+                <img src="https://skillicons.dev/icons?i=html" alt="HTML" class="skill-icon" />
+                <img src="https://skillicons.dev/icons?i=css" alt="CSS" class="skill-icon" />
+                <img src="https://skillicons.dev/icons?i=js" alt="JavaScript" class="skill-icon" />
+                <img src="https://skillicons.dev/icons?i=react" alt="React" class="skill-icon" />
+                <img src="https://skillicons.dev/icons?i=jquery" alt="jQuery" class="skill-icon" />
+                <img src="https://skillicons.dev/icons?i=postman" alt="Postman" class="skill-icon" />
+                <img src="https://skillicons.dev/icons?i=jest" alt="Jest" class="skill-icon" />
+                <img src="https://skillicons.dev/icons?i=git" alt="Git" class="skill-icon" />
+                <img src="https://skillicons.dev/icons?i=github" alt="GitHub" class="skill-icon" />
+                <img src="https://skillicons.dev/icons?i=azure" alt="Azure" class="skill-icon" />
+                <img src="https://skillicons.dev/icons?i=idea" alt="IntelliJ IDEA" class="skill-icon" />
+                <img src="https://skillicons.dev/icons?i=vscode" alt="VS Code" class="skill-icon" />
+              </div>
+            </section>
+          </section>
+        </article>
+      </section>
+
+      <!-- Resume Section -->
+      <article class="resume" data-page="resume">
+        <header>
+          <h2 class="h2 article-title">Resume</h2>
+        </header>
+
+        <section class="timeline">
+          <div class="title-wrapper">
+            <div class="icon-box">
+              <ion-icon name="book-outline"></ion-icon>
+            </div>
+
+            <h3 class="h3">Experience</h3>
+          </div>
+
+          <ol class="timeline-list">
+            <li class="timeline-item">
+              <h4 class="h4 timeline-item-title">Software Engineer - eMudhra Limited</h4>
+              <span>April 2022 — Present</span>
+            </li>
+
+            <li class="timeline-item">
+              <h4 class="h4 timeline-item-title">S/MIME Automation</h4>
+              <!-- <p class="timeline-text"> -->
+              <ul class="timeline-text">
+                <li>Developed a secure email communication plugin with features like auto-enrollment,
+                  silent installation, and auto-configuration, enhancing user experience.</li>
+              </ul>
+              <!-- </p> -->
+            </li>
+
+            <li class="timeline-item">
+              <h4 class="h4 timeline-item-title">Remote Signing Service (RSDS)</h4>
+              <ul class="timeline-text">
+                <li>Built a SpringBoot-based solution for cross-border digital signature recognition, collaborating with
+                  international TSPs (Trust Service Providers) from India, Japan, and the EU.</li>
+                <li>Significantly boosted sales by actively participating in backend development for RSDS.</li>
+              </ul>
+            </li>
+
+            <li class="timeline-item">
+              <h4 class="h4 timeline-item-title">eSign Service</h4>
+              <ul class="timeline-text">
+                <li>Engineered customization features for ASPs (Application Service Providers), allowing for
+                  personalized branding and enhancing client satisfaction.</li>
+                <li>Rigorously scrutinized and debugged REST APIs with Postman, drastically slashing bug occurrences.
+                </li>
+              </ul>
+            </li>
+          </ol>
+        </section>
+
+        <section class="timeline">
+          <div class="title-wrapper">
+            <div class="icon-box">
+              <ion-icon name="book-outline"></ion-icon>
+            </div>
+            <h3 class="h3">Education</h3>
+          </div>
+
+          <ol class="timeline-list">
+            <li class="timeline-item">
+              <h4 class="h4 timeline-item-title">PES College of Engineering</h4>
+              <span>2015 — 2019</span>
+              <p class="timeline-text">Bachelor of Engineering (ECE)</p>
+            </li>
+
+            <li class="timeline-item">
+              <h4 class="h4 timeline-item-title">Sadvidya Semi-Residential College</h4>
+              <span>2013 — 2015</span>
+              <p class="timeline-text">PUC (PCME)</p>
+            </li>
+          </ol>
+        </section>
+
+        <section class="timeline">
+          <div class="title-wrapper">
+            <div class="icon-box">
+              <ion-icon name="book-outline"></ion-icon>
+            </div>
+
+            <h3 class="h3">Position of Responsibilities</h3>
+          </div>
+
+          <ol class="timeline-list">
+            <li class="timeline-item">
+              <h4 class="h4 timeline-item-title">
+                Lead Developer - S/MIME Automation
+                <span>Aug 2023 - Present</span>
+              </h4>
+              <p class="timeline-text">
+                As a Lead Developer for the S/MIME Automation project, I had to develop both MS Outlook plugin in NodeJs
+                and an
+                Desktop application in C# for secure email communication. Took complete ownership of the project from
+                frontend
+                to backend. I had to collaborated with multiple teams from QA team
+                to sales team for testing, bug fixes, and general understanding of the application. The application
+                drastically
+                cut down the time invovled for the users to generate and import the PFX certificates in their respective
+                systems.
+              </p>
+            </li>
+          </ol>
+        </section>
+
+        <section class="timeline">
+          <div class="title-wrapper">
+            <div class="icon-box">
+              <ion-icon name="book-outline"></ion-icon>
+            </div>
+
+            <h3 class="h3">Achievements</h3>
+          </div>
+
+          <ol class="timeline-list">
+            <li class="timeline-item">
+              <h4 class="h4 timeline-item-title">
+                Winners of Inter-Department Football Tournament
+              </h4>
+              <span>PES College of Engineering</span>
+            </li>
+          </ol>
+        </section>
+
+        <!-- <section class="timeline">
+          <div class="title-wrapper">
+            <div class="icon-box">
+              <ion-icon name="book-outline"></ion-icon>
+            </div>
+
+            <h3 class="h3">Volunteer/Contribution</h3>
+          </div>
+
+          <ol class="timeline-list">
+            <li class="timeline-item">
+              <h4 class="h4 timeline-item-title">
+                NA
+                <span>NA</span>
+              </h4>
+              <p class="timeline-text">
+                NA
+              </p>
+            </li>
+          </ol>
+        </section> -->
+      </article>
+
+      <!--- #Projects -->
+
+      <article class="portfolio" data-page="projects">
+        <header>
+          <h2 class="h2 article-title">Projects</h2>
+        </header>
+
+        <section class="projects">
+          <ul class="filter-list">
+            <li class="filter-item">
+              <button class="active" data-filter-btn>All</button>
+            </li>
+          </ul>
+
+          <div class="filter-select-box">
+            <button class="filter-select" data-select>
+              <div class="select-value" data-selecct-value>
+                Select category
+              </div>
+
+              <div class="select-icon">
+                <ion-icon name="chevron-down"></ion-icon>
+              </div>
+            </button>
+
+            <ul class="select-list">
+              <li class="select-item">
+                <button data-select-item>All</button>
+              </li>
+            </ul>
+          </div>
+
+          <ul class="project-list">
+            <li class="project-item active" data-filter-item data-category="web development">
+              <a href="https://github.com/MayurCaariappa/Office-Metaverse" target="_blank" rel="Office-Metaverse"
+                aria-label="Visit LinkedIn profile">
+                <figure class="project-img">
+                  <div class="project-item-icon-box">
+                    <ion-icon name="eye-outline"></ion-icon>
+                  </div>
+                  <img src="./assets/images/project-10.png" alt="Office-Metaverse" height="10" width="10"
+                    loading="lazy" />
+                </figure>
+
+                <div style="display: flex;">
+                  <h3 class="project-title-ongoing">Office-Metaverse
+                    <span class="ongoingtag">Ongoing</span>
+                  </h3>
+                </div>
+
+                <p class="project-category"></p>
+                <span class="project-category" style="color: var(--orange-yellow-crayola);font-size:14px">NodeJs |
+                  Phaser | React | ExpressJs | MongoDB</span>
+                <br />
+
+                <p class="project-category" style="font-size:14px">
+                  The Office Metaverse is a 2D virtual office space built using the Phaser game
+                  engine and MERN stack. The project allows users to interact in a virtual environment
+                  that mimics an office, where each user is represented by a unique avatar. Users can
+                  move around, interact with other users via text, video, or voice chat, and see other
+                  users’ status (online/offline). As more users join, the office space dynamically expands.
+                  The backend supports seamless user management, ensuring a smooth experience.
+                  Upcoming features include community discussions. </p>
+              </a>
+            </li>
+          </ul>
+        </section>
+      </article>
+    </div>
+  </main>
+
+  <!--- custom js link -->
+  <script src="./js/script.js"></script>
+
+  <!--- ionicon link -->
+  <script type="module" src="https://unpkg.com/ionicons@5.5.2/dist/ionicons/ionicons.esm.js"></script>
+  <script nomodule src="https://unpkg.com/ionicons@5.5.2/dist/ionicons/ionicons.js"></script>
+</body>
+
+</html>
