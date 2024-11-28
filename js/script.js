@@ -247,14 +247,4 @@ for (let i = 0; i < navigationLinks.length; i++) {
     }
 
   });
-
-  // Get the current date
-  const currentDate = new Date();
-  const options = { year: 'numeric', month: 'long', day: 'numeric' }; // Format options
-  const formattedDate = currentDate.toLocaleDateString('en-US', options);
-
-  // Update the .date-view div content
-  const dateViewDiv = document.querySelector('.date-view');
-  dateViewDiv.innerHTML = `<p>Issue dated ${formattedDate} | Bangalore, India</p>`;
-
 }
