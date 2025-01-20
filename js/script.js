@@ -95,7 +95,6 @@ document.addEventListener("DOMContentLoaded", () => {
     navbarlink.forEach(element => {
       element.style.color = checkbox.checked ? 'var(--light-gray)' : 'white';
     });
-
   });
 });
 
@@ -137,9 +136,7 @@ for (let i = 0; i < testimonialsItem.length; i++) {
     modalText.innerHTML = this.querySelector("[data-testimonials-text]").innerHTML;
 
     testimonialsModalFunc();
-
   });
-
 }
 
 // add click event to modal close button
@@ -162,7 +159,6 @@ for (let i = 0; i < selectItems.length; i++) {
     selectValue.innerText = this.innerText;
     elementToggleFunc(select);
     filterFunc(selectedValue);
-
   });
 }
 
@@ -180,9 +176,7 @@ const filterFunc = function (selectedValue) {
     } else {
       filterItems[i].classList.remove("active");
     }
-
   }
-
 }
 
 // add event in all filter button items for large screen
@@ -199,12 +193,8 @@ for (let i = 0; i < filterBtn.length; i++) {
     lastClickedBtn.classList.remove("active");
     this.classList.add("active");
     lastClickedBtn = this;
-
   });
-
 }
-
-
 
 // contact form variables
 const form = document.querySelector("[data-form]");
@@ -221,11 +211,8 @@ for (let i = 0; i < formInputs.length; i++) {
     } else {
       formBtn.setAttribute("disabled", "");
     }
-
   });
 }
-
-
 
 // page navigation variables
 const navigationLinks = document.querySelectorAll("[data-nav-link]");
@@ -245,6 +232,5 @@ for (let i = 0; i < navigationLinks.length; i++) {
         navigationLinks[i].classList.remove("active");
       }
     }
-
   });
 }
