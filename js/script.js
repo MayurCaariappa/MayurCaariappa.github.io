@@ -165,27 +165,26 @@ for (let i = 0; i < selectItems.length; i++) {
 // filter variables
 const filterItems = document.querySelectorAll("[data-filter-item]");
 
+// Ensure only "All" is active on initial load
+filterBtn.forEach(btn => btn.classList.remove("active"));
+filterBtn[0].classList.add("active");
+
 const filterFunc = function (selectedValue) {
-
-  for (let i = 0; i < filterItems.length; i++) {
-
-    if (selectedValue === "all") {
-      filterItems[i].classList.add("active");
-    } else if (selectedValue === filterItems[i].dataset.category) {
-      filterItems[i].classList.add("active");
+  filterItems.forEach(item => {
+    const category = item.dataset.category;
+    if (selectedValue === "all" || selectedValue === category) {
+      item.classList.add("active");
     } else {
-      filterItems[i].classList.remove("active");
+      item.classList.remove("active");
     }
-  }
-}
+  });
+};
 
 // add event in all filter button items for large screen
 let lastClickedBtn = filterBtn[0];
 
 for (let i = 0; i < filterBtn.length; i++) {
-
   filterBtn[i].addEventListener("click", function () {
-
     let selectedValue = this.innerText.toLowerCase();
     selectValue.innerText = this.innerText;
     filterFunc(selectedValue);

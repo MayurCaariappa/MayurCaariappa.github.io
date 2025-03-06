@@ -485,6 +485,11 @@ main {
 .social-item .social-link {
   color: var(--light-gray-70);
   font-size: 18px;
+  transition: none !important;
+}
+
+.social-item .social-link i {
+  transition: color 0s;
 }
 
 /* Hover effect for color change */
@@ -1680,9 +1685,13 @@ main {
 .skill-icon {
   width: 50px;
   height: 50px;
-  transition: filter 0.3s ease, transform 0.3s ease;
+  transition: filter 0.15s ease, transform 0.15s ease;
 }
 
-.skill-icon:hover {
-  transform: scale(1.1);
+.social-item {
+  transition: filter 0.15s ease, transform 0.15s ease;
+}
+
+.skill-icon:hover, .social-item:hover {
+  transform: scale(1.4);
 }
