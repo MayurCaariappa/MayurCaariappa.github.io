@@ -489,20 +489,23 @@ main {
 }
 
 .social-item .social-link i {
-  transition: color 0s;
+  transition: color 0s !important;
 }
 
 /* Hover effect for color change */
 .social-item:nth-child(1) .social-link:hover i {
-  color: #0077b5;  /* LinkedIn color */
+  color: #0077b5;
+  /* LinkedIn color */
 }
 
 .social-item:nth-child(2) .social-link:hover i {
-  color: #1d9bf0;  /* X color */
-}
+  color: #fff;
+  /* X color */
+}s
 
 .social-item:nth-child(3) .social-link:hover i {
-  color: #333;  /* GitHub color */
+  color: #333;
+  /* GitHub color */
 }
 
 /*-----------------------------------*\
@@ -939,7 +942,7 @@ main {
 
 .filter-select {
   background: var(--eerie-black-2);
-  color: var(--light-gray);
+  color: var(--orange-yellow-crayola);
   display: flex;
   justify-content: space-between;
   align-items: center;
@@ -978,7 +981,7 @@ main {
 
 .select-item button {
   background: var(--eerie-black-2);
-  color: var(--light-gray);
+  color: var(--white-1);
   font-size: var(--fs-6);
   font-weight: var(--fw-300);
   text-transform: capitalize;
@@ -1125,13 +1128,22 @@ main {
 
 /*-----------------------------------*\
   #RESPONSIVE
-  \*-----------------------------------*/
-
+\*-----------------------------------*/
 @media (min-width: 450px) {
 
   .project-img,
   .blog-banner-box {
     height: auto;
+  }
+
+  /* Skill Icon Styles */
+  .skill-icons {
+    display: grid;
+    grid-template-columns: repeat(5, 1fr);
+    gap: 20px;
+    justify-items: center;
+    align-items: center;
+    margin-top: 20px;
   }
 }
 
@@ -1396,6 +1408,16 @@ main {
   .form-btn ion-icon {
     font-size: 18px;
   }
+
+  /* Skill Icon Styles */
+  .skill-icons {
+    display: grid;
+    grid-template-columns: repeat(6, 1fr);
+    gap: 20px;
+    justify-items: center;
+    align-items: center;
+    margin-top: 20px;
+  }
 }
 
 @media (min-width: 768px) {
@@ -1445,13 +1467,13 @@ main {
   }
 
   .filter-item button {
-    color: var(--light-gray);
+    color: var(--light-gray-70);
     font-size: var(--fs-5);
     transition: var(--transition-1);
   }
 
   .filter-item button:hover {
-    color: var(--light-gray-70);
+    color: var(--white-1);
   }
 
   .filter-item button.active {
@@ -1470,6 +1492,16 @@ main {
   .form-btn {
     width: max-content;
     margin-left: auto;
+  }
+
+  /* Skill Icon Styles */
+  .skill-icons {
+    display: grid;
+    grid-template-columns: repeat(8, 1fr);
+    gap: 20px;
+    justify-items: center;
+    align-items: center;
+    margin-top: 20px;
   }
 }
 
@@ -1532,6 +1564,16 @@ main {
 
   .blog-banner-box {
     height: 230px;
+  }
+
+  /* Skill Icon Styles */
+  .skill-icons {
+    display: grid;
+    grid-template-columns: repeat(8, 1fr);
+    gap: 20px;
+    justify-items: center;
+    align-items: center;
+    margin-top: 20px;
   }
 }
 
@@ -1670,16 +1712,16 @@ main {
     user-select: text;
     color: #094369;
   }
-}
 
-/* Skill Icon Styles */
-.skill-icons {
-  display: grid;
-  grid-template-columns: repeat(8, 1fr);
-  gap: 20px;
-  justify-items: center;
-  align-items: center;
-  margin-top: 20px;
+  /* Skill Icon Styles */
+  .skill-icons {
+    display: grid;
+    grid-template-columns: repeat(8, 1fr);
+    gap: 20px;
+    justify-items: center;
+    align-items: center;
+    margin-top: 20px;
+  }
 }
 
 .skill-icon {
@@ -1692,6 +1734,23 @@ main {
   transition: filter 0.15s ease, transform 0.15s ease;
 }
 
-.skill-icon:hover, .social-item:hover {
-  transform: scale(1.4);
+.skill-icon:hover,
+.social-item:hover {
+  transform: scale(1.5);
+}
+
+.title-container {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+}
+
+.title-container a {
+  font-size: 16px;
+  text-decoration: none;
+  color: var(--vegas-gold);;
+}
+
+.title-container a:hover {
+  text-decoration: underline;
 }
