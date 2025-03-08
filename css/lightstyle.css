@@ -1129,7 +1129,7 @@ main {
 /*-----------------------------------*\
   #RESPONSIVE
 \*-----------------------------------*/
-@media (min-width: 450px) {
+@media (min-width: 100px) {
 
   .project-img,
   .blog-banner-box {
