@@ -159,11 +159,27 @@ document.addEventListener("DOMContentLoaded", () => {
           : "var(--white-1)";
     });
 
-    // Send mail button (only set background, let CSS handle color)
+    // Send mail button
     const sendMailBtn = document.querySelector(".contact-button");
     sendMailBtn.style.background = isLightMode
-      ? "rgb(220, 193, 243)"
+      ? "rgb(153, 102, 204)" // Matches hsl(270, 50%, 60%)
       : "var(--bg-gradient-onyx)";
+  }
+
+  // Copy email button
+  const copyEmailBtn = document.querySelector("#copy-email-btn");
+  if (copyEmailBtn) {
+    copyEmailBtn.addEventListener("click", () => {
+      navigator.clipboard
+        .writeText("mayurcaariappa10@gmail.com")
+        .then(() => {
+          copyEmailBtn.classList.add("copied");
+          setTimeout(() => copyEmailBtn.classList.remove("copied"), 2000);
+        })
+        .catch((err) => {
+          console.error("Failed to copy email:", err);
+        });
+    });
   }
 
   // Toggle function for elements
@@ -175,39 +191,6 @@ document.addEventListener("DOMContentLoaded", () => {
   const sidebar = document.querySelector("[data-sidebar]");
   const sidebarBtn = document.querySelector("[data-sidebar-btn-2]");
   sidebarBtn.addEventListener("click", () => elementToggleFunc(sidebar));
-
-  // Testimonials modal
-  const testimonialsItems = document.querySelectorAll(
-    "[data-testimonials-item]"
-  );
-  const modalContainer = document.querySelector("[data-modal-container]");
-  const modalCloseBtn = document.querySelector("[data-modal-close-btn]");
-  const overlay = document.querySelector("[data-overlay]");
-  const modalImg = document.querySelector("[data-modal-img]");
-  const modalTitle = document.querySelector("[data-modal-title]");
-  const modalText = document.querySelector("[data-modal-text]");
-
-  const testimonialsModalFunc = () => {
-    modalContainer.classList.toggle("active");
-    overlay.classList.toggle("active");
-  };
-
-  testimonialsItems.forEach((item) => {
-    item.addEventListener("click", () => {
-      modalImg.src = item.querySelector("[data-testimonials-avatar]").src;
-      modalImg.alt = item.querySelector("[data-testimonials-avatar]").alt;
-      modalTitle.innerHTML = item.querySelector(
-        "[data-testimonials-title]"
-      ).innerHTML;
-      modalText.innerHTML = item.querySelector(
-        "[data-testimonials-text]"
-      ).innerHTML;
-      testimonialsModalFunc();
-    });
-  });
-
-  modalCloseBtn.addEventListener("click", testimonialsModalFunc);
-  overlay.addEventListener("click", testimonialsModalFunc);
 
   // Custom select for filtering
   const select = document.querySelector("[data-select]");
@@ -246,9 +229,7 @@ document.addEventListener("DOMContentLoaded", () => {
       let selectedValue = btn.innerText.toLowerCase();
       selectValue.innerText = btn.innerText;
       filterFunc(selectedValue);
-      document
-        .querySelectorAll("button")
-        .forEach((b) => b.classList.remove("active"));
+      filterBtn.forEach((b) => b.classList.remove("active"));
       btn.classList.add("active");
     });
   });

@@ -175,6 +175,7 @@ a {
 
 li {
   list-style: none;
+  color: hsl(0, 1%, 85%);
 }
 
 img,
@@ -663,6 +664,7 @@ s .social-item:nth-child(3) .social-link:hover i {
 }
 
 .service-title {
+  display: flex;
   margin-bottom: 20px;
 }
 
@@ -685,7 +687,7 @@ s .social-item:nth-child(3) .social-link:hover i {
   position: relative;
   background: var(--border-gradient-onyx);
   padding: 15px;
-  padding-top: 45px;
+  padding-top: 15px;
   border-radius: 14px;
   box-shadow: var(--shadow-2);
   cursor: pointer;
@@ -722,58 +724,6 @@ s .social-item:nth-child(3) .social-link:hover i {
   font-size: var(--fs-6);
   font-weight: var(--fw-300);
   line-height: 1.6;
-}
-
-.testimonials {
-  margin-bottom: 30px;
-}
-
-.testimonials-title {
-  margin-bottom: 20px;
-}
-
-.testimonials-list {
-  display: flex;
-  justify-content: flex-start;
-  align-items: flex-start;
-  gap: 15px;
-  margin: 0 -15px;
-  padding: 25px 15px;
-  padding-bottom: 35px;
-  overflow-x: auto;
-  scroll-behavior: smooth;
-  overscroll-behavior-inline: contain;
-  scroll-snap-type: inline mandatory;
-}
-
-.testimonials-item {
-  min-width: 100%;
-  scroll-snap-align: center;
-}
-
-.testimonials-avatar-box {
-  position: absolute;
-  top: 0;
-  left: 0;
-  transform: translate(15px, -25px);
-  background: var(--bg-gradient-onyx);
-  border-radius: 14px;
-  box-shadow: var(--shadow-1);
-}
-
-.testimonials-item-title {
-  margin-bottom: 7px;
-}
-
-.testimonials-text-main {
-  color: white;
-  font-size: var(--fs-6);
-  font-weight: var(--fw-300);
-  line-height: 1.6;
-  line-clamp: 4;
-  -webkit-line-clamp: 4;
-  -webkit-box-orient: vertical;
-  overflow: hidden;
 }
 
 .modal-container {
@@ -895,6 +845,11 @@ s .social-item:nth-child(3) .social-link:hover i {
   line-height: 1.6;
 }
 
+/* GitHub Contribution Chart */
+.github-chart {
+  width: 100%;
+  height: auto;
+}
 /*-----------------------------------*\
     #RESUME
   \*-----------------------------------*/
@@ -1478,36 +1433,8 @@ s .social-item:nth-child(3) .social-link:hover i {
     padding-top: 25px;
   }
 
-  .testimonials-avatar-box {
-    transform: translate(30px, -30px);
-    border-radius: 20px;
-  }
-
-  .testimonials-avatar-box img {
-    width: 80px;
-  }
-
-  .testimonials-item-title {
-    margin-bottom: 10px;
-  }
-
-  .testimonials-text-main {
-    line-clamp: 2;
-    -webkit-line-clamp: 2;
-    font-weight: var(--fw-300);
-  }
-
   .modal-container {
     padding: 20px;
-  }
-
-  .testimonials-modal {
-    display: flex;
-    justify-content: flex-start;
-    align-items: stretch;
-    gap: 25px;
-    padding: 30px;
-    border-radius: 20px;
   }
 
   .modal-img-wrapper {
@@ -1646,13 +1573,13 @@ s .social-item:nth-child(3) .social-link:hover i {
   }
 
   .filter-item button {
-    color: var(--light-gray-70);
+    color: hsl(0, 1%, 85%);
     font-size: var(--fs-5);
     transition: var(--transition-1);
   }
 
   .filter-item button:hover {
-    color: var(--white-1);
+    color: var(--light-gray-70);
   }
 
   .filter-item button.active {
