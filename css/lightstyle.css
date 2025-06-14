@@ -1,3 +1,60 @@
+/* Ensure smooth transitions for theme-related properties */
+:root {
+  --transition-theme: 0.4s ease; /* Smoother transition for theme changes */
+}
+
+body, .sidebar, .navbar, .article, .checkbox-label, .info-content .title, 
+.info_more-btn, .testimonials-text-main, .about-text, .service-item-text, 
+.service-item::before, .service-item, .content-card::before, .content-card, 
+.timeline-text, .navbar-link {
+  transition: background-color var(--transition-theme), 
+              color var(--transition-theme), 
+              border-color var(--transition-theme), 
+              opacity var(--transition-1); /* Preserve existing opacity transitions */
+}
+
+/* Enhance checkbox label animation */
+.checkbox-label {
+  margin-top: 2%;
+  background-color: var(--bg-gradient-onyx);
+  border: 1px solid var(--jet);
+  width: 50px;
+  height: 26px;
+  border-radius: 50px;
+  position: relative;
+  padding: 5px;
+  cursor: pointer;
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  transition: background-color var(--transition-theme), 
+              border-color var(--transition-theme);
+}
+
+.checkbox-label .fa-moon,
+.checkbox-label .fa-sun {
+  transition: transform var(--transition-theme); /* Animate icon rotation */
+}
+
+.checkbox:checked + .checkbox-label .fa-moon {
+  transform: rotate(360deg); /* Rotate moon when switching to light mode */
+}
+
+.checkbox:checked + .checkbox-label .fa-sun {
+  transform: rotate(360deg); /* Rotate sun when switching to light mode */
+}
+
+.checkbox-label .ball {
+  background-color: #fff;
+  width: 22px;
+  height: 22px;
+  position: absolute;
+  left: 2px;
+  top: 2px;
+  border-radius: 50%;
+  transition: transform var(--transition-theme), background-color var(--transition-theme);
+}
+
 :root {
   /* gradient */
   --bg-gradient-yellow-1: linear-gradient(to bottom right,
@@ -536,15 +593,16 @@ main {
 }
 
 .navbar-link {
-  color: white;
+  color: var(--white-1);
+  font-size: var(--fs-6);
   font-weight: var(--fw-400);
   padding: 20px 7px;
   transition: color var(--transition-1);
 }
-
-.navbar-link:hover,
-.navbar-link:focus {
-  color: var(--light-gray-70);
+.navbar-link:hover, .navbar-link:focus { color: var(--light-gray-70); }
+.navbar-link.active {
+  color: var(--orange-yellow-crayola) !important;
+  font-weight: var(--fw-600);
 }
 
 .navbar-link.active {
@@ -1753,4 +1811,26 @@ main {
 
 .title-container a:hover {
   text-decoration: underline;
+}
+
+.resume-header {
+  display: flex;
+  align-items: center;
+}
+
+.download-link img {
+  vertical-align: middle;
+}
+
+.download-link {
+  display: inline-block;
+  margin-left: 10px;
+  color: var(--white-2);
+  font-size: 18px;
+  transition: color var(--transition-1), transform var(--transition-1);
+  vertical-align: middle;
+}
+.download-link:hover {
+  color: var(--orange-yellow-crayola);
+  transform: scale(1.2);
 }

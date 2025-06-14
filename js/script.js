@@ -1,235 +1,282 @@
 document.addEventListener("DOMContentLoaded", () => {
+  // Theme toggle variables
   const checkbox = document.querySelector(".checkbox");
 
+  // Set checkbox state based on saved theme
+  checkbox.checked = localStorage.getItem("theme") === "light";
+  updateElementStyles(checkbox.checked); // Apply element-specific styles on load
+
+  // Theme toggle event listener
   checkbox.addEventListener("change", () => {
-    const root = document.documentElement;
-
     if (checkbox.checked) {
-      // Switch to light mode
-      root.style.setProperty('--bg-gradient-yellow-1', 'linear-gradient(to bottom right, hsl(282, 68%, 85%) 0%, hsla(285, 94%, 81%, 0) 50%)');
-      root.style.setProperty('--text-gradient-yellow', 'linear-gradient(to right, hsl(260, 100%, 85%), hsl(290, 100%, 83%))');
-      root.style.setProperty('--bg-gradient-jet', 'white');
-      root.style.setProperty('--jet', 'hsl(0, 0%, 93%)');
-      root.style.setProperty('--onyx', 'hsl(271, 100%, 89%)');
-      root.style.setProperty('--eerie-black-1', 'hsl(0, 0%, 100%)');
-      root.style.setProperty('--eerie-black-2', 'hsl(240, 100%, 100%)');
-      root.style.setProperty('--smoky-black', 'hsl(0, 0%, 100%)');
-      root.style.setProperty('--white-1', 'hsl(0, 0%, 0%)');
-      root.style.setProperty('--white-2', 'hsl(0, 4%, 21%)');
-      root.style.setProperty('--orange-yellow-crayola', 'hsl(270, 50%, 70%)');
-      root.style.setProperty('--vegas-gold', 'hsl(270, 50%, 68%)');
-      root.style.setProperty('--bittersweet-shimmer', 'hsl(0, 43%, 51%)');
+      applyLightMode();
+      localStorage.setItem("theme", "light");
     } else {
-      // Switch to dark mode
-      root.style.setProperty('--bg-gradient-yellow-1', 'linear-gradient(to bottom right, hsl(283, 100%, 63%) 0%, hsla(285, 100%, 69%, 0) 50%)');
-      root.style.setProperty('--text-gradient-yellow', 'linear-gradient(to right, hsl(260, 96%, 71%), hsl(290, 100%, 76%))');
-      root.style.setProperty('--bg-gradient-jet', 'linear-gradient(to bottom right, hsla(240, 1%, 18%, 0.251) 0%, hsla(240, 2%, 11%, 0) 100%)');
-      root.style.setProperty('--jet', 'hsl(0, 0%, 22%)');
-      root.style.setProperty('--onyx', 'hsl(240, 1%, 17%)');
-      root.style.setProperty('--eerie-black-1', 'hsl(240, 2%, 13%)');
-      root.style.setProperty('--eerie-black-2', 'hsl(240, 2%, 12%)');
-      root.style.setProperty('--smoky-black', 'hsl(0, 0%, 7%)');
-      root.style.setProperty('--white-1', 'hsl(0, 0%, 100%)');
-      root.style.setProperty('--white-2', 'hsl(0, 0%, 98%)');
-      root.style.setProperty('--orange-yellow-crayola', 'hsl(260, 96%, 71%)');
-      root.style.setProperty('--vegas-gold', 'hsl(270, 50%, 68%)');
-      root.style.setProperty('--bittersweet-shimmer', 'hsl(0, 43%, 51%)');
+      applyDarkMode();
+      localStorage.setItem("theme", "dark");
     }
+  });
 
-    // Toggle styles for checkbox label
+  // Apply light mode styles
+  function applyLightMode() {
+    const root = document.documentElement;
+    root.style.setProperty(
+      "--bg-gradient-yellow-1",
+      "linear-gradient(to bottom right, hsl(282, 68%, 85%) 0%, hsla(285, 94%, 81%, 0) 50%)"
+    );
+    root.style.setProperty(
+      "--text-gradient-yellow",
+      "linear-gradient(to right, hsl(260, 100%, 85%), hsl(290, 100%, 83%))"
+    );
+    root.style.setProperty("--bg-gradient-jet", "white");
+    root.style.setProperty("--jet", "hsl(0, 0%, 93%)");
+    root.style.setProperty("--onyx", "hsl(271, 100%, 89%)");
+    root.style.setProperty("--eerie-black-1", "hsl(0, 0%, 100%)");
+    root.style.setProperty("--eerie-black-2", "hsl(240, 100%, 100%)");
+    root.style.setProperty("--smoky-black", "hsl(0, 0%, 100%)");
+    root.style.setProperty("--white-1", "hsl(0, 0%, 0%)");
+    root.style.setProperty("--white-2", "hsl(0, 4%, 21%)");
+    root.style.setProperty("--orange-yellow-crayola", "hsl(270, 50%, 70%)");
+    root.style.setProperty("--vegas-gold", "hsl(270, 50%, 68%)");
+    root.style.setProperty("--bittersweet-shimmer", "hsl(0, 43%, 51%)");
+    root.style.setProperty("--light-gray", "hsl(0, 0%, 30%)");
+
+    updateElementStyles(true);
+  }
+
+  // Apply dark mode styles
+  function applyDarkMode() {
+    const root = document.documentElement;
+    root.style.setProperty(
+      "--bg-gradient-yellow-1",
+      "linear-gradient(to bottom right, hsl(283, 100%, 63%) 0%, hsla(285, 100%, 69%, 0) 50%)"
+    );
+    root.style.setProperty(
+      "--text-gradient-yellow",
+      "linear-gradient(to right, hsl(260, 96%, 71%), hsl(290, 100%, 76%))"
+    );
+    root.style.setProperty(
+      "--bg-gradient-jet",
+      "linear-gradient(to bottom right, hsla(240, 1%, 18%, 0.251) 0%, hsla(240, 2%, 11%, 0) 100%)"
+    );
+    root.style.setProperty("--jet", "hsl(0, 0%, 22%)");
+    root.style.setProperty("--onyx", "hsl(240, 1%, 17%)");
+    root.style.setProperty("--eerie-black-1", "hsl(240, 2%, 13%)");
+    root.style.setProperty("--eerie-black-2", "hsl(240, 2%, 12%)");
+    root.style.setProperty("--smoky-black", "hsl(0, 0%, 7%)");
+    root.style.setProperty("--white-1", "hsl(0, 0%, 100%)");
+    root.style.setProperty("--white-2", "hsl(0, 0%, 98%)");
+    root.style.setProperty("--orange-yellow-crayola", "hsl(260, 96%, 71%)");
+    root.style.setProperty("--vegas-gold", "hsl(270, 50%, 68%)");
+    root.style.setProperty("--bittersweet-shimmer", "hsl(0, 43%, 51%)");
+    root.style.setProperty("--light-gray", "hsl(0, 1%, 85%)");
+
+    updateElementStyles(false);
+  }
+
+  // Update element-specific styles based on theme
+  function updateElementStyles(isLightMode) {
+    // Checkbox label
     const checkboxLabel = document.querySelector(".checkbox-label");
-    checkboxLabel.style.backgroundColor = checkbox.checked ? 'var(--onyx)' : 'var(--bg-gradient-onyx)';
-    checkboxLabel.style.border = checkbox.checked ? '1px solid hsl(270, 50%, 68%)' : '1px solid var(--jet)';
+    checkboxLabel.style.backgroundColor = isLightMode
+      ? "var(--onyx)"
+      : "var(--bg-gradient-onyx)";
+    checkboxLabel.style.border = isLightMode
+      ? "1px solid hsl(270, 50%, 68%)"
+      : "1px solid var(--jet)";
 
-    // Toggle styles for info content title
+    // Sidebar info title
     const infoContentTitle = document.querySelector(".info-content .title");
-    infoContentTitle.style.background = checkbox.checked ? 'hsla(270, 50%, 70%, 0.634)' : 'var(--onyx)';
-    const infomorebutton = document.querySelector(".info_more-btn");
-    infomorebutton.style.backgroundColor = checkbox.checked ? 'white' : 'var(--bg-gradient-jet)';
+    infoContentTitle.style.background = isLightMode
+      ? "hsla(270, 50%, 70%, 0.634)"
+      : "var(--onyx)";
 
-    // Toggle styles for navbar
+    // Info more button
+    const infoMoreButton = document.querySelector(".info_more-btn");
+    infoMoreButton.style.background = isLightMode
+      ? "white"
+      : "var(--bg-gradient-jet)";
+
+    // Navbar
     const navbar = document.querySelector(".navbar");
-    navbar.style.background = checkbox.checked ? 'var(--onyx)' : 'hsla(240, 1%, 17%, 0.75)';
-    navbar.style.border = checkbox.checked ? '1px solid hsl(270, 50%, 68%)' : '1px solid var(--jet)';
+    navbar.style.background = isLightMode
+      ? "var(--onyx)"
+      : "hsla(240, 1%, 17%, 0.75)";
+    navbar.style.border = isLightMode
+      ? "1px solid hsl(270, 50%, 68%)"
+      : "1px solid var(--jet)";
 
-    // Toggle styles for testimonials-text
-    const testimonialsTextMain = document.querySelectorAll(".testimonials-text-main");
-    testimonialsTextMain.forEach(element => {
-      element.style.color = checkbox.checked ? 'var(--light-gray)' : 'white';
+    // Testimonials text
+    document.querySelectorAll(".testimonials-text-main").forEach((element) => {
+      element.style.color = isLightMode
+        ? "var(--light-gray)"
+        : "var(--white-1)";
     });
 
+    // About text
+    const aboutText = document.querySelector(".about-text");
+    aboutText.style.color = isLightMode
+      ? "var(--light-gray)"
+      : "var(--white-1)";
 
-    // Toggle styles for about-text paragraphs
-    const aboutTextParagraphs = document.querySelector(".about-text");
-    aboutTextParagraphs.style.color = checkbox.checked ? 'var(--light-gray)' : 'white';
-
-    const servicetext = document.querySelectorAll(".service-item-text");
-    servicetext.forEach(element => {
-      element.style.color = checkbox.checked ? 'var(--light-gray)' : 'white';
-    });
-
-    const serviceitembefore = document.querySelectorAll(".service-item::before");
-    const serviceitem = document.querySelectorAll(".service-item");
-    const infomorebtn = document.querySelectorAll(".info_more-btn");
-    const contentcardbefore = document.querySelectorAll(".content-card::before");
-    const contentcard = document.querySelectorAll(".content-card");
-    const timelinetext = document.querySelectorAll(".timeline-text");
-
-    serviceitembefore.forEach(element => {
-      element.style.backgroundColor = checkbox.checked ? 'white' : 'var(--bg-gradient-jet)';
-    });
-    infomorebtn.forEach(element => {
-      element.style.background = checkbox.checked ? 'var(--onyx)' : 'var(--border-gradient-onyx)';
-    });
-    serviceitem.forEach(element => {
-      element.style.background = checkbox.checked ? 'white' : 'var(--border-gradient-onyx)';
-    });
-    contentcard.forEach(element => {
-      element.style.background = checkbox.checked ? 'white' : 'var(--border-gradient-onyx)';
-    });
-    timelinetext.forEach(element => {
-      element.style.color = checkbox.checked ? ' var(--light-gray)' : 'hsl(0, 1%, 85%)';
+    // Service item text
+    document.querySelectorAll(".service-item-text").forEach((element) => {
+      element.style.color = isLightMode
+        ? "var(--light-gray)"
+        : "var(--white-1)";
     });
 
-    const navbarlink = document.querySelectorAll(".navbar-link");
-    navbarlink.forEach(element => {
-      element.style.color = checkbox.checked ? 'var(--light-gray)' : 'white';
+    // Service item and content card backgrounds
+    document
+      .querySelectorAll(".service-item, .content-card")
+      .forEach((element) => {
+        element.style.background = isLightMode
+          ? "white"
+          : "var(--border-gradient-onyx)";
+      });
+
+    // Info more button background
+    document.querySelectorAll(".info_more-btn").forEach((element) => {
+      element.style.background = isLightMode
+        ? "var(--onyx)"
+        : "var(--border-gradient-onyx)";
+    });
+
+    // Timeline text
+    document.querySelectorAll(".timeline-text").forEach((element) => {
+      element.style.color = isLightMode
+        ? "var(--light-gray)"
+        : "var(--light-gray)";
+    });
+
+    // Navbar links
+    document.querySelectorAll(".navbar-link").forEach((element) => {
+      element.style.color =
+        isLightMode && !element.classList.contains("active")
+          ? "var(--light-gray)"
+          : element.classList.contains("active")
+          ? "var(--orange-yellow-crayola)"
+          : "var(--white-1)";
+    });
+  }
+
+  // Toggle function for elements
+  const elementToggleFunc = function (elem) {
+    elem.classList.toggle("active");
+  };
+
+  // Sidebar toggle
+  const sidebar = document.querySelector("[data-sidebar]");
+  const sidebarBtn = document.querySelector("[data-sidebar-btn-2]");
+  sidebarBtn.addEventListener("click", () => elementToggleFunc(sidebar));
+
+  // Testimonials modal
+  const testimonialsItems = document.querySelectorAll(
+    "[data-testimonials-item]"
+  );
+  const modalContainer = document.querySelector("[data-modal-container]");
+  const modalCloseBtn = document.querySelector("[data-modal-close-btn]");
+  const overlay = document.querySelector("[data-overlay]");
+  const modalImg = document.querySelector("[data-modal-img]");
+  const modalTitle = document.querySelector("[data-modal-title]");
+  const modalText = document.querySelector("[data-modal-text]");
+
+  const testimonialsModalFunc = () => {
+    modalContainer.classList.toggle("active");
+    overlay.classList.toggle("active");
+  };
+
+  testimonialsItems.forEach((item) => {
+    item.addEventListener("click", () => {
+      modalImg.src = item.querySelector("[data-testimonials-avatar]").src;
+      modalImg.alt = item.querySelector("[data-testimonials-avatar]").alt;
+      modalTitle.innerHTML = item.querySelector(
+        "[data-testimonials-title]"
+      ).innerHTML;
+      modalText.innerHTML = item.querySelector(
+        "[data-testimonials-text]"
+      ).innerHTML;
+      testimonialsModalFunc();
     });
   });
-});
 
-// element toggle function
-const elementToggleFunc = function (elem) { elem.classList.toggle("active"); }
+  modalCloseBtn.addEventListener("click", testimonialsModalFunc);
+  overlay.addEventListener("click", testimonialsModalFunc);
 
-// sidebar variables
-const sidebar = document.querySelector("[data-sidebar]");
-const sidebarBtn = document.querySelector("[data-sidebar-btn-2]");
+  // Custom select for filtering
+  const select = document.querySelector("[data-select]");
+  const selectItems = document.querySelectorAll("[data-select-item]");
+  const selectValue = document.querySelector("[data-selecct-value]");
+  const filterBtn = document.querySelectorAll("[data-filter-btn]");
 
-// sidebar toggle functionality for mobile
-sidebarBtn.addEventListener("click", function () { elementToggleFunc(sidebar); });
+  select.addEventListener("click", () => elementToggleFunc(select));
 
-// testimonials variables
-const testimonialsItem = document.querySelectorAll("[data-testimonials-item]");
-const modalContainer = document.querySelector("[data-modal-container]");
-const modalCloseBtn = document.querySelector("[data-modal-close-btn]");
-const overlay = document.querySelector("[data-overlay]");
-
-// modal variable
-const modalImg = document.querySelector("[data-modal-img]");
-const modalTitle = document.querySelector("[data-modal-title]");
-const modalText = document.querySelector("[data-modal-text]");
-
-// modal toggle function
-const testimonialsModalFunc = function () {
-  modalContainer.classList.toggle("active");
-  overlay.classList.toggle("active");
-}
-
-// add click event to all modal items
-for (let i = 0; i < testimonialsItem.length; i++) {
-
-  testimonialsItem[i].addEventListener("click", function () {
-
-    modalImg.src = this.querySelector("[data-testimonials-avatar]").src;
-    modalImg.alt = this.querySelector("[data-testimonials-avatar]").alt;
-    modalTitle.innerHTML = this.querySelector("[data-testimonials-title]").innerHTML;
-    modalText.innerHTML = this.querySelector("[data-testimonials-text]").innerHTML;
-
-    testimonialsModalFunc();
+  selectItems.forEach((item) => {
+    item.addEventListener("click", () => {
+      let selectedValue = item.innerText.toLowerCase();
+      selectValue.innerText = item.innerText;
+      elementToggleFunc(select);
+      filterFunc(selectedValue);
+    });
   });
-}
 
-// add click event to modal close button
-modalCloseBtn.addEventListener("click", testimonialsModalFunc);
-overlay.addEventListener("click", testimonialsModalFunc);
+  // Filter functionality
+  const filterItems = document.querySelectorAll("[data-filter-item]");
+  filterBtn[0].classList.add("active"); // Set "All" as active on load
 
-// custom select variables
-const select = document.querySelector("[data-select]");
-const selectItems = document.querySelectorAll("[data-select-item]");
-const selectValue = document.querySelector("[data-selecct-value]");
-const filterBtn = document.querySelectorAll("[data-filter-btn]");
-
-select.addEventListener("click", function () { elementToggleFunc(this); });
-
-// add event in all select items
-for (let i = 0; i < selectItems.length; i++) {
-  selectItems[i].addEventListener("click", function () {
-
-    let selectedValue = this.innerText.toLowerCase();
-    selectValue.innerText = this.innerText;
-    elementToggleFunc(select);
-    filterFunc(selectedValue);
-  });
-}
-
-// filter variables
-const filterItems = document.querySelectorAll("[data-filter-item]");
-
-// Ensure only "All" is active on initial load
-filterBtn.forEach(btn => btn.classList.remove("active"));
-filterBtn[0].classList.add("active");
-
-const filterFunc = function (selectedValue) {
-  filterItems.forEach(item => {
-    const category = item.dataset.category;
-    if (selectedValue === "all" || selectedValue === category) {
-      item.classList.add("active");
-    } else {
-      item.classList.remove("active");
-    }
-  });
-};
-
-// add event in all filter button items for large screen
-let lastClickedBtn = filterBtn[0];
-
-for (let i = 0; i < filterBtn.length; i++) {
-  filterBtn[i].addEventListener("click", function () {
-    let selectedValue = this.innerText.toLowerCase();
-    selectValue.innerText = this.innerText;
-    filterFunc(selectedValue);
-
-    lastClickedBtn.classList.remove("active");
-    this.classList.add("active");
-    lastClickedBtn = this;
-  });
-}
-
-// contact form variables
-const form = document.querySelector("[data-form]");
-const formInputs = document.querySelectorAll("[data-form-input]");
-const formBtn = document.querySelector("[data-form-btn]");
-
-// add event to all form input field
-for (let i = 0; i < formInputs.length; i++) {
-  formInputs[i].addEventListener("input", function () {
-
-    // check form validation
-    if (form.checkValidity()) {
-      formBtn.removeAttribute("disabled");
-    } else {
-      formBtn.setAttribute("disabled", "");
-    }
-  });
-}
-
-// page navigation variables
-const navigationLinks = document.querySelectorAll("[data-nav-link]");
-const pages = document.querySelectorAll("[data-page]");
-
-// add event to all nav link
-for (let i = 0; i < navigationLinks.length; i++) {
-  navigationLinks[i].addEventListener("click", function () {
-
-    for (let i = 0; i < pages.length; i++) {
-      if (this.innerHTML.toLowerCase() === pages[i].dataset.page) {
-        pages[i].classList.add("active");
-        navigationLinks[i].classList.add("active");
-        window.scrollTo(0, 0);
+  const filterFunc = (selectedValue) => {
+    filterItems.forEach((item) => {
+      const category = item.dataset.category;
+      if (selectedValue === "all" || selectedValue === category) {
+        item.classList.add("active");
       } else {
-        pages[i].classList.remove("active");
-        navigationLinks[i].classList.remove("active");
+        item.classList.remove("active");
       }
-    }
+    });
+  };
+
+  filterBtn.forEach((btn) => {
+    btn.addEventListener("click", () => {
+      let selectedValue = btn.innerText.toLowerCase();
+      selectValue.innerText = btn.innerText;
+      filterFunc(selectedValue);
+      filterBtn.forEach((b) => b.classList.remove("active"));
+      btn.classList.add("active");
+    });
   });
-}
+
+  // Page navigation
+  const navigationLinks = document.querySelectorAll("[data-nav-link]");
+  const pages = document.querySelectorAll("[data-page]");
+
+  navigationLinks.forEach((link) => {
+    link.addEventListener("click", () => {
+      const sectionName = link.innerHTML.toLowerCase();
+      pages.forEach((page) => {
+        if (sectionName === page.dataset.page) {
+          page.classList.add("active");
+          link.classList.add("active");
+        } else {
+          page.classList.remove("active");
+          navigationLinks.forEach((nl) => nl.classList.remove("active"));
+          link.classList.add("active");
+        }
+      });
+      // Update navbar link colors based on theme
+      updateElementStyles(checkbox.checked);
+      window.scrollTo(0, 0);
+    });
+  });
+
+  // Initialize active section on load
+  const activeLink = document.querySelector(".navbar-link.active");
+  if (activeLink) {
+    const activeSection = document.querySelector(
+      `article[data-page="${activeLink.innerHTML.toLowerCase()}"]`
+    );
+    if (activeSection) {
+      activeSection.classList.add("active");
+      activeLink.classList.add("active");
+    }
+  }
+});
