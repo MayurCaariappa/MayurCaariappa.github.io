@@ -158,6 +158,12 @@ document.addEventListener("DOMContentLoaded", () => {
           ? "var(--orange-yellow-crayola)"
           : "var(--white-1)";
     });
+
+    // Send mail button (only set background, let CSS handle color)
+    const sendMailBtn = document.querySelector(".contact-button");
+    sendMailBtn.style.background = isLightMode
+      ? "rgb(220, 193, 243)"
+      : "var(--bg-gradient-onyx)";
   }
 
   // Toggle function for elements
@@ -240,7 +246,9 @@ document.addEventListener("DOMContentLoaded", () => {
       let selectedValue = btn.innerText.toLowerCase();
       selectValue.innerText = btn.innerText;
       filterFunc(selectedValue);
-      filterBtn.forEach((b) => b.classList.remove("active"));
+      document
+        .querySelectorAll("button")
+        .forEach((b) => b.classList.remove("active"));
       btn.classList.add("active");
     });
   });
