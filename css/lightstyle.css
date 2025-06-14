@@ -846,10 +846,20 @@ s .social-item:nth-child(3) .social-link:hover i {
 }
 
 /* GitHub Contribution Chart */
+.github-contribution,
+.service-item,
+.title-wrapper {
+  margin: 0;
+  padding: 0;
+  width: 100%;
+}
+
 .github-chart {
   width: 100%;
-  height: auto;
+  height: 100%;
+  object-fit: contain;
 }
+
 /*-----------------------------------*\
     #RESUME
   \*-----------------------------------*/
