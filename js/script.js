@@ -166,15 +166,28 @@ document.addEventListener("DOMContentLoaded", () => {
       : "var(--bg-gradient-onyx)";
   }
 
-  // Copy email button
+  /* Copy-to-clipboard button */
   const copyEmailBtn = document.querySelector("#copy-email-btn");
-  if (copyEmailBtn) {
-    copyEmailBtn.addEventListener("click", () => {
+  const tickIcon = document.querySelector("#tick-icon");
+
+  if (copyEmailBtn && tickIcon) {
+    // Ensure the copy icon is visible on page load
+    copyEmailBtn.classList.remove("hidden");
+    tickIcon.classList.remove("active");
+
+    copyEmailBtn.addEventListener("click", (event) => {
       navigator.clipboard
         .writeText("mayurcaariappa10@gmail.com")
         .then(() => {
-          copyEmailBtn.classList.add("copied");
-          setTimeout(() => copyEmailBtn.classList.remove("copied"), 2000);
+          // Show tick icon and hide copy icon
+          copyEmailBtn.classList.add("hidden");
+          tickIcon.classList.add("active");
+
+          // Revert to copy icon after 2 seconds
+          setTimeout(() => {
+            tickIcon.classList.remove("active");
+            copyEmailBtn.classList.remove("hidden");
+          }, 2000);
         })
         .catch((err) => {
           console.error("Failed to copy email:", err);
