@@ -159,55 +159,54 @@ document.addEventListener("DOMContentLoaded", () => {
           : "var(--white-1)";
     });
 
-    // Send mail button (only set background, let CSS handle color)
+    // Send mail button
     const sendMailBtn = document.querySelector(".contact-button");
     sendMailBtn.style.background = isLightMode
-      ? "rgb(220, 193, 243)"
+      ? "rgb(153, 102, 204)" // Matches hsl(270, 50%, 60%)
       : "var(--bg-gradient-onyx)";
   }
 
-  // Toggle function for elements
-  const elementToggleFunc = function (elem) {
-    elem.classList.toggle("active");
-  };
+  /* COPY-TO-CLIPBOARD BUTTON */
+  const copyEmailBtn = document.querySelector("#copy-email-btn");
+  const tickIcon = document.querySelector("#tick-icon");
+  if (copyEmailBtn && tickIcon) {
+    // Ensure the copy icon is visible on page load
+    copyEmailBtn.classList.remove("hidden");
+    tickIcon.classList.remove("active");
+
+    copyEmailBtn.addEventListener("click", (event) => {
+      navigator.clipboard
+        .writeText("mayurcaariappa10@gmail.com")
+        .then(() => {
+          // Show tick icon and hide copy icon
+          copyEmailBtn.classList.add("hidden");
+          tickIcon.classList.add("active");
+
+          // Revert to copy icon after 2 seconds
+          setTimeout(() => {
+            tickIcon.classList.remove("active");
+            copyEmailBtn.classList.remove("hidden");
+          }, 2000);
+        })
+        .catch((err) => {
+          console.error("Failed to copy email:", err);
+        });
+    });
+  }
+
+  /* DOWNLOAD RESUME BUTTON */
+  const downloadIcon = document.querySelector(".download-icon");
+  function restartAnimation() {
+    downloadIcon.style.animation = "none";
+    downloadIcon.offsetHeight; // Reading offsetHeight forces a reflow
+    downloadIcon.style.animation = "pulse 1s ease-in-out 4 forwards"; // Reapply the animation
+  }
+  setInterval(restartAnimation, 15000); // Restart the animation every 15 seconds (5s animation + 10s delay)
 
   // Sidebar toggle
   const sidebar = document.querySelector("[data-sidebar]");
   const sidebarBtn = document.querySelector("[data-sidebar-btn-2]");
   sidebarBtn.addEventListener("click", () => elementToggleFunc(sidebar));
-
-  // Testimonials modal
-  const testimonialsItems = document.querySelectorAll(
-    "[data-testimonials-item]"
-  );
-  const modalContainer = document.querySelector("[data-modal-container]");
-  const modalCloseBtn = document.querySelector("[data-modal-close-btn]");
-  const overlay = document.querySelector("[data-overlay]");
-  const modalImg = document.querySelector("[data-modal-img]");
-  const modalTitle = document.querySelector("[data-modal-title]");
-  const modalText = document.querySelector("[data-modal-text]");
-
-  const testimonialsModalFunc = () => {
-    modalContainer.classList.toggle("active");
-    overlay.classList.toggle("active");
-  };
-
-  testimonialsItems.forEach((item) => {
-    item.addEventListener("click", () => {
-      modalImg.src = item.querySelector("[data-testimonials-avatar]").src;
-      modalImg.alt = item.querySelector("[data-testimonials-avatar]").alt;
-      modalTitle.innerHTML = item.querySelector(
-        "[data-testimonials-title]"
-      ).innerHTML;
-      modalText.innerHTML = item.querySelector(
-        "[data-testimonials-text]"
-      ).innerHTML;
-      testimonialsModalFunc();
-    });
-  });
-
-  modalCloseBtn.addEventListener("click", testimonialsModalFunc);
-  overlay.addEventListener("click", testimonialsModalFunc);
 
   // Custom select for filtering
   const select = document.querySelector("[data-select]");
@@ -246,9 +245,7 @@ document.addEventListener("DOMContentLoaded", () => {
       let selectedValue = btn.innerText.toLowerCase();
       selectValue.innerText = btn.innerText;
       filterFunc(selectedValue);
-      document
-        .querySelectorAll("button")
-        .forEach((b) => b.classList.remove("active"));
+      filterBtn.forEach((b) => b.classList.remove("active"));
       btn.classList.add("active");
     });
   });
