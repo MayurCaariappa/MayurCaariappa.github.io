@@ -1264,17 +1264,153 @@ s .social-item:nth-child(3) .social-link:hover i {
   transform: scale(1.1);
 }
 
-/* Responsive design */
-@media (min-width: 580px) {
-  .contact-button {
-    padding: 14px 24px;
+/* Contact button styling */
+.contact-button-copy {
+  position: relative;
+  overflow: hidden;
+  display: inline-flex;
+  align-items: center;
+  padding: 8px;
+  border-radius: 8px;
+  cursor: pointer;
+  transition: background-color 0.3s ease, transform 0.2s ease;
+}
+
+.contact-button-copy:hover {
+  transform: scale(1.2);
+}
+
+/* Icon styling */
+.icon {
+  transition: opacity 0.3s ease, transform 0.3s ease;
+}
+
+/* Ensure the container is positioned relatively */
+.icon-container {
+  display: inline-block;
+  position: relative;
+  width: 25px;
+  height: 25px;
+  cursor: pointer;
+}
+
+/* Initially, the tick icon is hidden */
+.tick-icon {
+  position: absolute;
+  top: 0;
+  left: 0;
+  opacity: 0;
+  pointer-events: none;
+  transition: opacity 0.3s ease;
+}
+
+/* When active, the tick icon becomes visible */
+.tick-icon.active {
+  opacity: 1;
+}
+
+.tick-icon {
+  position: absolute;
+  top: 0;
+  opacity: 0;
+  transform: scale(0.8);
+  transition: opacity 0.3s ease, transform 0.3s ease;
+}
+
+.icon-container.show-tick .tick-icon {
+  opacity: 1;
+  transform: scale(1);
+}
+
+.hidden {
+  opacity: 0;
+  transform: scale(0.8);
+}
+
+/* Ripple effect styling */
+.ripple {
+  pointer-events: none;
+  position: absolute;
+  border-radius: 50%;
+  background: rgba(255, 255, 255, 0.6);
+  transform: scale(0);
+  animation: ripple-animation 0.6s linear;
+}
+
+@keyframes ripple-animation {
+  to {
+    transform: scale(4);
+    opacity: 0;
   }
 }
 
 /*-----------------------------------*\
   #RESPONSIVE
 \*-----------------------------------*/
+@media (min-width: 0px) {
+  .project-img,
+  .blog-banner-box {
+    height: auto;
+  }
+
+  /* Skill Icon Styles */
+  .skill-icons {
+    display: grid;
+    grid-template-columns: repeat(2, 1fr);
+    gap: 15px;
+    justify-items: center;
+    align-items: center;
+    margin-top: 20px;
+  }
+
+  .contact-button {
+    margin-bottom: 50px;
+  }
+}
+
 @media (min-width: 100px) {
+  .project-img,
+  .blog-banner-box {
+    height: auto;
+  }
+
+  /* Skill Icon Styles */
+  .skill-icons {
+    display: grid;
+    grid-template-columns: repeat(3, 1fr);
+    gap: 15px;
+    justify-items: center;
+    align-items: center;
+    margin-top: 20px;
+  }
+
+  .contact-button {
+    margin-bottom: 50px;
+  }
+}
+
+@media (min-width: 300px) {
+  .project-img,
+  .blog-banner-box {
+    height: auto;
+  }
+
+  /* Skill Icon Styles */
+  .skill-icons {
+    display: grid;
+    grid-template-columns: repeat(4, 1fr);
+    gap: 15px;
+    justify-items: center;
+    align-items: center;
+    margin-top: 20px;
+  }
+
+  .contact-button {
+    margin-bottom: 50px;
+  }
+}
+
+@media (min-width: 400px) {
   .project-img,
   .blog-banner-box {
     height: auto;
@@ -1288,6 +1424,10 @@ s .social-item:nth-child(3) .social-link:hover i {
     justify-items: center;
     align-items: center;
     margin-top: 20px;
+  }
+
+  .contact-button {
+    margin-bottom: 50px;
   }
 }
 
@@ -1534,6 +1674,10 @@ s .social-item:nth-child(3) .social-link:hover i {
     align-items: center;
     margin-top: 20px;
   }
+
+  .contact-button {
+    margin-bottom: 50px;
+  }
 }
 
 @media (min-width: 768px) {
@@ -1618,6 +1762,10 @@ s .social-item:nth-child(3) .social-link:hover i {
     align-items: center;
     margin-top: 20px;
   }
+
+  .contact-button {
+    margin-bottom: 50px;
+  }
 }
 
 @media (min-width: 1024px) {
@@ -1689,6 +1837,10 @@ s .social-item:nth-child(3) .social-link:hover i {
     justify-items: center;
     align-items: center;
     margin-top: 20px;
+  }
+
+  .contact-button {
+    margin-bottom: 50px;
   }
 }
 
