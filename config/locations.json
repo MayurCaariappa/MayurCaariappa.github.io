@@ -1,0 +1,65 @@
+{
+  "type": "FeatureCollection",
+  "features": [
+    {
+      "type": "Feature",
+      "properties": {
+        "description": "<strong>Cubbon Park</strong><p>Perfect spot for a morning run and skateboard</p>"
+      },
+      "geometry": {
+        "type": "Point",
+        "coordinates": [77.5937, 12.9757]
+      }
+    },
+    {
+      "type": "Feature",
+      "properties": {
+        "description": "<strong>Vijayanagar</strong><p>My basecamp for 6 years and counting...</p>"
+      },
+      "geometry": {
+        "type": "Point",
+        "coordinates": [77.5348443, 12.9708403]
+      }
+    },
+    {
+      "type": "Feature",
+      "properties": {
+        "description": "<strong>Kanteerava Football Statium</strong><p>Still hold the record: BFC unbeaten at every game I've been to!</p>"
+      },
+      "geometry": {
+        "type": "Point",
+        "coordinates": [77.5938, 12.9695647]
+      }
+    },
+    {
+      "type": "Feature",
+      "properties": {
+        "description": "<strong>Church Street</strong><p>Where I clock in for work and clock out for fun</p>"
+      },
+      "geometry": {
+        "type": "Point",
+        "coordinates": [77.6077341, 12.9743637]
+      }
+    },
+    {
+      "type": "Feature",
+      "properties": {
+        "description": "<strong>eMudhra</strong><p>3 years, 80km a day - like a Road Trip to Airport! Everyday!</p>"
+      },
+      "geometry": {
+        "type": "Point",
+        "coordinates": [77.705183, 13.1656539]
+      }
+    },
+    {
+      "type": "Feature",
+      "properties": {
+        "description": "<strong>South United FC</strong><p>Football? Count me in every time!</p>"
+      },
+      "geometry": {
+        "type": "Point",
+        "coordinates": [77.6116858, 12.9810167]
+      }
+    }
+  ]
+}

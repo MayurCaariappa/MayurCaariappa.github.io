@@ -166,6 +166,245 @@ document.addEventListener("DOMContentLoaded", () => {
       : "var(--bg-gradient-onyx)";
   }
 
+  /* MAP LIBRARY INITIALIZATION */
+  async function initializeMap() {
+    try {
+      // Fetch GeoJSON data early
+      const response = await fetch("/config/locations.json");
+      if (!response.ok) {
+        throw new Error(
+          `Failed to load locations.json: ${response.statusText}`
+        );
+      }
+      const geojsonData = await response.json();
+
+      // Calculate bounds from marker coordinates
+      let bounds = geojsonData.features.reduce((bounds, feature) => {
+        const [lng, lat] = feature.geometry.coordinates;
+        return bounds.extend([lng, lat]);
+      }, new maplibregl.LngLatBounds());
+
+      // Initialize map
+      const map = new maplibregl.Map({
+        container: "map",
+        style:
+          "https://api.maptiler.com/maps/backdrop/style.json?key=DkZBwTcNZd93pVZ7b4qy",
+        center: bounds.getCenter(),
+        zoom: 2,
+        pitch: 100,
+        bearing: 45,
+        hash: true,
+        maxBounds: [
+          [77.4, 12.8], // SW-Bangalore
+          [77.8, 13.2], // NE-Bangalore
+        ],
+      });
+
+      // Fit map to bounds and ensure angled view
+      map.on("load", () => {
+        map.fitBounds(bounds, {
+          padding: 100,
+          maxZoom: 2,
+          duration: 0,
+          pitch: 100,
+          bearing: 45,
+        });
+        popup.remove(); // Ensure popup is closed
+      });
+
+      // Disable all zooming
+      map.scrollZoom.disable();
+      map.touchZoomRotate.disable();
+      map.boxZoom.disable();
+
+      // Log any map errors
+      map.on("error", (e) => {
+        logError("Map error", e.error);
+      });
+
+      // Initialize popup
+      const popup = new maplibregl.Popup({
+        closeButton: false,
+        closeOnClick: false,
+        className: "custom-popup",
+      });
+
+      map.on("style.load", () => {
+        // Handle missing images
+        map.on("styleimagemissing", (e) => {
+          const id = e.id;
+          if (!map.hasImage(id) && id !== "custom-marker") {
+            const canvas = document.createElement("canvas");
+            canvas.width = 1;
+            canvas.height = 1;
+            const ctx = canvas.getContext("2d");
+            ctx.clearRect(0, 0, 1, 1);
+            map.addImage(id, canvas);
+          }
+        });
+
+        // Hide label and symbol layers
+        map.getStyle().layers.forEach((layer) => {
+          if (layer.type === "symbol") {
+            map.setLayoutProperty(layer.id, "visibility", "none");
+          }
+        });
+
+        // Add 3D buildings layer
+        try {
+          if (map.getSource("composite") && map.getLayer("building")) {
+            map.addLayer({
+              id: "3d-buildings",
+              source: "composite",
+              "source-layer": "building",
+              type: "fill-extrusion",
+              minzoom: 12, // Increased to ensure buildings render at closer zoom
+              paint: {
+                "fill-extrusion-color": "#aaa",
+                "fill-extrusion-height": [
+                  "interpolate",
+                  ["linear"],
+                  ["zoom"],
+                  12,
+                  0,
+                  14,
+                  ["get", "height"],
+                ],
+                "fill-extrusion-base": [
+                  "interpolate",
+                  ["linear"],
+                  ["zoom"],
+                  12,
+                  0,
+                  14,
+                  ["get", "min_height"],
+                ],
+                "fill-extrusion-opacity": 0.8,
+              },
+            });
+          } else {
+            console.warn(
+              "3D buildings source or layer missing in MapTiler style"
+            );
+          }
+        } catch (error) {
+          logError("Failed to add 3D buildings layer", error);
+        }
+
+        // Add GeoJSON source
+        map.addSource("places", {
+          type: "geojson",
+          data: geojsonData,
+        });
+
+        // Load custom marker image
+        const img = new Image(20, 20);
+        img.src = "./assets/svg/flag-purple.svg";
+        img.style.boxShadow = "0 0 10px rgb(0, 0, 0)"; // Add shadow for better visibility
+        img.onload = () => {
+          map.addImage("custom-marker", img);
+
+          // Add markers layer with reduced hit area
+          map.addLayer({
+            id: "places",
+            type: "symbol",
+            source: "places",
+            layout: {
+              "icon-image": "custom-marker",
+              "icon-size": 1,
+              "icon-allow-overlap": true,
+              "icon-anchor": "bottom",
+              "icon-padding": 5, // Reduced to minimize overlap
+            },
+          });
+        };
+        img.onerror = () => {
+          logError("Failed to load flag-purple.svg", error);
+          // Fallback: Purple square
+          const canvas = document.createElement("canvas");
+          canvas.width = 40;
+          canvas.height = 40;
+          const ctx = canvas.getContext("2d");
+          ctx.fillStyle = "#800080";
+          ctx.fillRect(0, 0, 40, 40);
+          map.addImage("custom-marker", canvas);
+
+          // Add markers layer with reduced hit area
+          map.addLayer({
+            id: "places",
+            type: "symbol",
+            source: "places",
+            layout: {
+              "icon-image": "custom-marker",
+              "icon-size": 1,
+              "icon-allow-overlap": true,
+              "icon-anchor": "bottom",
+              "icon-padding": 5, // Reduced to minimize overlap
+            },
+          });
+        };
+
+        // Handle hover to show popup for closest marker
+        map.on("mousemove", "places", (e) => {
+          if (e.features.length > 0) {
+            // Select the first (closest) feature
+            const feature = e.features[0];
+            map.getCanvas().style.cursor = "pointer";
+
+            const coordinates = feature.geometry.coordinates.slice();
+            const description = feature.properties.description;
+
+            // Normalize coordinates
+            while (coordinates[0] > 180) coordinates[0] -= 360;
+            while (coordinates[0] < -180) coordinates[0] += 360;
+
+            // Add slight offset to avoid popup overlap
+            popup
+              .setLngLat(coordinates)
+              .setHTML(description)
+              .setOffset([0, -20]) // Move popup 20px above marker
+              .addTo(map);
+          }
+        });
+
+        // Remove popup on mouse leave
+        map.on("mouseleave", "places", () => {
+          map.getCanvas().style.cursor = "";
+          popup.remove();
+        });
+
+        // Accessibility: Handle click for keyboard users
+        map.on("click", "places", (e) => {
+          if (e.features.length > 0) {
+            const feature = e.features[0];
+            const description = feature.properties.description;
+            const coordinates = feature.geometry.coordinates.slice();
+            popup
+              .setLngLat(coordinates)
+              .setHTML(description)
+              .setOffset([0, -20])
+              .addTo(map);
+          }
+        });
+      });
+    } catch (error) {
+      logError("GeoJSON fetch failed:", error);
+      document.getElementById("map").innerHTML = `
+    <div style="text-align: center; padding: 20px; color: #fff;">
+      Unable to load map data. Please try again later.
+    </div>`;
+      return;
+    }
+  }
+
+  // Call the async function to initialize the map
+  initializeMap();
+
+  // Centralized error logging function
+  function logError(message, error) {
+    console.error(`[Map Error] ${message}`, error);
+  }
+
   /* COPY-TO-CLIPBOARD BUTTON */
   const copyEmailBtn = document.querySelector("#copy-email-btn");
   const tickIcon = document.querySelector("#tick-icon");
@@ -189,7 +428,7 @@ document.addEventListener("DOMContentLoaded", () => {
           }, 2000);
         })
         .catch((err) => {
-          console.error("Failed to copy email:", err);
+          logError("Failed to copy email", err);
         });
     });
   }
