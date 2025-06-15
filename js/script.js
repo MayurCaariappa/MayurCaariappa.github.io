@@ -166,10 +166,9 @@ document.addEventListener("DOMContentLoaded", () => {
       : "var(--bg-gradient-onyx)";
   }
 
-  /* Copy-to-clipboard button */
+  /* COPY-TO-CLIPBOARD BUTTON */
   const copyEmailBtn = document.querySelector("#copy-email-btn");
   const tickIcon = document.querySelector("#tick-icon");
-
   if (copyEmailBtn && tickIcon) {
     // Ensure the copy icon is visible on page load
     copyEmailBtn.classList.remove("hidden");
@@ -195,10 +194,14 @@ document.addEventListener("DOMContentLoaded", () => {
     });
   }
 
-  // Toggle function for elements
-  const elementToggleFunc = function (elem) {
-    elem.classList.toggle("active");
-  };
+  /* DOWNLOAD RESUME BUTTON */
+  const downloadIcon = document.querySelector(".download-icon");
+  function restartAnimation() {
+    downloadIcon.style.animation = "none";
+    downloadIcon.offsetHeight; // Reading offsetHeight forces a reflow
+    downloadIcon.style.animation = "pulse 1s ease-in-out 4 forwards"; // Reapply the animation
+  }
+  setInterval(restartAnimation, 15000); // Restart the animation every 15 seconds (5s animation + 10s delay)
 
   // Sidebar toggle
   const sidebar = document.querySelector("[data-sidebar]");

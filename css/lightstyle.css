@@ -926,7 +926,7 @@ s .social-item:nth-child(3) .social-link:hover i {
 }
 
 .timeline-text {
-  color: hsl(0, 1%, 85%);
+  color: hsl(0, 1%, 85%) !important;
   font-weight: var(--fw-300);
   line-height: 1.6;
 }
@@ -2025,19 +2025,80 @@ s .social-item:nth-child(3) .social-link:hover i {
   align-items: center;
 }
 
-.download-link img {
-  vertical-align: middle;
-}
-
+/* Download link styling */
 .download-link {
   display: inline-block;
   margin-left: 10px;
   color: var(--white-2);
   font-size: 18px;
-  transition: color var(--transition-1), transform var(--transition-1);
   vertical-align: middle;
+  position: relative;
+  text-decoration: none;
+  transition: color var(--transition-1), transform var(--transition-1);
 }
+
 .download-link:hover {
   color: var(--orange-yellow-crayola);
   transform: scale(1.2);
+}
+
+/* Download icon styling */
+.download-icon {
+  vertical-align: middle;
+  transition: transform var(--transition-1), opacity var(--transition-1);
+  animation: pulse 1s ease-in-out 4 forwards;
+}
+
+/* Pulse animation */
+@keyframes pulse {
+  0%,
+  100% {
+    transform: scale(1);
+  }
+  50% {
+    transform: scale(1.2);
+  }
+}
+
+/* Tooltip on hover */
+.download-link:hover::after {
+  content: "Download Resume";
+  position: absolute;
+  top: -35px;
+  left: 50%;
+  transform: translateX(-50%);
+  background: #333;
+  color: #fff;
+  padding: 4px 8px;
+  border-radius: 4px;
+  font-size: 12px;
+  white-space: nowrap;
+  z-index: 10;
+  opacity: 0;
+  animation: fadeIn 0.3s forwards;
+}
+
+@keyframes fadeIn {
+  to {
+    opacity: 1;
+  }
+}
+
+@keyframes bounce {
+  0%,
+  100% {
+    transform: translateY(0);
+  }
+  50% {
+    transform: translateY(-5px);
+  }
+}
+
+/* Respect reduced motion */
+@media (prefers-reduced-motion: reduce) {
+  .download-icon,
+  .download-link:hover::after {
+    animation: none;
+    transition: none;
+  }
 }
