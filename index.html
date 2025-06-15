@@ -30,6 +30,8 @@
     }
   </script>
 
+  <script src="https://unpkg.com/maplibre-gl@5.6.0/dist/maplibre-gl.js"></script>
+  <link href="https://unpkg.com/maplibre-gl@5.6.0/dist/maplibre-gl.css" rel="stylesheet" />
   <link rel="stylesheet" href="./css/lightstyle.css" />
   <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css" rel="stylesheet">
   <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.0/font/bootstrap-icons.css">
@@ -166,6 +168,18 @@
                 alt="Mayur Caariappa's Github chart" />
             </div>
           </li>
+        </section>
+
+        <!-- Places Visited Section -->
+        <section class="map-section">
+          <figure>
+            <figcaption class="map-header">
+              <h3 class="h3">Bangalore – A Personal Map of My City Adventures</h3>
+            </figcaption>
+            <div id="map" role="region" aria-label="Interactive map of places visited in Bangalore"
+              style="width: 100%; height: 300px;"></div>
+          </figure>
+        </section>
       </article>
 
       <!-- Skills Section -->

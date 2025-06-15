@@ -1,6 +1,9 @@
 /* Ensure smooth transitions for theme-related properties */
 :root {
   --transition-theme: 0.4s ease; /* Smoother transition for theme changes */
+  --map-shadow: 0 4px 8px rgba(0, 0, 0, 0.2);
+  --popup-bg: #fff;
+  --marker-size: 40px;
 }
 
 body,
@@ -2100,5 +2103,99 @@ s .social-item:nth-child(3) .social-link:hover i {
   .download-link:hover::after {
     animation: none;
     transition: none;
+  }
+}
+
+/*-----------------------------------*\
+    #MAP
+  \*-----------------------------------*/
+/* Map section styling */
+.map-section {
+  margin: 2rem 0;
+  padding: 1rem;
+}
+
+.map-header {
+  margin-bottom: 1rem;
+}
+
+.h2.article-title {
+  color: var(--white-2);
+  font-size: 2rem;
+}
+
+/* Map container */
+#map {
+  position: relative;
+  border-radius: 8px;
+  overflow: hidden;
+  box-shadow: var(--map-shadow);
+}
+
+.marker:hover {
+  transform: scale(1.2);
+}
+
+/* Popup styling */
+.maplibregl-popup {
+  max-width: 250px;
+  font: 14px/20px "Helvetica Neue", Arial, Helvetica, sans-serif;
+  opacity: 0;
+  transition: opacity 0.2s ease-in-out;
+  will-change: opacity;
+}
+
+/* Show popup when visible */
+.maplibregl-popup:not(.maplibregl-popup-closing) {
+  opacity: 1;
+}
+
+/* Style popup content as a rectangle */
+.maplibregl-popup-content {
+  transform: none !important;
+  animation: none !important;
+  transition: none !important;
+  border-radius: 4px;
+  padding: 10px;
+  background: var(--popup-bg);
+  box-shadow: var(--map-shadow);
+}
+
+/* Hide the popup anchor (triangle) */
+.maplibregl-popup-anchor {
+  display: none !important;
+}
+
+/* Style attribution to appear on one line */
+.maplibregl-ctrl-attrib {
+  font-size: 12px;
+  background: rgba(255, 255, 255, 0.8);
+  padding: 2px 5px;
+  border-radius: 3px;
+  white-space: nowrap;
+  display: block !important;
+}
+
+/* Style attribution links and text */
+.maplibregl-ctrl-attrib a,
+.maplibregl-ctrl-attrib span {
+  display: inline;
+  margin-right: 5px;
+}
+
+/* Remove animation for reduced motion */
+@media (prefers-reduced-motion: reduce) {
+  .marker {
+    transition: none;
+  }
+  .maplibregl-popup {
+    transition: none;
+  }
+}
+
+/* Responsive map height */
+@media (max-width: 768px) {
+  #map {
+    height: 300px;
   }
 }
