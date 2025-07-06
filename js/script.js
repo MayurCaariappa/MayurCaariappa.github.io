@@ -74,6 +74,43 @@ document.addEventListener("DOMContentLoaded", () => {
     updateElementStyles(false);
   }
 
+  const words = ["Software Engineer", "Footballer", "Photographer"];
+  let wordIndex = 0;
+  let charIndex = 0;
+  let isDeleting = false;
+  const speed = 100;
+  const pause = 1100;
+  const typewriter = document.getElementById("typewriter");
+
+  function type() {
+    const currentWord = words[wordIndex];
+
+    if (isDeleting) {
+      charIndex--;
+    } else {
+      charIndex++;
+    }
+
+    typewriter.textContent = currentWord.substring(0, charIndex);
+
+    let delay = isDeleting ? speed / 2 : speed;
+
+    if (!isDeleting && charIndex === currentWord.length) {
+      // Finished typing
+      isDeleting = true;
+      delay = pause;
+    } else if (isDeleting && charIndex === 0) {
+      // Finished deleting
+      isDeleting = false;
+      wordIndex = (wordIndex + 1) % words.length;
+      delay = 250; // small delay before typing starts again
+    }
+
+    setTimeout(type, delay);
+  }
+
+  type();
+
   // Update element-specific styles based on theme
   function updateElementStyles(isLightMode) {
     // Checkbox label
@@ -146,7 +183,21 @@ document.addEventListener("DOMContentLoaded", () => {
     document.querySelectorAll(".timeline-text").forEach((element) => {
       element.style.color = isLightMode
         ? "var(--light-gray)"
-        : "var(--light-gray)";
+        : "var(--white-1)";
+    });
+
+    // Project Category text
+    document.querySelectorAll(".p-c-space").forEach((element) => {
+      element.style.color = isLightMode
+        ? "var(--light-gray)"
+        : "var(--white-1)";
+    });
+
+    // Filter item buttons
+    document.querySelectorAll(".filter-item button").forEach((element) => {
+      element.style.color = isLightMode
+        ? "var(--light-gray)"
+        : "var(--white-1)";
     });
 
     // Navbar links
@@ -162,7 +213,7 @@ document.addEventListener("DOMContentLoaded", () => {
     // Send mail button
     const sendMailBtn = document.querySelector(".contact-button");
     sendMailBtn.style.background = isLightMode
-      ? "rgb(153, 102, 204)" // Matches hsl(270, 50%, 60%)
+      ? "var(--onyx)"
       : "var(--bg-gradient-onyx)";
   }
 
@@ -209,7 +260,7 @@ document.addEventListener("DOMContentLoaded", () => {
           pitch: 100,
           bearing: 45,
         });
-        popup.remove(); // Ensure popup is closed
+        popup.remove();
       });
 
       // Disable all zooming

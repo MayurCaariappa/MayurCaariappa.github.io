@@ -4,9 +4,10 @@
 <head>
   <meta charset="UTF-8" />
   <meta http-equiv="X-UA-Compatible" content="IE=edge" />
+  <link rel="icon" type="image/png" href="assets/images/mayurcaariappa.gif" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
   <meta property="og:title" content="Personal Portfolio of Mayur Caariappa" />
-  <meta name="description"
+  <meta property="og:description"
     content="Portfolio of Mayur Caariappa, a Software Engineer specializing in Java, SpringBoot, and MERN stack development.">
   <title>Personal Portfolio</title>
 
@@ -70,7 +71,7 @@
 
         <div class="info-content">
           <h1 class="name" title="Mayur Caariappa">Mayur Caariappa</h1>
-          <p class="title">Software Engineer</p>
+          <p class="title" id="typewriter"></p>
         </div>
 
         <button class="info_more-btn" data-sidebar-btn>
@@ -229,7 +230,7 @@
         <header class="resume-header">
           <h2 class="h2 article-title">
             Resume
-            <a href="docs/Resume_MayurCaariappa.pdf" download="Resume_MayurCaariappa" class="download-link">
+            <a href="docs/Resume_MayurCaariappa_MERN.pdf" download="Resume_MayurCaariappa" class="download-link">
               <span class="icon-wrapper">
                 <img id="download-resume-btn" src="assets/svg/resume-purple.svg" alt="Download Resume" width="50"
                   height="50" class="download-icon" />
@@ -388,10 +389,13 @@
               <button class="active" data-filter-btn>All</button>
             </li>
             <li class="filter-item">
-              <button data-filter-btn>Personal</button>
+              <button data-filter-btn class="filter-btn-test">Kaplan</button>
             </li>
             <li class="filter-item">
-              <button data-filter-btn>eMudhra</button>
+              <button data-filter-btn class="filter-btn-test">eMudhra</button>
+            </li>
+            <li class="filter-item">
+              <button data-filter-btn class="filter-btn-test">Personal</button>
             </li>
           </ul>
           <div class="filter-select-box">
@@ -407,6 +411,9 @@
               </li>
               <li class="select-item">
                 <button data-select-item>Personal</button>
+              </li>
+              <li class="select-item">
+                <button data-select-item>Kaplan</button>
               </li>
               <li class="select-item">
                 <button data-select-item>eMudhra</button>
@@ -425,18 +432,77 @@
                     loading="lazy" />
                 </figure>
                 <div style="display: flex;">
-                  <h3 class="project-title-ongoing">Office-Metaverse
-                    <span class="ongoingtag">Ongoing</span>
-                  </h3>
+                  <h4 class="h4 timeline-item-title">Office-Metaverse</h4>
+                  <span class="ongoingtag">Ongoing</span>
                 </div>
                 <p class="project-category"></p>
                 <span class="project-category" style="color: var(--orange-yellow-crayola);font-size:14px">NodeJs |
                   Socket.io | React | ExpressJs | MongoDB</span>
-                <br />
-                <p class="project-category" style="font-size:14px">
+                <p class="project-category p-c-space" style="font-size:14px">
                   The Office Metaverse is a 2D virtual workspace built with the Phaser game engine and MERN stack, where
                   users interact via unique avatars. It features movement, text, video, voice chat, and real-time status
                   visibility. Future plans include adding community discussions.</p>
+              </a>
+            </li>
+            <li class="project-item active" data-filter-item data-category="emudhra">
+              <a href="" target="_blank" rel="Instigo" aria-label="Visit Instigo">
+                <figure class="project-img">
+                  <div class="project-item-icon-box">
+                    <ion-icon name="eye-outline"></ion-icon>
+                  </div>
+                  <img src="assets/images/instigo.png" alt="Instigo" height="10" width="10" loading="lazy" />
+                </figure>
+                <div style="display: flex;">
+                  <h4 class="h4 timeline-item-title">Instigo</h4>
+                </div>
+                <p class="project-category"></p>
+                <span class="project-category" style="color: var(--orange-yellow-crayola);font-size:14px">Java |
+                  SpringBoot | Javascript | JDBC | JWT</span>
+                <p class="project-category p-c-space" style="font-size:14px">
+                  Instigo enables users to complete eKYC for opening demat and trading accounts, review terms &
+                  conditions, and submit applications.</p>
+              </a>
+            </li>
+            <li class="project-item active" data-filter-item data-category="emudhra">
+              <a href="https://emsign.com/secure-email-certificate" target="_blank" rel="emSign S/MIME Automation"
+                aria-label="Visit emSign S/MIME Automation">
+                <figure class="project-img">
+                  <div class="project-item-icon-box">
+                    <ion-icon name="eye-outline"></ion-icon>
+                  </div>
+                  <img src="assets/images/smimePlugin.png" alt="emSign S/MIME Automation" height="10" width="10"
+                    loading="lazy" />
+                </figure>
+                <div style="display: flex;">
+                  <h4 class="h4 timeline-item-title">emSign S/MIME Automation</h4>
+                </div>
+                <p class="project-category"></p>
+                <span class="project-category" style="color: var(--orange-yellow-crayola);font-size:14px">NodeJs |
+                  Express | C# | Advanced Installer</span>
+                <p class="project-category p-c-space" style="font-size:14px">
+                  Enterprise-grade application for email security with automatic S/MIME certificate issuance,
+                  silent installation, and seamless Outlook configuration.</p>
+              </a>
+            </li>
+            <li class="project-item active" data-filter-item data-category="kaplan">
+              <a href="https://nit.kaptest.com/" target="_blank" rel="atom educator portal"
+                aria-label="Visit Atom Educator Portal">
+                <figure class="project-img">
+                  <div class="project-item-icon-box">
+                    <ion-icon name="eye-outline"></ion-icon>
+                  </div>
+                  <img src="assets/images/KaplanNursing.png" alt="atom educator portal" height="10" width="10"
+                    loading="lazy" />
+                </figure>
+                <div style="display: flex;">
+                  <h4 class="h4 timeline-item-title">Atom Educator</h4>
+                </div>
+                <p class="project-category"></p>
+                <span class="project-category" style="color: var(--orange-yellow-crayola);font-size:14px">
+                  TypeScript | GraphQL | ES | Postgres | Jenkins</span>
+                <p class="project-category p-c-space" style="font-size:14px">
+                  The Portal empowers Nursing and Healthcare faculty to effortlessly create assessments, customize
+                  quizzes, manage cohorts and access detailed student report cards. </p>
               </a>
             </li>
             <li class="project-item active" data-filter-item data-category="personal">
@@ -450,13 +516,12 @@
                     loading="lazy" />
                 </figure>
                 <div style="display: flex;">
-                  <h3 class="project-title-ongoing">bangalore.wiki</h3>
+                  <h4 class="h4 timeline-item-title">bangalore.wiki</h4>
                 </div>
                 <p class="project-category"></p>
                 <span class="project-category" style="color: var(--orange-yellow-crayola);font-size:14px">
                   React | Vite</span>
-                <br />
-                <p class="project-category" style="font-size:14px">
+                <p class="project-category p-c-space" style="font-size:14px">
                   bangalore.wiki offers a curated guide to Bangalore's top spots across categories
                   like Food, Cafes, and Outskirts, with direct links to Google Maps. Perfect for discovering the city’s
                   charm through a local's lens.</p>
@@ -472,36 +537,14 @@
                   <img src="assets/images/EasyPark-BLR.png" alt="EasyPark-BLR" height="10" width="10" loading="lazy" />
                 </figure>
                 <div style="display: flex;">
-                  <h3 class="project-title-ongoing">EasyPark-BLR</h3>
+                  <h4 class="h4 timeline-item-title">EasyPark-BLR</h4>
                 </div>
                 <p class="project-category"></p>
                 <span class="project-category" style="color: var(--orange-yellow-crayola);font-size:14px">NodeJs |
                   React | ExpressJs | OpenStreetMap | MapLibre</span>
-                <br />
-                <p class="project-category" style="font-size:14px">
+                <p class="project-category p-c-space" style="font-size:14px">
                   EasyPark-BLR helps users find parking spots in Bangalore, India. It fetches real-time data and
                   displays it on an interactive map, making parking spot discovery easier for users.</p>
-              </a>
-            </li>
-            <li class="project-item active" data-filter-item data-category="emudhra">
-              <a href="" target="_blank" rel="Instigo" aria-label="Visit Instigo">
-                <figure class="project-img">
-                  <div class="project-item-icon-box">
-                    <ion-icon name="eye-outline"></ion-icon>
-                  </div>
-                  <img src="assets/images/instigo.png" alt="Instigo" height="10" width="10" loading="lazy" />
-                </figure>
-                <div style="display: flex;">
-                  <h3 class="project-title-ongoing">Instigo</h3>
-                  <span class="ongoingtag">Ongoing</span>
-                </div>
-                <p class="project-category"></p>
-                <span class="project-category" style="color: var(--orange-yellow-crayola);font-size:14px">Java |
-                  SpringBoot | Javascript | JDBC | JWT</span>
-                <br />
-                <p class="project-category" style="font-size:14px">
-                  Instigo enables users to complete eKYC for opening demat and trading accounts, review terms &
-                  conditions, and submit applications.</p>
               </a>
             </li>
             <li class="project-item active" data-filter-item data-category="emudhra">
@@ -513,37 +556,14 @@
                   <img src="assets/images/kycSystems.png" alt="KYC Systems" height="10" width="10" loading="lazy" />
                 </figure>
                 <div style="display: flex;">
-                  <h3 class="project-title-ongoing">KYC Systems</h3>
+                  <h4 class="h4 timeline-item-title">KYC Systems</h4>
                 </div>
                 <p class="project-category"></p>
                 <span class="project-category" style="color: var(--orange-yellow-crayola);font-size:14px">Java |
                   SpringBoot | Javascript | JQuery | JDBC</span>
-                <br />
-                <p class="project-category" style="font-size:14px">
+                <p class="project-category p-c-space" style="font-size:14px">
                   KYC Systems simplifies the KYC verification by utilizing services such as Aadhaar, DigiLocker,
                   and PAN for Indian users, along with Veridas and eID for users worldwide.</p>
-              </a>
-            </li>
-            <li class="project-item active" data-filter-item data-category="emudhra">
-              <a href="https://emsign.com/secure-email-certificate" target="_blank" rel="emSign S/MIME Automation"
-                aria-label="Visit emSign S/MIME Automation">
-                <figure class="project-img">
-                  <div class="project-item-icon-box">
-                    <ion-icon name="eye-outline"></ion-icon>
-                  </div>
-                  <img src="assets/images/smimePlugin.png" alt="emSign S/MIME Automation" height="10" width="10"
-                    loading="lazy" />
-                </figure>
-                <div style="display: flex;">
-                  <h3 class="project-title-ongoing">emSign S/MIME Automation</h3>
-                </div>
-                <p class="project-category"></p>
-                <span class="project-category" style="color: var(--orange-yellow-crayola);font-size:14px">NodeJs |
-                  Express | C# | Advanced Installer</span>
-                <br />
-                <p class="project-category" style="font-size:14px">
-                  Enterprise-grade application for email security with automatic S/MIME certificate issuance,
-                  silent installation, and seamless Outlook configuration.</p>
               </a>
             </li>
             <li class="project-item active" data-filter-item data-category="emudhra">
@@ -556,13 +576,12 @@
                   <img src="assets/images/g20Pilot.png" alt="G20 Pilot" height="10" width="10" loading="lazy" />
                 </figure>
                 <div style="display: flex;">
-                  <h3 class="project-title-ongoing">G20 Pilot</h3>
+                  <h4 class="h4 timeline-item-title">G20 Pilot</h4>
                 </div>
                 <p class="project-category"></p>
                 <span class="project-category" style="color: var(--orange-yellow-crayola);font-size:14px">Java |
                   SpringBoot | Javascript | itextpdf</span>
-                <br />
-                <p class="project-category" style="font-size:14px">
+                <p class="project-category p-c-space" style="font-size:14px">
                   The G20 Pilot is a cross-border digital signature platform integrating with TSPs from India, Japan,
                   and the EU, showcasing mutual recognition of digital signatures.</p>
               </a>
