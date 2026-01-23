@@ -79,10 +79,10 @@ document.addEventListener("DOMContentLoaded", () => {
     contentDiv.classList.remove("fade-in");
 
     const footer = document.getElementById("contact-footer");
-  if (footer) {
-    footer.classList.remove("visible");
-    document.querySelector(".main-content").style.paddingBottom = "0";
-  }
+    if (footer) {
+      footer.classList.remove("visible");
+      document.querySelector(".main-content").style.paddingBottom = "0";
+    }
 
     setTimeout(() => {
       const data = noteData[key];
@@ -117,9 +117,9 @@ document.addEventListener("DOMContentLoaded", () => {
       contentDiv.classList.add("fade-in");
 
       if (key === "contact" && footer) {
-      footer.classList.add("visible");
-      document.querySelector(".main-content").style.paddingBottom = "48px";
-    }
+        footer.classList.add("visible");
+        document.querySelector(".main-content").style.paddingBottom = "48px";
+      }
     }, 180);
   }
 
