@@ -1,424 +1,192 @@
+import { highlight, getBestSnippet, buildNoteData } from "./utils.js";
+
 document.addEventListener("DOMContentLoaded", () => {
-  // Theme configuration object
-  const themeStyles = {
-    light: {
-      "--bg-gradient-yellow-1":
-        "linear-gradient(to bottom right, hsl(282, 68%, 85%) 0%, hsla(285, 94%, 81%, 0) 50%)",
-      "--text-gradient-yellow":
-        "linear-gradient(to right, hsl(260, 100%, 85%), hsl(290, 100%, 83%))",
-      "--bg-gradient-jet": "white",
-      "--jet": "hsl(0, 0%, 93%)",
-      "--onyx": "hsl(271, 100%, 89%)",
-      "--eerie-black-1": "hsl(0, 0%, 100%)",
-      "--eerie-black-2": "hsl(240, 100%, 100%)",
-      "--smoky-black": "hsl(0, 0%, 100%)",
-      "--white-1": "hsl(0, 0%, 0%)",
-      "--white-2": "hsl(0, 4%, 21%)",
-      "--orange-yellow-crayola": "hsl(270, 50%, 70%)",
-      "--vegas-gold": "hsl(270, 50%, 68%)",
-      "--bittersweet-shimmer": "hsl(0, 43%, 51%)",
-      "--light-gray": "hsl(0, 0%, 30%)",
-      "--twitter-hover-color": "hsl(0, 0%, 0%)",
-    },
-    dark: {
-      "--bg-gradient-yellow-1":
-        "linear-gradient(to bottom right, hsl(283, 100%, 63%) 0%, hsla(285, 100%, 69%, 0) 50%)",
-      "--text-gradient-yellow":
-        "linear-gradient(to right, hsl(260, 96%, 71%), hsl(290, 100%, 76%))",
-      "--bg-gradient-jet":
-        "linear-gradient(to bottom right, hsla(240, 1%, 18%, 0.251) 0%, hsla(240, 2%, 11%, 0) 100%)",
-      "--jet": "hsl(0, 0%, 22%)",
-      "--onyx": "hsl(240, 1%, 17%)",
-      "--eerie-black-1": "hsl(240, 2%, 13%)",
-      "--eerie-black-2": "hsl(240, 2%, 12%)",
-      "--smoky-black": "hsl(0, 0%, 7%)",
-      "--white-1": "hsl(0, 0%, 100%)",
-      "--white-2": "hsl(0, 0%, 98%)",
-      "--orange-yellow-crayola": "hsl(260, 96%, 71%)",
-      "--vegas-gold": "hsl(270, 50%, 68%)",
-      "--bittersweet-shimmer": "hsl(0, 43%, 51%)",
-      "--light-gray": "hsl(0, 1%, 85%)",
-      "--twitter-hover-color": "hsl(0, 0%, 100%)",
-    },
-  };
+  // DOM references
+  const contentDiv = document.getElementById("note-content");
+  const searchInput = document.getElementById("search-notes");
+  const noResults = document.getElementById("no-results");
+  const sidebarItems = document.querySelectorAll("#notes-list li");
 
-  // Applies the selected theme (light or dark) to the document
-  function applyTheme(isLight) {
-    const mode = isLight ? "light" : "dark";
-    const root = document.documentElement;
-    Object.entries(themeStyles[mode]).forEach(([key, value]) => {
-      root.style.setProperty(key, value);
-    });
-    updateElementStyles(isLight);
-    localStorage.setItem("theme", mode);
-  }
+  // Prepare data once
+  const noteData = buildNoteData(sidebarItems);
 
-  // Updates specific element styles based on the theme
-  function updateElementStyles(isLight) {
-    const styles = {
-      ".checkbox-label": {
-        backgroundColor: isLight ? "var(--onyx)" : "var(--bg-gradient-onyx)",
-        border: isLight
-          ? "1px solid hsl(270, 50%, 68%)"
-          : "1px solid var(--jet)",
-      },
-      ".info-content .title": {
-        background: isLight ? "hsla(270, 50%, 70%, 0.634)" : "var(--onyx)",
-      },
-      ".info_more-btn": {
-        background: isLight ? "white" : "var(--bg-gradient-jet)",
-      },
-      ".navbar": {
-        background: isLight ? "var(--onyx)" : "hsla(240, 1%, 17%, 0.75)",
-        border: isLight
-          ? "1px solid hsl(270, 50%, 68%)"
-          : "1px solid var(--jet)",
-      },
-      ".testimonials-text-main, .about-text, .service-item-text, .timeline-text, .p-c-space, .filter-item button":
-        {
-          color: isLight ? "var(--light-gray)" : "var(--white-1)",
-        },
-      ".service-item, .content-card": {
-        background: isLight ? "white" : "var(--border-gradient-onyx)",
-      },
-      ".contact-button": {
-        background: isLight ? "var(--onyx)" : "var(--bg-gradient-onyx)",
-      },
-    };
+  function filterNotes(rawTerm) {
+    const term = rawTerm.trim();
+    const lowerTerm = term.toLowerCase();
+    let visibleCount = 0;
 
-    Object.entries(styles).forEach(([selector, props]) => {
-      document.querySelectorAll(selector).forEach((element) => {
-        Object.entries(props).forEach(([prop, value]) => {
-          element.style[prop] = value;
-        });
-      });
-    });
+    sidebarItems.forEach((item) => {
+      const key = item.dataset.section;
+      const data = noteData[key];
+      if (!data) return;
 
-    document.querySelectorAll(".navbar-link").forEach((element) => {
-      element.style.color =
-        isLight && !element.classList.contains("active")
-          ? "var(--light-gray)"
-          : element.classList.contains("active")
-          ? "var(--orange-yellow-crayola)"
-          : "var(--white-1)";
-    });
-  }
+      const matchTitle = data.lowerTitle.includes(lowerTerm);
+      const matchContent = data.lowerContent.includes(lowerTerm);
+      const matches = !term || matchTitle || matchContent;
 
-  // Initializes theme based on saved preference or default
-  function initializeTheme() {
-    const checkbox = document.querySelector(".checkbox");
-    const savedTheme = localStorage.getItem("theme") || "dark";
-    checkbox.checked = savedTheme === "light";
-    applyTheme(checkbox.checked);
-    checkbox.addEventListener("change", () => applyTheme(checkbox.checked));
-  }
+      item.style.display = matches ? "" : "none";
+      if (matches) visibleCount++;
 
-  // Handles typewriter animation for text
-  function initializeTypewriter() {
-    const words = ["Software Engineer", "Footballer", "Photographer"];
-    let wordIndex = 0,
-      charIndex = 0,
-      isDeleting = false;
-    const typewriter = document.getElementById("typewriter");
+      const titleEl = item.querySelector(".note-title");
+      const previewEl = item.querySelector(".note-preview");
 
-    function type() {
-      const currentWord = words[wordIndex];
+      titleEl.innerHTML = highlight(data.title, matchTitle ? term : "");
 
-      // Update text content first to ensure correct character display
-      if (isDeleting) {
-        typewriter.textContent = currentWord.substring(0, charIndex);
-        charIndex--;
-      } else {
-        typewriter.textContent = currentWord.substring(0, charIndex + 1);
-        charIndex++;
-      }
-
-      let delay = isDeleting ? 50 : 100;
-
-      // Check conditions after updating text and charIndex
-      if (!isDeleting && charIndex === currentWord.length) {
-        isDeleting = true;
-        delay = 1100;
-      } else if (isDeleting && charIndex < 0) {
-        isDeleting = false;
-        wordIndex = (wordIndex + 1) % words.length;
-        charIndex = 0;
-        delay = 250;
-      }
-
-      setTimeout(type, delay);
-    }
-    type();
-  }
-
-  // Initializes map with GeoJSON data and custom markers
-  async function initializeMap() {
-    try {
-      const response = await fetch("/config/locations.json");
-      if (!response.ok)
-        throw new Error(
-          `Failed to load locations.json: ${response.statusText}`
+      let previewText = "";
+      if (matchContent) {
+        previewText = getBestSnippet(
+          data.plainContent,
+          term,
+          data.lowerContent
         );
-      const geojsonData = await response.json();
+      }
 
-      const bounds = geojsonData.features.reduce(
-        (b, f) => b.extend(f.geometry.coordinates),
-        new maplibregl.LngLatBounds()
+      previewEl.innerHTML = highlight(previewText, term);
+      previewEl.style.display = previewText ? "block" : "none";
+    });
+
+    noResults.classList.toggle("hidden", visibleCount > 0 || !term);
+
+    // If search is cleared → refresh current note without highlights
+    if (!term && searchInput.value === "") {
+      const active = document.querySelector("#notes-list li.active");
+      if (active) {
+        loadNote(active.dataset.section);
+      }
+    }
+
+    // If zero results now → clear main content (remove stale highlighted note)
+    if (visibleCount === 0 && term) {
+      contentDiv.innerHTML = "";
+      contentDiv.classList.remove("fade-in");
+    }
+
+    // Auto-select first visible if active one is filtered out
+    const active = document.querySelector("#notes-list li.active");
+    if (active?.style.display === "none" && visibleCount > 0) {
+      const firstVisible = [...sidebarItems].find(
+        (el) => el.style.display !== "none"
       );
-      const map = new maplibregl.Map({
-        container: "map",
-        style:
-          "https://api.maptiler.com/maps/backdrop/style.json?key=DkZBwTcNZd93pVZ7b4qy",
-        center: bounds.getCenter(),
-        zoom: 40,
-        pitch: 100,
-        bearing: 45,
-        hash: true,
-        maxBounds: [
-          [77.4, 12.8],
-          [77.8, 13.2],
-        ],
-      });
+      if (firstVisible) {
+        sidebarItems.forEach((el) => el.classList.remove("active"));
+        firstVisible.classList.add("active");
+        loadNote(firstVisible.dataset.section);
+      }
+    }
+  }
 
-      map.on("load", () => {
-        map.fitBounds(bounds, {
-          padding: 100,
-          maxZoom: 4, // Adjusted max zoom for fitBounds
-          duration: 0,
-          pitch: 100,
-          bearing: 45,
-        });
-      });
+  function loadNote(key) {
+    contentDiv.classList.remove("fade-in");
 
-      map.scrollZoom.disable();
-      map.touchZoomRotate.disable();
-      map.boxZoom.disable();
-      map.on("error", (e) => console.error("[Map Error]", e.error));
+    const footer = document.getElementById("contact-footer");
+  if (footer) {
+    footer.classList.remove("visible");
+    document.querySelector(".main-content").style.paddingBottom = "0";
+  }
 
-      const popup = new maplibregl.Popup({
-        closeButton: false,
-        closeOnClick: false,
-        className: "custom-popup",
-      });
+    setTimeout(() => {
+      const data = noteData[key];
+      if (!data) return;
 
-      map.on("style.load", () => {
-        map.getStyle().layers.forEach((layer) => {
-          if (layer.type === "symbol")
-            map.setLayoutProperty(layer.id, "visibility", "none");
-        });
+      const fragment = data.template.content.cloneNode(true);
+      const term = searchInput.value.trim();
 
-        if (map.getSource("composite") && map.getLayer("building")) {
-          map.addLayer({
-            id: "3d-buildings",
-            source: "composite",
-            "source-layer": "building",
-            type: "fill-extrusion",
-            minzoom: 12,
-            paint: {
-              "fill-extrusion-color": "#aaa",
-              "fill-extrusion-height": [
-                "interpolate",
-                ["linear"],
-                ["zoom"],
-                12,
-                0,
-                14,
-                ["get", "height"],
-              ],
-              "fill-extrusion-base": [
-                "interpolate",
-                ["linear"],
-                ["zoom"],
-                12,
-                0,
-                14,
-                ["get", "min_height"],
-              ],
-              "fill-extrusion-opacity": 0.8,
-            },
-          });
+      if (term) {
+        const walker = document.createTreeWalker(
+          fragment,
+          NodeFilter.SHOW_TEXT
+        );
+        let node;
+        while ((node = walker.nextNode())) {
+          const text = node.nodeValue;
+          if (!text.trim()) continue;
+
+          const html = highlight(text, term);
+          if (html === text) continue;
+
+          const span = document.createElement("span");
+          span.innerHTML = html;
+          node.parentNode.replaceChild(span, node);
         }
-
-        map.addSource("places", { type: "geojson", data: geojsonData });
-
-        const img = new Image(20, 20);
-        img.src = "./assets/svg/flag-purple.svg";
-        img.style.boxShadow = "0 0 10px rgb(0, 0, 0)";
-
-        img.onload = () => {
-          map.addImage("custom-marker", img);
-          map.addLayer({
-            id: "places",
-            type: "symbol",
-            source: "places",
-            layout: {
-              "icon-image": "custom-marker",
-              "icon-size": 1,
-              "icon-allow-overlap": true,
-              "icon-anchor": "bottom",
-              "icon-padding": 5,
-            },
-          });
-        };
-
-        img.onerror = () => {
-          const canvas = document.createElement("canvas");
-          canvas.width = 40;
-          canvas.height = 40;
-          canvas.getContext("2d").fillStyle = "#800080";
-          canvas.getContext("2d").fillRect(0, 0, 40, 40);
-          map.addImage("custom-marker", canvas);
-          map.addLayer({
-            id: "places",
-            type: "symbol",
-            source: "places",
-            layout: {
-              "icon-image": "custom-marker",
-              "icon-size": 1,
-              "icon-allow-overlap": true,
-              "icon-anchor": "bottom",
-              "icon-padding": 5,
-            },
-          });
-        };
-
-        map.on("mousemove", "places", (e) => {
-          if (e.features.length) {
-            const feature = e.features[0];
-            map.getCanvas().style.cursor = "pointer";
-            const coordinates = feature.geometry.coordinates.slice();
-            while (coordinates[0] > 180) coordinates[0] -= 360;
-            while (coordinates[0] < -180) coordinates[0] += 360;
-            popup
-              .setLngLat(coordinates)
-              .setHTML(feature.properties.description)
-              .setOffset([0, -20])
-              .addTo(map);
-          }
-        });
-
-        map.on("mouseleave", "places", () => {
-          map.getCanvas().style.cursor = "";
-          popup.remove();
-        });
-
-        map.on("click", "places", (e) => {
-          if (e.features.length) {
-            const feature = e.features[0];
-            popup
-              .setLngLat(feature.geometry.coordinates.slice())
-              .setHTML(feature.properties.description)
-              .setOffset([0, -20])
-              .addTo(map);
-          }
-        });
-      });
-    } catch (error) {
-      console.error("[Map Error] GeoJSON fetch failed:", error);
-      document.getElementById(
-        "map"
-      ).innerHTML = `<div style="text-align: center; padding: 20px; color: #fff;">Unable to load map data. Please try again later.</div>`;
-    }
-  }
-
-  // Initializes download icon animation
-  function initializeDownloadAnimation() {
-    const downloadIcon = document.querySelector(".download-icon");
-    function restartAnimation() {
-      downloadIcon.style.animation = "none";
-      downloadIcon.offsetHeight;
-      downloadIcon.style.animation = "pulse 1s ease-in-out 4 forwards";
-    }
-    setInterval(restartAnimation, 15000);
-  }
-
-  // Toggles visibility of an element
-  function elementToggleFunc(element) {
-    element.classList.toggle("active");
-  }
-
-  // Initializes sidebar toggle functionality
-  function initializeSidebar() {
-    const sidebar = document.querySelector("[data-sidebar]");
-    const sidebarBtn = document.querySelector("[data-sidebar-btn-2]");
-    sidebarBtn.addEventListener("click", () => elementToggleFunc(sidebar));
-  }
-
-  // Initializes project filter functionality
-  function initializeProjectFilter() {
-    const select = document.querySelector("[data-select]");
-    const selectItems = document.querySelectorAll("[data-select-item]");
-    const selectValue = document.querySelector("[data-selecct-value]");
-    const filterBtn = document.querySelectorAll("[data-filter-btn]");
-    const filterItems = document.querySelectorAll("[data-filter-item]");
-
-    select.addEventListener("click", () => elementToggleFunc(select));
-    selectItems.forEach((item) => {
-      item.addEventListener("click", () => {
-        let selectedValue = item.innerText.toLowerCase();
-        selectValue.innerText = item.innerText;
-        elementToggleFunc(select);
-        filterFunc(selectedValue);
-      });
-    });
-
-    filterBtn[0].classList.add("active");
-    const filterFunc = (selectedValue) => {
-      filterItems.forEach((item) => {
-        item.classList.toggle(
-          "active",
-          selectedValue === "all" || selectedValue === item.dataset.category
-        );
-      });
-    };
-
-    filterBtn.forEach((btn) => {
-      btn.addEventListener("click", () => {
-        let selectedValue = btn.innerText.toLowerCase();
-        selectValue.innerText = btn.innerText;
-        filterFunc(selectedValue);
-        filterBtn.forEach((b) => b.classList.remove("active"));
-        btn.classList.add("active");
-      });
-    });
-  }
-
-  // Initializes navigation between pages
-  function initializeNavigation() {
-    const navigationLinks = document.querySelectorAll("[data-nav-link]");
-    const pages = document.querySelectorAll("[data-page]");
-    navigationLinks.forEach((link) => {
-      link.addEventListener("click", () => {
-        const sectionName = link.innerHTML.toLowerCase();
-        pages.forEach((page) => {
-          page.classList.toggle("active", sectionName === page.dataset.page);
-          navigationLinks.forEach((nl) =>
-            nl.classList.toggle("active", nl === link)
-          );
-        });
-        updateElementStyles(document.querySelector(".checkbox").checked);
-        window.scrollTo(0, 0);
-      });
-    });
-
-    const activeLink = document.querySelector(".navbar-link.active");
-    if (activeLink) {
-      const activeSection = document.querySelector(
-        `article[data-page="${activeLink.innerHTML.toLowerCase()}"]`
-      );
-      if (activeSection) {
-        activeSection.classList.add("active");
-        activeLink.classList.add("active");
       }
+
+      contentDiv.innerHTML = "";
+      contentDiv.appendChild(fragment);
+
+      void contentDiv.offsetWidth; // trigger reflow
+      contentDiv.classList.add("fade-in");
+
+      if (key === "contact" && footer) {
+      footer.classList.add("visible");
+      document.querySelector(".main-content").style.paddingBottom = "48px";
     }
+    }, 180);
   }
 
-  // Initialize all functionalities
-  initializeTheme();
-  initializeTypewriter();
-  initializeMap();
-  initializeDownloadAnimation();
-  initializeSidebar();
-  initializeProjectFilter();
-  initializeNavigation();
+  sidebarItems.forEach((item) => {
+    item.addEventListener("click", () => {
+      if (item.style.display === "none") return;
+      sidebarItems.forEach((i) => i.classList.remove("active"));
+      item.classList.add("active");
+      loadNote(item.dataset.section);
+    });
+  });
+
+  searchInput.addEventListener("input", (e) => filterNotes(e.target.value));
+
+  // Initial state
+  filterNotes("");
+  document.querySelector('#notes-list li[data-section="about"]').click();
+
+  /* Keyboard navigation */
+  document.addEventListener("keydown", (e) => {
+    // Skip if user is typing in search field
+    if (document.activeElement === searchInput) return;
+
+    // Only handle ArrowUp / ArrowDown (and optionally Enter)
+    if (e.key !== "ArrowUp" && e.key !== "ArrowDown" && e.key !== "Enter")
+      return;
+
+    e.preventDefault(); // prevent page scroll
+
+    // Get currently visible items (in DOM order)
+    const visibleItems = [...sidebarItems].filter(
+      (item) => item.style.display !== "none"
+    );
+
+    if (visibleItems.length === 0) return;
+
+    // Find current active (or default to first if none)
+    let currentIndex = visibleItems.findIndex((item) =>
+      item.classList.contains("active")
+    );
+    if (currentIndex === -1) currentIndex = 0;
+
+    let nextIndex = currentIndex;
+
+    if (e.key === "ArrowUp") {
+      nextIndex = currentIndex - 1;
+      if (nextIndex < 0) nextIndex = 0; // or visibleItems.length - 1 for wrap-around
+    } else if (e.key === "ArrowDown") {
+      nextIndex = currentIndex + 1;
+      if (nextIndex >= visibleItems.length) nextIndex = visibleItems.length - 1; // or 0 for wrap
+    }
+
+    // If Enter → just load current (no move)
+    if (e.key === "Enter") {
+      nextIndex = currentIndex;
+    }
+
+    if (nextIndex !== currentIndex || e.key === "Enter") {
+      // Remove active from all
+      sidebarItems.forEach((i) => i.classList.remove("active"));
+      // Add to new one
+      const targetItem = visibleItems[nextIndex];
+      targetItem.classList.add("active");
+      // Scroll the sidebar item into view (nice UX)
+      targetItem.scrollIntoView({ block: "nearest", behavior: "smooth" });
+      // Load the note
+      loadNote(targetItem.dataset.section);
+    }
+  });
 });
