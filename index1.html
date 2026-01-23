@@ -1,0 +1,632 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+  <meta charset="UTF-8" />
+  <meta http-equiv="X-UA-Compatible" content="IE=edge" />
+  <link rel="icon" type="image/png" href="assets/images/mayurcaariappa.gif" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <meta property="og:title" content="Personal Portfolio of Mayur Caariappa" />
+  <meta property="og:description"
+    content="Portfolio of Mayur Caariappa, a Software Engineer specializing in Java, SpringBoot, and MERN stack development.">
+  <title>Personal Portfolio</title>
+
+  <script>
+    if (localStorage.getItem("theme") === "light") {
+      const root = document.documentElement;
+      root.style.setProperty('--bg-gradient-yellow-1', 'linear-gradient(to bottom right, hsl(282, 68%, 85%) 0%, hsla(285, 94%, 81%, 0) 50%)');
+      root.style.setProperty('--text-gradient-yellow', 'linear-gradient(to right, hsl(260, 100%, 85%), hsl(290, 100%, 83%))');
+      root.style.setProperty('--bg-gradient-jet', 'white');
+      root.style.setProperty('--jet', 'hsl(0, 0%, 93%)');
+      root.style.setProperty('--onyx', 'hsl(271, 100%, 89%)');
+      root.style.setProperty('--eerie-black-1', 'hsl(0, 0%, 100%)');
+      root.style.setProperty('--eerie-black-2', 'hsl(240, 100%, 100%)');
+      root.style.setProperty('--smoky-black', 'hsl(0, 0%, 100%)');
+      root.style.setProperty('--white-1', 'hsl(0, 0%, 0%)');
+      root.style.setProperty('--white-2', 'hsl(0, 4%, 21%)');
+      root.style.setProperty('--orange-yellow-crayola', 'hsl(270, 50%, 70%)');
+      root.style.setProperty('--vegas-gold', 'hsl(270, 50%, 68%)');
+      root.style.setProperty('--bittersweet-shimmer', 'hsl(0, 43%, 51%)');
+      root.style.setProperty('--light-gray', 'hsl(0, 0%, 30%)');
+    }
+  </script>
+
+  <script src="https://unpkg.com/maplibre-gl@5.6.0/dist/maplibre-gl.js"></script>
+  <link href="https://unpkg.com/maplibre-gl@5.6.0/dist/maplibre-gl.css" rel="stylesheet" />
+  <link rel="stylesheet" href="./css/lightstyle.css" />
+  <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css" rel="stylesheet">
+  <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.0/font/bootstrap-icons.css">
+  <link rel="preconnect" href="https://fonts.googleapis.com" />
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+  <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;500;600&display=swap" rel="stylesheet" />
+  <!-- Google tag (gtag.js) -->
+  <script async src="https://www.googletagmanager.com/gtag/js?id=G-466GVB5J40"></script>
+  <script>
+    window.dataLayer = window.dataLayer || [];
+    function gtag() { dataLayer.push(arguments); }
+    gtag('js', new Date());
+
+    gtag('config', 'G-466GVB5J40');
+  </script>
+</head>
+
+<body>
+  <!-- Dark Mode Toggle -->
+  <div class="mode-container">
+    <input type="checkbox" id="theme-toggle" class="checkbox">
+    <label for="theme-toggle" class="checkbox-label">
+      <i class="fas fa-moon"></i>
+      <i class="fas fa-sun"></i>
+      <span class="ball"></span>
+    </label>
+  </div>
+
+  <main>
+    <!-- Sidebar -->
+    <aside class="sidebar" data-sidebar>
+      <div class="sidebar-info" data-sidebar-btn-2>
+        <figure class="avatar-box">
+          <img src="assets/images/mayurcaariappa.gif" alt="Mayur_Caariappa" width="80" style="border-radius: 25px" />
+        </figure>
+
+        <div class="info-content">
+          <h1 class="name" title="Mayur Caariappa">Mayur Caariappa</h1>
+          <p class="title" id="typewriter"></p>
+        </div>
+
+        <button class="info_more-btn" data-sidebar-btn>
+          <span>Show Contacts</span>
+          <ion-icon name="chevron-down"></ion-icon>
+        </button>
+      </div>
+
+      <div class="sidebar-info_more">
+        <div class="separator"></div>
+
+        <ul class="contacts-list">
+          <li class="contact-item">
+            <div class="icon-box">
+              <ion-icon name="mail-outline"></ion-icon>
+            </div>
+            <div class="contact-info">
+              <p class="contact-title">Email</p>
+              <a href="mailto:mayurcaariappa10@gmail.com" class="contact-link">mayurcaariappa10@gmail.com</a>
+            </div>
+          </li>
+          <li class="contact-item">
+            <div class="icon-box">
+              <ion-icon name="location-outline"></ion-icon>
+            </div>
+            <div class="contact-info">
+              <p class="contact-title">Location</p>
+              <address>Bangalore, India</address>
+            </div>
+          </li>
+        </ul>
+
+        <div class="separator"></div>
+
+        <ul class="social-list">
+          <li class="social-item">
+            <a href="https://www.linkedin.com/in/mayurcaariappa/" target="_blank" class="social-link"
+              rel="noopener noreferrer" aria-label="Visit LinkedIn profile">
+              <i class="fa-brands fa-linkedin"></i>
+            </a>
+          </li>
+          <li class="social-item">
+            <a href="https://x.com/mayurcaariappa" target="_blank" class="social-link" rel="noopener noreferrer"
+              aria-label="Visit X profile">
+              <i class="fa-brands fa-x-twitter"></i>
+            </a>
+          </li>
+          <li class="social-item">
+            <a href="https://github.com/mayurcaariappa" target="_blank" class="social-link" rel="noopener noreferrer"
+              aria-label="Visit GitHub profile">
+              <i class="fa-brands fa-github"></i>
+            </a>
+          </li>
+        </ul>
+      </div>
+    </aside>
+
+    <div class="main-content">
+      <!-- Navbar -->
+      <nav class="navbar">
+        <ul class="navbar-list">
+          <li class="navbar-item"><button class="navbar-link active" data-nav-link>About</button></li>
+          <li class="navbar-item"><button class="navbar-link" data-nav-link>Skills</button></li>
+          <li class="navbar-item"><button class="navbar-link" data-nav-link>Resume</button></li>
+          <li class="navbar-item"><button class="navbar-link" data-nav-link>Projects</button></li>
+          <li class="navbar-item"><button class="navbar-link" data-nav-link>Contact</button></li>
+        </ul>
+      </nav>
+
+      <!-- About Section -->
+      <article class="about active" data-page="about">
+        <header>
+          <h2 class="h2 article-title">About me</h2>
+        </header>
+        <section class="about-text">
+          <p>
+            As a Software Engineer with a diverse skill set across Java, Spring Boot, and the MERN stack,
+            I am passionate about building impactful software solutions. I bring a proven track record of
+            delivering complex projects, such as secure email automation and digital signature services,
+            that enhance both user experience and system performance.
+          </p>
+          <p>
+            Driven by continuous learning, I thrive in environments that challenge me to grow professionally,
+            contributing to team goals and innovating with a user-centric mindset. Currently, I’m exploring
+            opportunities that align with my skills and commitment to impactful development.
+          </p>
+        </section>
+
+        <!-- GitHub Contribution Section -->
+        <section class="github-contribution">
+          <li class="service-item">
+            <div class="title-wrapper">
+              <h3 class="h3 service-title">GitHub Contributions</h3>
+              <img class="github-chart" src="http://ghchart.rshah.org/mayurcaariappa"
+                alt="Mayur Caariappa's Github chart" />
+            </div>
+          </li>
+        </section>
+
+        <!-- Places Visited Section -->
+        <section class="map-section">
+          <figure>
+            <figcaption class="map-header">
+              <h3 class="h3">Bangalore – A Personal Map of My City Adventures</h3>
+            </figcaption>
+            <div id="map" role="region" aria-label="Interactive map of places visited in Bangalore"
+              style="width: 100%; height: 300px;"></div>
+          </figure>
+        </section>
+      </article>
+
+      <!-- Skills Section -->
+      <article class="skills" data-page="skills">
+        <header>
+          <h2 class="h2 article-title">Skills</h2>
+        </header>
+        <section>
+          <div class="skill-icons">
+            <img src="https://skillicons.dev/icons?i=java" alt="Java" title="Java" class="skill-icon" />
+            <img src="https://skillicons.dev/icons?i=spring" alt="Spring" title="Spring" class="skill-icon" />
+            <img src="https://skillicons.dev/icons?i=nodejs" alt="Node.js" title="Node.js" class="skill-icon" />
+            <img src="https://skillicons.dev/icons?i=express" alt="Express.js" title="Express.js" class="skill-icon" />
+            <img src="https://skillicons.dev/icons?i=mongodb" alt="MongoDB" title="MongoDB" class="skill-icon" />
+            <img src="https://skillicons.dev/icons?i=mysql" alt="MySQL" title="MySQL" class="skill-icon" />
+            <img src="https://skillicons.dev/icons?i=postgres" alt="Postgres" title="Postgres" class="skill-icon" />
+            <img src="https://skillicons.dev/icons?i=elasticsearch" alt="ElasticSearch" title="ElasticSearch"
+              class="skill-icon" />
+            <img src="https://skillicons.dev/icons?i=graphql" alt="GraphQL" title="GraphQL" class="skill-icon" />
+            <img src="https://skillicons.dev/icons?i=hibernate" alt="Hibernate" title="Hibernate" class="skill-icon" />
+            <img src="https://skillicons.dev/icons?i=cs" alt="CSharp" title="CSharp" class="skill-icon" />
+            <img src="https://skillicons.dev/icons?i=html" alt="HTML" title="HTML" class="skill-icon" />
+            <img src="https://skillicons.dev/icons?i=css" alt="CSS" title="CSS" class="skill-icon" />
+            <img src="https://skillicons.dev/icons?i=js" alt="JavaScript" title="JavaScript" class="skill-icon" />
+            <img src="https://skillicons.dev/icons?i=ts" alt="TypeScript" title="TypeScript" class="skill-icon" />
+            <img src="https://skillicons.dev/icons?i=react" alt="React" title="React" class="skill-icon" />
+            <img src="https://skillicons.dev/icons?i=angular" alt="Angular" title="Angular" class="skill-icon" />
+            <img src="https://skillicons.dev/icons?i=jquery" alt="jQuery" title="jQuery" class="skill-icon" />
+            <img src="https://skillicons.dev/icons?i=postman" alt="Postman" title="Postman" class="skill-icon" />
+            <img src="https://skillicons.dev/icons?i=jest" alt="Jest" title="Jest" class="skill-icon" />
+            <img src="https://skillicons.dev/icons?i=git" alt="Git" title="Git" class="skill-icon" />
+            <img src="https://skillicons.dev/icons?i=github" alt="GitHub" title="GitHub" class="skill-icon" />
+            <img src="https://skillicons.dev/icons?i=azure" alt="Azure" title="Azure" class="skill-icon" />
+            <img src="https://skillicons.dev/icons?i=aws" alt="AWS" title="AWS" class="skill-icon" />
+            <img src="https://skillicons.dev/icons?i=docker" alt="Docker" title="Docker" class="skill-icon" />
+            <img src="https://skillicons.dev/icons?i=redis" alt="Redis" title="Redis" class="skill-icon" />
+            <img src="https://skillicons.dev/icons?i=jenkins" alt="Jenkins" title="Jenkins" class="skill-icon" />
+            <img src="https://skillicons.dev/icons?i=idea" alt="IntelliJ IDEA" title="IntelliJ IDEA"
+              class="skill-icon" />
+            <img src="https://skillicons.dev/icons?i=vscode" alt="VS Code" title="VS Code" class="skill-icon" />
+          </div>
+        </section>
+      </article>
+
+      <!-- Resume Section -->
+      <article class="resume" data-page="resume">
+        <header class="resume-header">
+          <h2 class="h2 article-title">
+            Resume
+            <a href="docs/MayurCaariappa-Resume.pdf" download="Resume_MayurCaariappa" class="download-link">
+              <span class="icon-wrapper">
+                <img id="download-resume-btn" src="assets/svg/resume-purple.svg" alt="Download Resume" width="50"
+                  height="50" class="download-icon" />
+              </span>
+            </a>
+          </h2>
+        </header>
+
+        <section class="timeline">
+          <div class="title-wrapper">
+            <div class="icon-box">
+              <ion-icon name="book-outline"></ion-icon>
+            </div>
+            <h3 class="h3">Experience</h3>
+          </div>
+          <ol class="timeline-list">
+            <li class="timeline-item">
+              <h4 class="h4 timeline-item-title">Software Engineer 1 - Kaplan</h4>
+              <span>April 2025 — present</span>
+            </li>
+            <li class="timeline-item">
+              <h4 class="h4 timeline-item-title">Atom Educator</h4>
+              <ul class="timeline-text">
+                <li> - Unified fragmented services into a single Educator Portal, improving system efficiency and
+                  maintainability.</li>
+                <li> - Collaborated with cross-functional teams to enhance student engagement and retention</li>
+                <li> - Built scalable micro services in nodes handling 100k+ daily graphic requests</li>
+                <li> - Designed an effective faculty experience charter for Nursing and Healthcare professionals,
+                  boosting engagement with features like Contents Tag, Test Status, and Question Bank Performance.</li>
+              </ul>
+            </li>
+            <li class="timeline-item">
+              <h4 class="h4 timeline-item-title">Software Engineer - eMudhra Limited</h4>
+              <span>August 2022 — April 2025</span>
+            </li>
+            <li class="timeline-item">
+              <h4 class="h4 timeline-item-title">Instigo</h4>
+              <ul class="timeline-text">
+                <li> - Built Instigo for seamless eKYC in demat, trading, and other account openings in collaboration
+                  with NSDL.</li>
+                <li> - Also developed the Governance Model (Back Office) portal for CAs to review, approve, and reject
+                  applications.</li>
+              </ul>
+            </li>
+            <li class="timeline-item">
+              <div class="title-container">
+                <h4 class="h4 timeline-item-title">emSign S/MIME Automation Plugin</h4>
+                <a href="https://emsign.com/secure-email-certificate" target="_blank"
+                  rel="noopener noreferrer">(Link)</a>
+              </div>
+              <ul class="timeline-text">
+                <li>Engineered an enterprise-grade plugin for email security with features like auto-enrollment, silent
+                  installation, and auto-configuration, enhancing user experience.</li>
+              </ul>
+            </li>
+            <li class="timeline-item">
+              <div class="title-container">
+                <h4 class="h4 timeline-item-title">Remote Signing Service (RSDS)</h4>
+                <a href="https://qaserver-int.emudhra.net:18004/G20PilotDemo/index" target="_blank" rel="G20 Pilot"
+                  aria-label="Visit G20 Pilot">(Link)</a>
+              </div>
+              <ul class="timeline-text">
+                <li> - Built a SpringBoot-based solution for cross-border digital signature recognition, collaborating
+                  with international TSPs (Trust Service Providers) from India, Japan, and the EU.</li>
+                <li> - Significantly boosted sales by actively participating in backend development for RSDS.</li>
+              </ul>
+            </li>
+            <li class="timeline-item">
+              <h4 class="h4 timeline-item-title">eSign Service</h4>
+              <ul class="timeline-text">
+                <li> - Engineered customization features for ASPs (Application Service Providers), allowing for
+                  personalized branding and enhancing client satisfaction.</li>
+                <li> - Rigorously scrutinized and debugged REST APIs with Postman, drastically slashing bug occurrences.
+                </li>
+              </ul>
+            </li>
+          </ol>
+        </section>
+        <section class="timeline">
+          <div class="title-wrapper">
+            <div class="icon-box">
+              <ion-icon name="book-outline"></ion-icon>
+            </div>
+            <h3 class="h3">Position of Responsibilities</h3>
+          </div>
+          <ol class="timeline-list">
+            <li class="timeline-item">
+              <h4 class="h4 timeline-item-title">
+                Developer - S/MIME Automation
+                <span>Aug 2023 - Present</span>
+              </h4>
+              <p class="timeline-text">
+                As the Lead Developer for the S/MIME Automation project, I spearheaded the development of both a
+                Microsoft Outlook plugin in Node.js and a desktop application in C# to facilitate secure email
+                communication. I took full ownership of the project, overseeing both the frontend and backend
+                development. My role involved close collaboration with cross-functional teams, including QA, sales, and
+                others, to ensure thorough testing, resolve bugs, and provide a comprehensive understanding of the
+                application. This solution significantly streamlined the process for users, reducing the time required
+                to generate and import PFX certificates into their systems.
+              </p>
+            </li>
+          </ol>
+        </section>
+        <section class="timeline">
+          <div class="title-wrapper">
+            <div class="icon-box">
+              <ion-icon name="book-outline"></ion-icon>
+            </div>
+            <h3 class="h3">Education</h3>
+          </div>
+          <ol class="timeline-list">
+            <li class="timeline-item">
+              <h4 class="h4 timeline-item-title">PES College of Engineering</h4>
+              <span>2015 — 2019</span>
+              <p class="timeline-text">Bachelor of Engineering (ECE)</p>
+            </li>
+            <li class="timeline-item">
+              <h4 class="h4 timeline-item-title">Sadvidya Semi-Residential College</h4>
+              <span>2013 — 2015</span>
+              <p class="timeline-text">PUC (PCME)</p>
+            </li>
+          </ol>
+        </section>
+        <section class="timeline">
+          <div class="title-wrapper">
+            <div class="icon-box">
+              <ion-icon name="book-outline"></ion-icon>
+            </div>
+            <h3 class="h3">Achievements</h3>
+          </div>
+          <ol class="timeline-list">
+            <li class="timeline-item">
+              <h4 class="h4 timeline-item-title">
+                Winners of Inter-Department Football Tournament
+              </h4>
+              <span>PES College of Engineering (2019)</span>
+            </li>
+            <li class="timeline-item">
+              <h4 class="h4 timeline-item-title">
+                Winner of Chess Tournament
+              </h4>
+              <span>eMudhra Limited (2024) & Kaplan (2025)</span>
+            </li>
+          </ol>
+        </section>
+      </article>
+
+      <!-- Projects Section -->
+      <article class="portfolio" data-page="projects">
+        <header>
+          <h2 class="h2 article-title">Projects</h2>
+        </header>
+        <section class="projects">
+          <ul class="filter-list">
+            <li class="filter-item">
+              <button class="active" data-filter-btn>All</button>
+            </li>
+            <li class="filter-item">
+              <button data-filter-btn class="filter-btn-test">Kaplan</button>
+            </li>
+            <li class="filter-item">
+              <button data-filter-btn class="filter-btn-test">eMudhra</button>
+            </li>
+            <li class="filter-item">
+              <button data-filter-btn class="filter-btn-test">Personal</button>
+            </li>
+          </ul>
+          <div class="filter-select-box">
+            <button class="filter-select" data-select>
+              <div class="select-value" data-selecct-value>Select category</div>
+              <div class="select-icon">
+                <ion-icon name="chevron-down"></ion-icon>
+              </div>
+            </button>
+            <ul class="select-list">
+              <li class="select-item">
+                <button data-select-item>All</button>
+              </li>
+              <li class="select-item">
+                <button data-select-item>Personal</button>
+              </li>
+              <li class="select-item">
+                <button data-select-item>Kaplan</button>
+              </li>
+              <li class="select-item">
+                <button data-select-item>eMudhra</button>
+              </li>
+            </ul>
+          </div>
+          <ul class="project-list">
+            <li class="project-item active" data-filter-item data-category="personal">
+              <a href="https://github.com/MayurCaariappa/Office-Metaverse" target="_blank" rel="Office-Metaverse"
+                aria-label="Visit Office-Metaverse">
+                <figure class="project-img">
+                  <div class="project-item-icon-box">
+                    <ion-icon name="eye-outline"></ion-icon>
+                  </div>
+                  <img src="assets/images/Office-Metaverse.png" alt="Office-Metaverse" height="10" width="10"
+                    loading="lazy" />
+                </figure>
+                <div style="display: flex;">
+                  <h4 class="h4 timeline-item-title">Office-Metaverse</h4>
+                  <span class="ongoingtag">Ongoing</span>
+                </div>
+                <p class="project-category"></p>
+                <span class="project-category" style="color: var(--orange-yellow-crayola);font-size:14px">NodeJs |
+                  Socket.io | React | ExpressJs | MongoDB</span>
+                <p class="project-category p-c-space" style="font-size:14px">
+                  The Office Metaverse is a 2D virtual workspace built with the Phaser game engine and MERN stack, where
+                  users interact via unique avatars. It features movement, text, video, voice chat, and real-time status
+                  visibility. Future plans include adding community discussions.</p>
+              </a>
+            </li>
+            <li class="project-item active" data-filter-item data-category="emudhra">
+              <a href="" target="_blank" rel="Instigo" aria-label="Visit Instigo">
+                <figure class="project-img">
+                  <div class="project-item-icon-box">
+                    <ion-icon name="eye-outline"></ion-icon>
+                  </div>
+                  <img src="assets/images/instigo.png" alt="Instigo" height="10" width="10" loading="lazy" />
+                </figure>
+                <div style="display: flex;">
+                  <h4 class="h4 timeline-item-title">Instigo</h4>
+                </div>
+                <p class="project-category"></p>
+                <span class="project-category" style="color: var(--orange-yellow-crayola);font-size:14px">Java |
+                  SpringBoot | Javascript | JDBC | JWT</span>
+                <p class="project-category p-c-space" style="font-size:14px">
+                  Instigo enables users to complete eKYC for opening demat and trading accounts, review terms &
+                  conditions, and submit applications.</p>
+              </a>
+            </li>
+            <li class="project-item active" data-filter-item data-category="emudhra">
+              <a href="https://emsign.com/secure-email-certificate" target="_blank" rel="emSign S/MIME Automation"
+                aria-label="Visit emSign S/MIME Automation">
+                <figure class="project-img">
+                  <div class="project-item-icon-box">
+                    <ion-icon name="eye-outline"></ion-icon>
+                  </div>
+                  <img src="assets/images/smimePlugin.png" alt="emSign S/MIME Automation" height="10" width="10"
+                    loading="lazy" />
+                </figure>
+                <div style="display: flex;">
+                  <h4 class="h4 timeline-item-title">emSign S/MIME Automation</h4>
+                </div>
+                <p class="project-category"></p>
+                <span class="project-category" style="color: var(--orange-yellow-crayola);font-size:14px">NodeJs |
+                  Express | C# | Advanced Installer</span>
+                <p class="project-category p-c-space" style="font-size:14px">
+                  Enterprise-grade application for email security with automatic S/MIME certificate issuance,
+                  silent installation, and seamless Outlook configuration.</p>
+              </a>
+            </li>
+            <li class="project-item active" data-filter-item data-category="kaplan">
+              <a href="https://nit.kaptest.com/" target="_blank" rel="atom educator portal"
+                aria-label="Visit Atom Educator Portal">
+                <figure class="project-img">
+                  <div class="project-item-icon-box">
+                    <ion-icon name="eye-outline"></ion-icon>
+                  </div>
+                  <img src="assets/images/KaplanNursing.png" alt="atom educator portal" height="10" width="10"
+                    loading="lazy" />
+                </figure>
+                <div style="display: flex;">
+                  <h4 class="h4 timeline-item-title">Atom Educator</h4>
+                </div>
+                <p class="project-category"></p>
+                <span class="project-category" style="color: var(--orange-yellow-crayola);font-size:14px">
+                  TypeScript | GraphQL | ES | Postgres | Jenkins</span>
+                <p class="project-category p-c-space" style="font-size:14px">
+                  The Portal empowers Nursing and Healthcare faculty to effortlessly create assessments, customize
+                  quizzes, manage cohorts and access detailed student report cards. </p>
+              </a>
+            </li>
+            <li class="project-item active" data-filter-item data-category="personal">
+              <a href="https://bangalore-wiki.vercel.app/" target="_blank" rel="bangalore.wiki"
+                aria-label="Visit bangalore.wiki">
+                <figure class="project-img">
+                  <div class="project-item-icon-box">
+                    <ion-icon name="eye-outline"></ion-icon>
+                  </div>
+                  <img src="assets/images/bangalore.wiki.png" alt="bangalore.wiki" height="10" width="10"
+                    loading="lazy" />
+                </figure>
+                <div style="display: flex;">
+                  <h4 class="h4 timeline-item-title">bangalore.wiki</h4>
+                </div>
+                <p class="project-category"></p>
+                <span class="project-category" style="color: var(--orange-yellow-crayola);font-size:14px">
+                  React | Vite</span>
+                <p class="project-category p-c-space" style="font-size:14px">
+                  bangalore.wiki offers a curated guide to Bangalore's top spots across categories
+                  like Food, Cafes, and Outskirts, with direct links to Google Maps. Perfect for discovering the city’s
+                  charm through a local's lens.</p>
+              </a>
+            </li>
+            <li class="project-item active" data-filter-item data-category="personal">
+              <a href="https://easypark-blr.netlify.app/" target="_blank" rel="EasyPark-BLR"
+                aria-label="Visit EasyPark-BLR">
+                <figure class="project-img">
+                  <div class="project-item-icon-box">
+                    <ion-icon name="eye-outline"></ion-icon>
+                  </div>
+                  <img src="assets/images/EasyPark-BLR.png" alt="EasyPark-BLR" height="10" width="10" loading="lazy" />
+                </figure>
+                <div style="display: flex;">
+                  <h4 class="h4 timeline-item-title">EasyPark-BLR</h4>
+                </div>
+                <p class="project-category"></p>
+                <span class="project-category" style="color: var(--orange-yellow-crayola);font-size:14px">NodeJs |
+                  React | ExpressJs | OpenStreetMap | MapLibre</span>
+                <p class="project-category p-c-space" style="font-size:14px">
+                  EasyPark-BLR helps users find parking spots in Bangalore, India. It fetches real-time data and
+                  displays it on an interactive map, making parking spot discovery easier for users.</p>
+              </a>
+            </li>
+            <li class="project-item active" data-filter-item data-category="emudhra">
+              <a href="https://kyc-qa.emsigner.com/" target="_blank" rel="KYC Systems" aria-label="Visit KYC Systems">
+                <figure class="project-img">
+                  <div class="project-item-icon-box">
+                    <ion-icon name="eye-outline"></ion-icon>
+                  </div>
+                  <img src="assets/images/kycSystems.png" alt="KYC Systems" height="10" width="10" loading="lazy" />
+                </figure>
+                <div style="display: flex;">
+                  <h4 class="h4 timeline-item-title">KYC Systems</h4>
+                </div>
+                <p class="project-category"></p>
+                <span class="project-category" style="color: var(--orange-yellow-crayola);font-size:14px">Java |
+                  SpringBoot | Javascript | JQuery | JDBC</span>
+                <p class="project-category p-c-space" style="font-size:14px">
+                  KYC Systems simplifies the KYC verification by utilizing services such as Aadhaar, DigiLocker,
+                  and PAN for Indian users, along with Veridas and eID for users worldwide.</p>
+              </a>
+            </li>
+            <li class="project-item active" data-filter-item data-category="emudhra">
+              <a href="https://qaserver-int.emudhra.net:18004/G20PilotDemo/index" target="_blank" rel="G20 Pilot"
+                aria-label="Visit G20 Pilot">
+                <figure class="project-img">
+                  <div class="project-item-icon-box">
+                    <ion-icon name="eye-outline"></ion-icon>
+                  </div>
+                  <img src="assets/images/g20Pilot.png" alt="G20 Pilot" height="10" width="10" loading="lazy" />
+                </figure>
+                <div style="display: flex;">
+                  <h4 class="h4 timeline-item-title">G20 Pilot</h4>
+                </div>
+                <p class="project-category"></p>
+                <span class="project-category" style="color: var(--orange-yellow-crayola);font-size:14px">Java |
+                  SpringBoot | Javascript | itextpdf</span>
+                <p class="project-category p-c-space" style="font-size:14px">
+                  The G20 Pilot is a cross-border digital signature platform integrating with TSPs from India, Japan,
+                  and the EU, showcasing mutual recognition of digital signatures.</p>
+              </a>
+            </li>
+          </ul>
+        </section>
+      </article>
+
+      <!-- Contact Section -->
+      <article class="contact" data-page="contact">
+        <header>
+          <h2 class="h2 article-title">Contact</h2>
+        </header>
+        <section class="contact-content">
+          <p class="contact-text">
+            When I’m not taming bugs in Node.js, React, or MongoDB—or convincing Spring Boot to behave—you’ll find me
+            pretending to be Messi on the football field, launching birdies into orbit on the badminton court dramatic
+            enough for a slow-mo, or channeling my inner Sid from Wake Up Sid, wandering through Bangalore
+            with a camera like the city’s just waiting to be my next photo essay.
+          </p>
+          <p class="contact-text">
+            I'm available for weddings, parties, and other events that are likely to include desserts.
+          </p>
+          <br>
+          <div class="contact-button-wrapper">
+            <a href="mailto:mayurcaariappa10@gmail.com" class="contact-button">
+              <img src="assets/svg/mail-purple.svg" alt="Send Mail" width="25" height="25" />
+              Shoot me an Email
+            </a>
+          </div>
+          <br>
+          <p class="contact-text" style="display: flex; justify-content: center;">
+            © 2025 Mayur Caariappa. Bangalore, India.
+          </p>
+        </section>
+      </article>
+    </div>
+  </main>
+
+  <!-- custom js link -->
+  <script src="./js/script.js"></script>
+
+  <!-- ionicon link -->
+  <script type="module" src="https://unpkg.com/ionicons@5.5.2/dist/ionicons/ionicons.esm.js"></script>
+  <script nomodule src="https://unpkg.com/ionicons@5.5.2/dist/ionicons/ionicons.js"></script>
+</body>
+
+</html>
