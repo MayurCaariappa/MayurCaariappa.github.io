@@ -64,7 +64,7 @@ body {
   padding: 0 12px;
   border-bottom: 1px solid var(--border);
   position: relative;
-  cursor: move;
+  cursor: default;
   -webkit-app-region: drag;
 }
 
@@ -462,6 +462,9 @@ ul.checklist li:hover::before {
     height: 44px;
     padding: 0 16px;
     cursor: default;
+    display: flex;
+    align-items: center;
+    transition: height 0.25s ease, opacity 0.2s ease;
   }
 
   .back-button {
@@ -476,39 +479,30 @@ ul.checklist li:hover::before {
     max-width: 70vw;
   }
 
-  .title-bar.content-view .title,
-  .title-bar.content-view .search-wrapper,
-  .title-bar.content-view .controls {
-    display: none;
-  }
-
-  /* Make whole back area feel like a button */
-  .title-bar.content-view::before {
-    content: "";
-    position: absolute;
-    inset: 0;
-    background: rgba(0, 0, 0, 0.08);
-    opacity: 0;
-    transition: opacity 0.12s;
-    pointer-events: none;
-  }
-
   .title-bar.content-view:active::before {
     opacity: 0.35;
   }
 
   .title-bar.content-view .back-button {
-    display: block;
+    display: flex;
+  }
+
+  .title-bar .back-button {
+    display: none;
+    color: #e2a82c;
+    font-size: 17px;
+    font-weight: 600;
+    align-items: center;
+    gap: 8px;
   }
 
   .title-bar.content-view {
-    height: 0;
-    padding: 0;
-    overflow: hidden;
-    border-bottom: none;
-    opacity: 0;
-    pointer-events: none;
-    transition: height 0.3s ease, opacity 0.25s ease;
+    height: 44px;
+    padding: 0 0 0 0;
+    opacity: 1;
+    pointer-events: auto;
+    border-bottom: 1px solid var(--border);
+    background: var(--title-bar);
   }
 
   .search-wrapper {
@@ -516,8 +510,9 @@ ul.checklist li:hover::before {
   }
 
   #search-notes {
-    width: 100%;
+    width: 60%;
     max-width: 240px;
+    margin-left: 40%;
   }
 
   .content-wrapper {

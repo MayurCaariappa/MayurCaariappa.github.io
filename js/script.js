@@ -1,5 +1,3 @@
-// script.js (complete updated version with all fixes)
-
 import { highlight, getBestSnippet, buildNoteData } from "./utils.js";
 
 /**
@@ -388,9 +386,12 @@ document.addEventListener("DOMContentLoaded", () => {
       sidebar.style.display = "none";
       titleBar.classList.add("content-view");
 
-      // Always show "Notes" + arrow — no dynamic note title here
-      backButton.innerHTML = `Notes`; // just the word "Notes"
+      backButton.innerHTML = `<svg xmlns="http://www.w3.org/2000/svg" width="32" height="32" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="lucide lucide-chevron-left text-[#e2a727]"><path d="m15 18-6-6 6-6"></path></svg>`;
+      backButton.innerHTML += `<span>Notes</span>`
+      backButton.style.color = "#e2a82c";
       backButton.style.display = "flex";
+      backButton.style.alignItems = "center";
+      backButton.style.gap = "8px";
 
       title.style.display = "none";
       searchWrapper.style.display = "none";
