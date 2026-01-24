@@ -40,10 +40,11 @@ body {
 }
 
 .notes-window {
-  width: 100%;
-  max-width: 1100px;
-  height: 92vh;
-  max-height: 92vh;
+  position: absolute;
+  width: 1100px;
+  min-width: 380px;
+  height: 88vh;
+  min-height: 440px;
   background: var(--bg-window);
   border-radius: 12px;
   overflow: hidden;
@@ -51,8 +52,10 @@ body {
     0 0 0 1px rgba(255, 255, 255, 0.08) inset;
   display: flex;
   flex-direction: column;
+  user-select: none;
 }
 
+/* Make title bar look draggable */
 .title-bar {
   height: 38px;
   background: var(--title-bar);
@@ -61,8 +64,25 @@ body {
   padding: 0 12px;
   border-bottom: 1px solid var(--border);
   position: relative;
+  cursor: move;
   -webkit-app-region: drag;
-  user-select: none;
+}
+
+/* When actually dragging */
+.notes-window.dragging {
+  box-shadow: 0 30px 100px rgba(0, 0, 0, 0.75),
+    0 0 0 1px rgba(255, 255, 255, 0.12) inset;
+  opacity: 0.98;
+}
+
+.resize-handle {
+  position: absolute;
+  right: 0;
+  bottom: 0;
+  width: 20px;
+  height: 20px;
+  cursor: nwse-resize;
+  z-index: 10;
 }
 
 .controls {
@@ -258,6 +278,7 @@ body {
   flex: 1;
   padding: 24px 32px;
   overflow-y: auto;
+  -webkit-overflow-scrolling: touch;
   background: var(--bg-main);
 }
 
@@ -424,9 +445,12 @@ ul.checklist li:hover::before {
     background: var(--bg-body);
     height: 100vh;
     align-items: flex-start;
+    display: block;
   }
 
   .notes-window {
+    position: static;
+    transform: none;
     width: 100%;
     height: 100vh;
     max-height: none;
@@ -437,10 +461,58 @@ ul.checklist li:hover::before {
   .title-bar {
     height: 44px;
     padding: 0 16px;
+    cursor: default;
+  }
+
+  .back-button {
+    display: none;
+    font-size: 17px;
+    font-weight: 600;
+    color: #000;
+    padding: 0 16px;
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    max-width: 70vw;
+  }
+
+  .title-bar.content-view .title,
+  .title-bar.content-view .search-wrapper,
+  .title-bar.content-view .controls {
+    display: none;
+  }
+
+  /* Make whole back area feel like a button */
+  .title-bar.content-view::before {
+    content: "";
+    position: absolute;
+    inset: 0;
+    background: rgba(0, 0, 0, 0.08);
+    opacity: 0;
+    transition: opacity 0.12s;
+    pointer-events: none;
+  }
+
+  .title-bar.content-view:active::before {
+    opacity: 0.35;
+  }
+
+  .title-bar.content-view .back-button {
+    display: block;
+  }
+
+  .title-bar.content-view {
+    height: 0;
+    padding: 0;
+    overflow: hidden;
+    border-bottom: none;
+    opacity: 0;
+    pointer-events: none;
+    transition: height 0.3s ease, opacity 0.25s ease;
   }
 
   .search-wrapper {
-    margin-left: 12px;
+    margin-left: auto; /* Adjusted for mobile */
   }
 
   #search-notes {
@@ -451,38 +523,38 @@ ul.checklist li:hover::before {
   .content-wrapper {
     flex-direction: column;
     overflow: hidden;
+    height: calc(100vh - 44px);
   }
 
   .sidebar {
     width: 100%;
-    height: auto;
-    max-height: 30vh;
+    height: 100%;
     border-right: none;
-    border-bottom: 1px solid var(--border);
+    border-bottom: none;
     overflow-y: auto;
     flex-shrink: 0;
     touch-action: pan-y;
   }
 
+  .sidebar-header {
+    display: block; /* Show header in mobile */
+    padding: 16px;
+  }
+
   #notes-list {
-    display: flex;
-    flex-direction: row;
-    flex-wrap: nowrap;
-    padding: 8px 0;
-    overflow-x: auto;
-    scroll-snap-type: x proximity;
+    display: block;
+    padding: 0;
+    overflow-y: auto;
     -webkit-overflow-scrolling: touch;
   }
 
   #notes-list li {
-    flex: 0 0 auto;
-    min-width: 140px;
-    max-width: 180px;
-    padding: 10px 14px;
-    margin: 0 6px;
-    border-radius: 10px;
-    background: rgba(255, 255, 255, 0.06);
-    text-align: center;
+    padding: 16px;
+    margin: 0;
+    border-bottom: 1px solid var(--border);
+    background: none;
+    text-align: left;
+    border-radius: 0;
     touch-action: manipulation;
   }
 
@@ -491,18 +563,16 @@ ul.checklist li:hover::before {
   }
 
   .note-preview {
-    display: none !important;
-  }
-
-  .sidebar-header {
-    display: none;
+    display: block !important;
   }
 
   .main-content {
+    display: none;
     flex: 1 1 auto;
     overflow-y: auto;
     padding: 20px 25px;
     -webkit-overflow-scrolling: touch;
+    position: relative;
   }
 
   #note-content h1 {
@@ -518,6 +588,7 @@ ul.checklist li:hover::before {
 
   .no-results {
     padding: 20px 16px;
+    text-align: left;
   }
 
   /* Performance: reduce transitions on mobile */
@@ -533,10 +604,14 @@ ul.checklist li:hover::before {
     width: 23px;
     height: 23px;
   }
-
   ul.checklist li.checked::before {
     font-size: 12px;
     line-height: 20px;
+  }
+
+  .window-footer {
+    height: 44px;
+    padding: 0 25px;
   }
 }
 

@@ -1,22 +1,180 @@
+// script.js (complete updated version with all fixes)
+
 import { highlight, getBestSnippet, buildNoteData } from "./utils.js";
 
 /**
  * Initializes the portfolio app on DOM load.
  */
 document.addEventListener("DOMContentLoaded", () => {
-  // Cache DOM elements for performance
+  // DOM elements
+  const windowEl = document.querySelector(".notes-window");
+  const titleBar = document.querySelector(".title-bar");
+  const backButton = document.querySelector(".back-button");
+  const controls = document.querySelector(".controls");
+  const title = document.querySelector(".title");
+  const searchWrapper = document.querySelector(".search-wrapper");
+  const resizeHandle = document.querySelector(".resize-handle");
   const contentDiv = document.getElementById("note-content");
   const searchInput = document.getElementById("search-notes");
   const noResults = document.getElementById("no-results");
   const notesList = document.getElementById("notes-list");
-  const sidebarItems = document.querySelectorAll("#notes-list li");
   const footer = document.getElementById("contact-footer");
   const mainContent = document.querySelector(".main-content");
+  const sidebar = document.querySelector(".sidebar");
 
-  // Build note data once
-  const noteData = buildNoteData(sidebarItems);
+  // Mobile detection
+  const isMobile = () => window.innerWidth <= 800;
 
-  // Restore and handle checklist toggles when skills note is loaded
+  // Proper initial centering for desktop
+  // Center window once on load (desktop only)
+  if (!isMobile()) {
+    function centerWindow() {
+      const w = windowEl.offsetWidth;
+      const h = windowEl.offsetHeight;
+
+      // Use viewport size
+      const vw = window.innerWidth;
+      const vh = window.innerHeight;
+
+      let left = Math.max(20, (vw - w) / 2);
+      let top = Math.max(20, (vh - h) / 2);
+
+      windowEl.style.left = `${left}px`;
+      windowEl.style.top = `${top}px`;
+      windowEl.style.margin = "0";
+      windowEl.style.transform = "none";
+    }
+
+    centerWindow();
+    window.addEventListener("load", centerWindow);
+    window.addEventListener("resize", centerWindow);
+  }
+
+  // Dragging state
+  let isDragging = false;
+  let dragStartX = 0;
+  let dragStartY = 0;
+  let dragStartLeft = 0;
+  let dragStartTop = 0;
+
+  // Resizing state
+  let isResizing = false;
+  let resizeStartX = 0;
+  let resizeStartY = 0;
+  let resizeStartWidth = 0;
+  let resizeStartHeight = 0;
+
+  // Initialize dragging and resizing (desktop only)
+  if (!isMobile()) {
+    initWindowDragging();
+    initWindowResizing();
+  }
+
+  function initWindowDragging() {
+    titleBar.addEventListener("pointerdown", startDrag);
+
+    function startDrag(e) {
+      // Skip if clicking on controls, search, or back button
+      if (e.target.closest(".controls, .search-wrapper, .back-button")) return;
+
+      // Very important: capture current position **in viewport coordinates**
+      const rect = windowEl.getBoundingClientRect();
+
+      isDragging = true;
+      dragStartX = e.clientX;
+      dragStartY = e.clientY;
+      dragStartLeft = rect.left;
+      dragStartTop = rect.top;
+
+      windowEl.classList.add("dragging");
+      document.body.style.userSelect = "none";
+      e.preventDefault();
+    }
+
+    function onDragMove(e) {
+      if (!isDragging) return;
+      e.preventDefault();
+
+      const dx = e.clientX - dragStartX;
+      const dy = e.clientY - dragStartY;
+
+      let newLeft = dragStartLeft + dx;
+      let newTop = dragStartTop + dy;
+
+      // Keep some margin so title bar doesn't go completely off-screen
+      const titleH = titleBar.offsetHeight;
+      newLeft = Math.max(
+        -windowEl.offsetWidth + 120,
+        Math.min(newLeft, window.innerWidth - 120)
+      );
+      newTop = Math.max(
+        -titleH + 40,
+        Math.min(newTop, window.innerHeight - titleH - 20)
+      );
+
+      windowEl.style.left = `${newLeft}px`;
+      windowEl.style.top = `${newTop}px`;
+    }
+
+    function stopDrag() {
+      if (!isDragging) return;
+      isDragging = false;
+      windowEl.classList.remove("dragging");
+      document.body.style.userSelect = "";
+    }
+
+    window.addEventListener("pointermove", onDragMove, { passive: false });
+    window.addEventListener("pointerup", stopDrag);
+    window.addEventListener("pointercancel", stopDrag);
+  }
+
+  function initWindowResizing() {
+    if (!resizeHandle) return;
+
+    resizeHandle.addEventListener("pointerdown", startResize);
+
+    function startResize(e) {
+      isResizing = true;
+      resizeStartX = e.clientX;
+      resizeStartY = e.clientY;
+      resizeStartWidth = windowEl.offsetWidth;
+      resizeStartHeight = windowEl.offsetHeight;
+
+      windowEl.classList.add("dragging");
+      document.body.style.userSelect = "none";
+      e.preventDefault();
+    }
+
+    function onResizeMove(e) {
+      if (!isResizing) return;
+      e.preventDefault();
+
+      const dx = e.clientX - resizeStartX;
+      const dy = e.clientY - resizeStartY;
+
+      const newWidth = Math.max(360, resizeStartWidth + dx);
+      const newHeight = Math.max(420, resizeStartHeight + dy);
+
+      windowEl.style.width = `${newWidth}px`;
+      windowEl.style.height = `${newHeight}px`;
+    }
+
+    function stopResize() {
+      if (!isResizing) return;
+      isResizing = false;
+      windowEl.classList.remove("dragging");
+      document.body.style.userSelect = "";
+    }
+
+    window.addEventListener("pointermove", onResizeMove, { passive: false });
+    window.addEventListener("pointerup", stopResize);
+    window.addEventListener("pointercancel", stopResize);
+  }
+
+  // Prepare note data
+  const noteData = buildNoteData(document.querySelectorAll("#notes-list li"));
+
+  // Checklist persistence (skills section)
   function initChecklist() {
     const checklistItems = document.querySelectorAll(
       "#note-content ul.checklist li"
@@ -29,25 +187,19 @@ document.addEventListener("DOMContentLoaded", () => {
       // Restore saved state
       const isChecked =
         localStorage.getItem(`skill-checked-${skillId}`) === "true";
-      if (isChecked) {
-        li.classList.add("checked");
-      }
+      if (isChecked) li.classList.add("checked");
 
       // Make circle clickable
       li.addEventListener("click", (e) => {
-        if (e.target.tagName === "A" || e.target.closest("a")) return;
-
+        if (e.target.closest("a")) return;
         li.classList.toggle("checked");
         const nowChecked = li.classList.contains("checked");
         localStorage.setItem(`skill-checked-${skillId}`, nowChecked);
 
-        li.style.transition = "background 0.2s";
         li.style.background = nowChecked
           ? "rgba(255, 204, 0, 0.08)"
           : "transparent";
-        setTimeout(() => {
-          li.style.background = "";
-        }, 300);
+        setTimeout(() => (li.style.background = ""), 300);
       });
     });
   }
@@ -55,13 +207,11 @@ document.addEventListener("DOMContentLoaded", () => {
   // Hook into loadNote to initialize checklist when skills loads
   const originalLoadNote = loadNote;
   loadNote = function (key) {
-    originalLoadNote.call(this, key); // Call original
+    originalLoadNote.call(this, key);
 
     // Delay slightly for DOM to settle
     setTimeout(() => {
-      if (key === "skills") {
-        initChecklist();
-      }
+      if (key === "skills") initChecklist();
     }, 200);
   };
 
@@ -73,7 +223,7 @@ document.addEventListener("DOMContentLoaded", () => {
     setTimeout(initChecklist, 300);
   }
 
-  // Flag for easter egg
+  // Easter egg state
   let easterRevealed = false;
   let easterItemElement = null;
 
@@ -88,7 +238,6 @@ document.addEventListener("DOMContentLoaded", () => {
 
     // Easter egg logic: reveal only once, remove when term doesn't match
     const shouldShowEaster = lowerTerm === "easter";
-
     if (shouldShowEaster && !easterRevealed) {
       revealEasterEgg();
       easterRevealed = true;
@@ -97,7 +246,7 @@ document.addEventListener("DOMContentLoaded", () => {
       easterRevealed = false;
     }
 
-    sidebarItems.forEach((item) => {
+    document.querySelectorAll("#notes-list li").forEach((item) => {
       const key = item.dataset.section;
       const data = noteData[key];
       if (!data) return;
@@ -130,7 +279,7 @@ document.addEventListener("DOMContentLoaded", () => {
     noResults.classList.toggle("hidden", visibleCount > 0 || !term);
 
     // Refresh current note if search cleared
-    if (!term) {
+    if (!term && !isMobile()) {
       const active = notesList.querySelector("li.active");
       if (active) loadNote(active.dataset.section);
     }
@@ -144,11 +293,13 @@ document.addEventListener("DOMContentLoaded", () => {
     // Auto-select first visible if active hidden
     const active = notesList.querySelector("li.active");
     if (active?.style.display === "none" && visibleCount > 0) {
-      const firstVisible = Array.from(sidebarItems).find(
+      const firstVisible = Array.from(notesList.querySelectorAll("li")).find(
         (el) => el.style.display !== "none"
       );
       if (firstVisible) {
-        sidebarItems.forEach((el) => el.classList.remove("active"));
+        document
+          .querySelectorAll("#notes-list li")
+          .forEach((el) => el.classList.remove("active"));
         firstVisible.classList.add("active");
         loadNote(firstVisible.dataset.section);
       }
@@ -161,6 +312,7 @@ document.addEventListener("DOMContentLoaded", () => {
    */
   function loadNote(key) {
     contentDiv.classList.remove("fade-in", "slide-in");
+    void contentDiv.offsetWidth; // reflow
 
     // Toggle footer for contact
     if (footer) {
@@ -199,52 +351,94 @@ document.addEventListener("DOMContentLoaded", () => {
       // Trigger reflow for animation
       void contentDiv.offsetWidth;
       contentDiv.classList.add("fade-in", "slide-in");
-    }, 180); // Matches transition duration
+    }, 30);
   }
 
-  // Sidebar click handlers
-  sidebarItems.forEach((item) => {
-    item.addEventListener("click", () => {
-      if (item.style.display === "none") return;
-      sidebarItems.forEach((i) => i.classList.remove("active"));
-      item.classList.add("active");
-      loadNote(item.dataset.section);
-    });
-  });
+  // Event delegation for sidebar clicks (fixes desktop & handles dynamic easter egg)
+  notesList.addEventListener("click", (e) => {
+    const item = e.target.closest("li");
+    if (!item || item.style.display === "none") return;
 
-  // Search input handler
-  searchInput.addEventListener("input", (e) => filterNotes(e.target.value));
+    document
+      .querySelectorAll("#notes-list li")
+      .forEach((i) => i.classList.remove("active"));
+    item.classList.add("active");
 
-  // Keyboard navigation
-  document.addEventListener("keydown", (e) => {
-    if (document.activeElement === searchInput) return;
-    if (!["ArrowUp", "ArrowDown", "Enter"].includes(e.key)) return;
-    e.preventDefault();
+    const key = item.dataset.section;
+    const noteTitle = item.querySelector(".note-title").textContent;
 
-    const visibleItems = Array.from(sidebarItems).filter(
-      (item) => item.style.display !== "none"
-    );
-    if (!visibleItems.length) return;
+    loadNote(key);
 
-    let currentIndex = visibleItems.findIndex((item) =>
-      item.classList.contains("active")
-    );
-    if (currentIndex === -1) currentIndex = 0;
+    if (isMobile()) {
+      mainContent.style.display = "block";
+      sidebar.style.display = "none";
+      titleBar.classList.add("content-view");
 
-    let nextIndex = currentIndex;
-    if (e.key === "ArrowUp") nextIndex = Math.max(0, currentIndex - 1);
-    if (e.key === "ArrowDown")
-      nextIndex = Math.min(visibleItems.length - 1, currentIndex + 1);
-    if (e.key === "Enter") nextIndex = currentIndex;
+      // Always show "Notes" + arrow — no dynamic note title here
+      backButton.innerHTML = `Notes`; // just the word "Notes"
+      backButton.style.display = "flex";
 
-    if (nextIndex !== currentIndex || e.key === "Enter") {
-      sidebarItems.forEach((i) => i.classList.remove("active"));
-      const targetItem = visibleItems[nextIndex];
-      targetItem.classList.add("active");
-      targetItem.scrollIntoView({ block: "nearest", behavior: "smooth" });
-      loadNote(targetItem.dataset.section);
+      title.style.display = "none";
+      searchWrapper.style.display = "none";
+      controls.style.display = "none";
     }
   });
+
+  // Back button
+  backButton.addEventListener("click", () => {
+    if (!isMobile()) return;
+
+    mainContent.style.display = "none";
+    sidebar.style.display = "block";
+    titleBar.classList.remove("content-view");
+    backButton.style.display = "none";
+    title.style.display = "block";
+    searchWrapper.style.display = "block";
+    controls.style.display = "flex";
+
+    contentDiv.innerHTML = "";
+    contentDiv.classList.remove("fade-in", "slide-in");
+    footer.classList.remove("visible");
+    mainContent.style.paddingBottom = "0";
+  });
+
+  // Search
+  searchInput.addEventListener("input", (e) => filterNotes(e.target.value));
+
+  // Keyboard nav (desktop only)
+  if (!isMobile()) {
+    document.addEventListener("keydown", (e) => {
+      if (document.activeElement === searchInput) return;
+      if (!["ArrowUp", "ArrowDown", "Enter"].includes(e.key)) return;
+      e.preventDefault();
+
+      const visibleItems = Array.from(notesList.querySelectorAll("li")).filter(
+        (item) => item.style.display !== "none"
+      );
+      if (!visibleItems.length) return;
+
+      let currentIndex = visibleItems.findIndex((item) =>
+        item.classList.contains("active")
+      );
+      if (currentIndex === -1) currentIndex = 0;
+
+      let nextIndex = currentIndex;
+      if (e.key === "ArrowUp") nextIndex = Math.max(0, currentIndex - 1);
+      if (e.key === "ArrowDown")
+        nextIndex = Math.min(visibleItems.length - 1, currentIndex + 1);
+      if (e.key === "Enter") nextIndex = currentIndex;
+
+      if (nextIndex !== currentIndex || e.key === "Enter") {
+        document
+          .querySelectorAll("#notes-list li")
+          .forEach((i) => i.classList.remove("active"));
+        const target = visibleItems[nextIndex];
+        target.classList.add("active");
+        target.scrollIntoView({ block: "nearest", behavior: "smooth" });
+        loadNote(target.dataset.section);
+      }
+    });
+  }
 
   /**
    * Reveals easter egg note in sidebar.
@@ -258,11 +452,11 @@ document.addEventListener("DOMContentLoaded", () => {
     notesList.appendChild(easterItem);
     easterItemElement = easterItem; // keep reference
 
-    // Add to noteData
-    const easterTemplate = document.getElementById("section-easter");
+    const easterTemplate = document.getElementById("section-easter"); // assume you have this in HTML
     const plain = easterTemplate.content.textContent
       .trim()
       .replace(/\s+/g, " ");
+
     noteData["easter"] = {
       title: "Fun Facts",
       lowerTitle: "fun facts",
@@ -271,14 +465,6 @@ document.addEventListener("DOMContentLoaded", () => {
       template: easterTemplate,
     };
 
-    // Bind click handler
-    easterItem.addEventListener("click", () => {
-      Array.from(sidebarItems).forEach((i) => i.classList.remove("active"));
-      easterItem.classList.add("active");
-      loadNote("easter");
-    });
-
-    // Force re-filter to show it immediately
     filterNotes(searchInput.value);
   }
 
@@ -299,7 +485,9 @@ document.addEventListener("DOMContentLoaded", () => {
     if (active?.dataset.section === "easter") {
       const aboutItem = notesList.querySelector('li[data-section="about"]');
       if (aboutItem) {
-        Array.from(sidebarItems).forEach((el) => el.classList.remove("active"));
+        document
+          .querySelectorAll("#notes-list li")
+          .forEach((el) => el.classList.remove("active"));
         aboutItem.classList.add("active");
         loadNote("about");
       }
@@ -311,5 +499,14 @@ document.addEventListener("DOMContentLoaded", () => {
 
   // Initial load
   filterNotes("");
-  document.querySelector('#notes-list li[data-section="about"]').click();
+  if (isMobile()) {
+    mainContent.style.display = "none";
+    sidebar.style.display = "block";
+    controls.style.display = "flex";
+  } else {
+    const aboutItem = document.querySelector(
+      '#notes-list li[data-section="about"]'
+    );
+    if (aboutItem) aboutItem.click();
+  }
 });
