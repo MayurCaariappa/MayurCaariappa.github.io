@@ -251,6 +251,20 @@ document.addEventListener("DOMContentLoaded", () => {
       const data = noteData[key];
       if (!data) return;
 
+      if (key === "easter") {
+        const shouldBeVisible = lowerTerm === "easter";
+        item.style.display = shouldBeVisible ? "" : "none";
+        if (!shouldBeVisible) {
+          visibleCount++;
+        }
+
+        const previewEl = item.querySelector(".note-preview");
+        previewEl.innerHTML = shouldBeVisible ? "Easter egg unlocked!" : "";
+        previewEl.style.display = shouldBeVisible ? "block" : "none";
+        if (shouldBeVisible) visibleCount++;
+        return;
+      }
+
       const matchTitle = data.lowerTitle.includes(lowerTerm);
       const matchContent = data.lowerContent.includes(lowerTerm);
       const matches = !term || matchTitle || matchContent;
