@@ -485,6 +485,14 @@ ul.checklist li:hover::before {
 
   .title-bar.content-view .back-button {
     display: flex;
+    align-items: center;
+    margin-top: 50px;
+    margin-left: -13px;
+    margin-bottom: 30px;
+    gap: 4px;
+    color: #e2a82c;
+    font-size: 15px;
+    font-weight: 400;
   }
 
   .title-bar .back-button {
@@ -498,11 +506,11 @@ ul.checklist li:hover::before {
 
   .title-bar.content-view {
     height: 44px;
-    padding: 0 0 0 0;
+    padding: 0 16px;
     opacity: 1;
     pointer-events: auto;
-    border-bottom: 1px solid var(--border);
-    background: var(--title-bar);
+    background: var(--bg-main) !important;
+    border-bottom: none !important;
   }
 
   .search-wrapper {
@@ -529,6 +537,7 @@ ul.checklist li:hover::before {
     overflow-y: auto;
     flex-shrink: 0;
     touch-action: pan-y;
+    background-color: var(--bg-main);
   }
 
   .sidebar-header {
@@ -568,6 +577,8 @@ ul.checklist li:hover::before {
     padding: 20px 25px;
     -webkit-overflow-scrolling: touch;
     position: relative;
+    background: var(--bg-main);
+    padding-top: 8px; 
   }
 
   #note-content h1 {

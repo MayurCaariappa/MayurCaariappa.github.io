@@ -386,9 +386,12 @@ document.addEventListener("DOMContentLoaded", () => {
       sidebar.style.display = "none";
       titleBar.classList.add("content-view");
 
-      backButton.innerHTML = `<svg xmlns="http://www.w3.org/2000/svg" width="32" height="32" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="lucide lucide-chevron-left text-[#e2a727]"><path d="m15 18-6-6 6-6"></path></svg>`;
-      backButton.innerHTML += `<span>Notes</span>`
-      backButton.style.color = "#e2a82c";
+      backButton.innerHTML = `
+        <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="#e2a727" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round" style="margin-right: -4px;">
+            <path d="m15 18-6-6 6-6"></path>
+        </svg>
+        <span style="color: #e2a727; font-size: 17px;">Notes</span>
+      `;
       backButton.style.display = "flex";
       backButton.style.alignItems = "center";
       backButton.style.gap = "8px";
