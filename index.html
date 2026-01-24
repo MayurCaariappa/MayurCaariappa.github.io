@@ -3,7 +3,7 @@
   <head>
     <meta charset="UTF-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-    <link rel="icon" type="image/gif" href="./assets/mayurcaariappa.gif" />
+    <link rel="icon" type="image/gif" href="images/mayurcaariappa.gif" />
     <title>Mayur's Portfolio</title>
     <link rel="stylesheet" href="./css/style.css" />
     <!-- Google tag (gtag.js) -->
@@ -77,16 +77,17 @@
       </div>
     </div>
 
-    <!-- Note contents moved here as semantic <template> elements -->
+    <!-- Note contents as semantic <template> elements -->
     <template id="section-about">
       <h1>About</h1>
       <p>
-        Hello, I'm Mayur Caariappa — a Senior Software Engineer from Bengaluru,
-        Karnataka.
+        Hello, I'm <strong>Mayur Caariappa</strong> — a
+        <strong>Software Engineer</strong> from Bengaluru, Karnataka.
       </p>
       <p>
-        As a Software Engineer with a diverse skill set across Java, Spring
-        Boot, and the MERN stack, I am passionate about building impactful
+        As a Software Engineer with a diverse skill set across
+        <strong>MERN stack</strong>, <strong>Java</strong>, and
+        <strong>Spring Boot</strong>, I am passionate about building impactful
         software solutions. I bring a proven track record of delivering complex
         projects, such as secure email automation and digital signature
         services, that enhance both user experience and system performance.
@@ -101,17 +102,23 @@
 
     <template id="section-skills">
       <h1>Skills</h1>
-      <ul>
-        <li><b>Languages: </b>TypeScript, JavaScript, Java, SQL</li>
-        <li>
-          <b>Backend & APIs: </b>Node.js (Express, Fastify), GraphQL, REST,
-          Spring Boot, Microservices
+      <ul class="checklist">
+        <li data-skill-id="languages">
+          Languages: TypeScript, JavaScript, Java, SQL
         </li>
-        <li><b>Databases: </b>PostgreSQL, MongoDB, Redis, Elasticsearch</li>
-        <li><b>Frontend: </b>React.js, Angular, Next.js, Thymeleaf</li>
-        <li>
-          <b>Cloud & DevOps: </b>AWS (ECS, Lambda, S3), Docker, Kubernetes,
-          CI/CD (GitHub Actions, Jenkins)
+        <li data-skill-id="backend">
+          Backend & APIs: Node.js (Express, Fastify), GraphQL, REST, Spring
+          Boot, Microservices
+        </li>
+        <li data-skill-id="databases">
+          Databases: PostgreSQL, MongoDB, Redis, Elasticsearch
+        </li>
+        <li data-skill-id="frontend">
+          Frontend: React.js, Angular, Next.js, Thymeleaf
+        </li>
+        <li data-skill-id="cloud">
+          Cloud & DevOps: AWS (ECS, Lambda, S3), Docker, Kubernetes, CI/CD
+          (GitHub Actions, Jenkins)
         </li>
       </ul>
     </template>
@@ -119,8 +126,8 @@
     <template id="section-resume">
       <h1>Resume</h1>
       <p>
-        <strong>Software Engineer 1</strong> — Kaplan, Bengaluru (April 2025 –
-        Present)
+        <strong>Software Engineer 1</strong> — <em>Kaplan, Bengaluru</em> (April
+        2025 – Present)
       </p>
       <ol>
         <li>
@@ -131,7 +138,6 @@
             class="contact-link"
           >
             Atom Educator
-            <span class="text-xs external-icon">↗</span>
           </a>
           <ul>
             <li>
@@ -159,13 +165,20 @@
       <hr />
       <br />
       <p>
-        <strong>Software Engineer</strong> — eMudhra Limited, Bengaluru (August
-        2022 – April 2025)
+        <strong>Software Engineer</strong> —
+        <em>eMudhra Limited, Bengaluru</em> (August 2022 – April 2025)
       </p>
 
       <ol>
         <li>
-          Instigo
+          <a
+            href="https://instigo-qa.emsigner.com/InstigoV2/testdp"
+            target="_blank"
+            rel="noopener noreferrer"
+            class="contact-link"
+          >
+            Instigo
+          </a>
           <ul>
             <li>
               Built Instigo for seamless eKYC in demat, trading, and other
@@ -186,7 +199,6 @@
             class="contact-link"
           >
             emSign S/MIME Automation Plugin
-            <span class="text-xs external-icon">↗</span>
           </a>
           <ul>
             <li>
@@ -213,7 +225,6 @@
             class="contact-link"
           >
             Remote Signing Service (RSDS)
-            <span class="text-xs external-icon">↗</span>
           </a>
         </li>
         <ul>
@@ -227,7 +238,16 @@
             development for RSDS
           </li>
         </ul>
-        <li>eSign Service</li>
+        <li>
+          <a
+            href="https://qaserver-int.emudhra.net:18004/eMudhraDemos/"
+            target="_blank"
+            rel="noopener noreferrer"
+            class="contact-link"
+          >
+            eSign Service
+          </a>
+        </li>
         <ul>
           <li>
             Engineered customization features for ASPs (Application Service
@@ -246,19 +266,43 @@
       <strong>Education</strong><br /><br />
       <ul>
         <li>
-          PES College of Engineering, Bachelor of Engineering (ECE) - (2015 –
-          2019)
+          Bachelor of Engineering (ECE) —
+          <em>PES College of Engineering</em> (2015 – 2019)
         </li>
-        <li>Sadvidya Semi-Residential College, PUC (PCME) - (2013 – 2015)</li>
+        <li>
+          PUC (PCME) — <em>Sadvidya Semi-Residential College</em> (2013 – 2015)
+        </li>
       </ul>
+      <br />
     </template>
 
     <template id="section-projects">
       <h1>Projects</h1>
       <p>
-        <strong>Instigo</strong><br />Instigo enables users to complete eKYC for
-        opening demat and trading accounts, review terms & conditions, and
-        submit applications.
+        <a
+          href="https://nit.kaptest.com/"
+          target="_blank"
+          rel="noopener noreferrer"
+          class="contact-link"
+        >
+          Atom Educator</a
+        ><br />
+        The Portal empowers Nursing and Healthcare faculty to effortlessly
+        create assessments, customize quizzes, manage cohorts and access
+        detailed student report cards.
+      </p>
+      <p>
+        <a
+          href="https://instigo-qa.emsigner.com/InstigoV2/testdp"
+          target="_blank"
+          rel="noopener noreferrer"
+          class="contact-link"
+        >
+          Instigo
+          </a
+        ><br />
+        Instigo enables users to complete eKYC for opening demat and trading
+        accounts, review terms & conditions, and submit applications.
       </p>
       <p>
         <a
@@ -267,26 +311,11 @@
           rel="noopener noreferrer"
           class="contact-link"
         >
-          emSign S/MIME Automation<span class="text-xs external-icon"
-            >↗</span
-          > </a
+          emSign S/MIME Automation</a
         ><br />
         Enterprise-grade application for email security with automatic S/MIME
         certificate issuance, silent installation, and seamless Outlook
         configuration.
-      </p>
-      <p>
-        <a
-          href="https://nit.kaptest.com/"
-          target="_blank"
-          rel="noopener noreferrer"
-          class="contact-link"
-        >
-          Atom Educator<span class="text-xs external-icon">↗</span> </a
-        ><br />
-        The Portal empowers Nursing and Healthcare faculty to effortlessly
-        create assessments, customize quizzes, manage cohorts and access
-        detailed student report cards.
       </p>
       <p>
         <a
@@ -295,7 +324,7 @@
           rel="noopener noreferrer"
           class="contact-link"
         >
-          KYC Systems<span class="text-xs external-icon">↗</span> </a
+          KYC Systems</a
         ><br />
         KYC Systems simplifies the KYC verification by utilizing services such
         as Aadhaar, DigiLocker, and PAN for Indian users, along with Veridas and
@@ -308,7 +337,7 @@
           rel="noopener noreferrer"
           class="contact-link"
         >
-          G20 Pilot<span class="text-xs external-icon">↗</span> </a
+          G20 Pilot</a
         ><br />
         The G20 Pilot is a cross-border digital signature platform integrating
         with TSPs from India, Japan, and the EU, showcasing mutual recognition
@@ -325,7 +354,7 @@
           rel="noopener noreferrer"
           class="contact-link"
         >
-          Office-Metaverse<span class="text-xs external-icon">↗</span> </a
+          Office-Metaverse</a
         ><br />
         The Office Metaverse is a 2D virtual workspace built with the Phaser
         game engine and MERN stack, where users interact via unique avatars. It
@@ -339,7 +368,7 @@
           rel="noopener noreferrer"
           class="contact-link"
         >
-          EasyPark-BLR<span class="text-xs external-icon">↗</span> </a
+          EasyPark-BLR</a
         ><br />
         EasyPark-BLR helps users find parking spots in Bengaluru, India. It
         fetches real-time data and displays it on an interactive map, making
@@ -352,7 +381,7 @@
 
       <p>
         <a href="mailto:mayurcaariappa10@gmail.com" class="contact-link">
-          Email <span class="text-xs external-icon">↗</span>
+          Email
         </a>
       </p>
 
@@ -363,7 +392,7 @@
           rel="noopener noreferrer"
           class="contact-link"
         >
-          LinkedIn <span class="text-xs external-icon">↗</span>
+          LinkedIn
         </a>
       </p>
 
@@ -374,7 +403,18 @@
           rel="noopener noreferrer"
           class="contact-link"
         >
-          GitHub <span class="text-xs external-icon">↗</span>
+          GitHub
+        </a>
+      </p>
+
+      <p>
+        <a
+          href="https://x.com/MayurCaariappa"
+          target="_blank"
+          rel="noopener noreferrer"
+          class="contact-link"
+        >
+          X
         </a>
       </p>
 
@@ -385,11 +425,112 @@
           rel="noopener noreferrer"
           class="contact-link"
         >
-          CV <span class="text-xs external-icon">↗</span>
+          CV
         </a>
       </p>
     </template>
 
-    <script type="module" src="./js/script.js"></script>
+    <!-- Easter egg template -->
+    <template id="section-easter">
+      <h1>Fun Facts</h1>
+
+      <p>
+        Well… you weren’t supposed to be here. But since you are, here are a few
+        fun facts:
+      </p>
+
+      <ol>
+        <li>
+          <strong>Football</strong><br />
+          I love playing Football. I support <strong>FC Barcelona</strong>,
+          which automatically answers the <strong>Messi</strong> vs Ronaldo
+          debate for me. <br />
+          (Yes, I chose joy. No, I won’t be taking questions.)
+        </li>
+
+        <li>
+          <strong>Movies are my comfort zone</strong><br />
+          I (used to) binge movies like it’s a competitive sport. I’ve even
+          directed a couple of
+          <a
+            href="https://www.youtube.com/watch?v=pXPW564UWj0"
+            target="_blank"
+            rel="noopener noreferrer"
+            class="contact-link"
+          >
+            short films</a
+          >, so I tend to watch everything with a director’s eye. I notice
+          framing, lighting, and editing, more often than you think.<br />
+          <ul>
+            <li>
+              I occasionally post pictures on
+              <a
+                href="https://www.instagram.com/mayur.caariappa/"
+                target="_blank"
+                rel="noopener noreferrer"
+                class="contact-link"
+                >Instagram
+              </a>
+              that I’m mildly proud of.
+            </li>
+            <li>
+              I've even maintained a personal notion
+              <a
+                href="https://eggplant-bottle-d88.notion.site/2218696a6f8b4d20ab282df6e3b00524?v=98c42d8ee503487ca522911a53e26cfa"
+                target="_blank"
+                rel="noopener noreferrer"
+                class="contact-link"
+                >database
+              </a>
+              of movies I've watched, complete with ratings and reviews.
+            </li>
+            <li>
+              I've won
+              <a
+                href="images/TrinTrin.jpg"
+                target="_blank"
+                rel="noopener noreferrer"
+                class="contact-link"
+              >
+                2nd place
+              </a>
+              in a short film competition organized by Mysore District for the
+              <em>Trin Trin Bicycle Awareness Campaign</em>.
+            </li>
+          </ul>
+        </li>
+        <li>
+          <strong>Athletic. Competitive.</strong><br />
+          I’ve won multiple medals across school, college and Office
+          competitions, including:
+          <ul>
+            <li>
+              <a
+                href="images/Football.jpg"
+                target="_blank"
+                rel="noopener noreferrer"
+                class="contact-link"
+              >
+                Inter-Department Football Tournament
+              </a>
+              , PES College of Engineering (2019)
+            </li>
+            <li>
+              Chess Tournament,
+              <a
+                href="images/Chess.jpg"
+                target="_blank"
+                rel="noopener noreferrer"
+                class="contact-link"
+              >
+                eMudhra Limited
+              </a>
+              (2024) and Kaplan (2025)
+            </li>
+          </ul>
+        </li>
+      </ol>
+    </template>
+    <script type="module" src="./js/script.js" defer></script>
   </body>
 </html>

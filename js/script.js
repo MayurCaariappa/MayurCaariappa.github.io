@@ -1,19 +1,101 @@
 import { highlight, getBestSnippet, buildNoteData } from "./utils.js";
 
+/**
+ * Initializes the portfolio app on DOM load.
+ */
 document.addEventListener("DOMContentLoaded", () => {
-  // DOM references
+  // Cache DOM elements for performance
   const contentDiv = document.getElementById("note-content");
   const searchInput = document.getElementById("search-notes");
   const noResults = document.getElementById("no-results");
+  const notesList = document.getElementById("notes-list");
   const sidebarItems = document.querySelectorAll("#notes-list li");
+  const footer = document.getElementById("contact-footer");
+  const mainContent = document.querySelector(".main-content");
 
-  // Prepare data once
+  // Build note data once
   const noteData = buildNoteData(sidebarItems);
 
+  // Restore and handle checklist toggles when skills note is loaded
+  function initChecklist() {
+    const checklistItems = document.querySelectorAll(
+      "#note-content ul.checklist li"
+    );
+
+    checklistItems.forEach((li) => {
+      const skillId = li.dataset.skillId;
+      if (!skillId) return;
+
+      // Restore saved state
+      const isChecked =
+        localStorage.getItem(`skill-checked-${skillId}`) === "true";
+      if (isChecked) {
+        li.classList.add("checked");
+      }
+
+      // Make circle clickable
+      li.addEventListener("click", (e) => {
+        if (e.target.tagName === "A" || e.target.closest("a")) return;
+
+        li.classList.toggle("checked");
+        const nowChecked = li.classList.contains("checked");
+        localStorage.setItem(`skill-checked-${skillId}`, nowChecked);
+
+        li.style.transition = "background 0.2s";
+        li.style.background = nowChecked
+          ? "rgba(255, 204, 0, 0.08)"
+          : "transparent";
+        setTimeout(() => {
+          li.style.background = "";
+        }, 300);
+      });
+    });
+  }
+
+  // Hook into loadNote to initialize checklist when skills loads
+  const originalLoadNote = loadNote;
+  loadNote = function (key) {
+    originalLoadNote.call(this, key); // Call original
+
+    // Delay slightly for DOM to settle
+    setTimeout(() => {
+      if (key === "skills") {
+        initChecklist();
+      }
+    }, 200);
+  };
+
+  // Also run on initial load if starting on skills
+  if (
+    document.querySelector("#notes-list li.active")?.dataset.section ===
+    "skills"
+  ) {
+    setTimeout(initChecklist, 300);
+  }
+
+  // Flag for easter egg
+  let easterRevealed = false;
+  let easterItemElement = null;
+
+  /**
+   * Filters sidebar notes based on search term.
+   * @param {string} rawTerm - The raw search input.
+   */
   function filterNotes(rawTerm) {
     const term = rawTerm.trim();
     const lowerTerm = term.toLowerCase();
     let visibleCount = 0;
+
+    // Easter egg logic: reveal only once, remove when term doesn't match
+    const shouldShowEaster = lowerTerm === "easter";
+
+    if (shouldShowEaster && !easterRevealed) {
+      revealEasterEgg();
+      easterRevealed = true;
+    } else if (!shouldShowEaster && easterRevealed) {
+      removeEasterEgg();
+      easterRevealed = false;
+    }
 
     sidebarItems.forEach((item) => {
       const key = item.dataset.section;
@@ -47,24 +129,22 @@ document.addEventListener("DOMContentLoaded", () => {
 
     noResults.classList.toggle("hidden", visibleCount > 0 || !term);
 
-    // If search is cleared → refresh current note without highlights
-    if (!term && searchInput.value === "") {
-      const active = document.querySelector("#notes-list li.active");
-      if (active) {
-        loadNote(active.dataset.section);
-      }
+    // Refresh current note if search cleared
+    if (!term) {
+      const active = notesList.querySelector("li.active");
+      if (active) loadNote(active.dataset.section);
     }
 
-    // If zero results now → clear main content (remove stale highlighted note)
+    // Clear content if no results
     if (visibleCount === 0 && term) {
       contentDiv.innerHTML = "";
-      contentDiv.classList.remove("fade-in");
+      contentDiv.classList.remove("fade-in", "slide-in");
     }
 
-    // Auto-select first visible if active one is filtered out
-    const active = document.querySelector("#notes-list li.active");
+    // Auto-select first visible if active hidden
+    const active = notesList.querySelector("li.active");
     if (active?.style.display === "none" && visibleCount > 0) {
-      const firstVisible = [...sidebarItems].find(
+      const firstVisible = Array.from(sidebarItems).find(
         (el) => el.style.display !== "none"
       );
       if (firstVisible) {
@@ -75,13 +155,17 @@ document.addEventListener("DOMContentLoaded", () => {
     }
   }
 
+  /**
+   * Loads and renders a note section.
+   * @param {string} key - The section key.
+   */
   function loadNote(key) {
-    contentDiv.classList.remove("fade-in");
+    contentDiv.classList.remove("fade-in", "slide-in");
 
-    const footer = document.getElementById("contact-footer");
+    // Toggle footer for contact
     if (footer) {
-      footer.classList.remove("visible");
-      document.querySelector(".main-content").style.paddingBottom = "0";
+      footer.classList.toggle("visible", key === "contact");
+      mainContent.style.paddingBottom = key === "contact" ? "48px" : "0";
     }
 
     setTimeout(() => {
@@ -92,6 +176,7 @@ document.addEventListener("DOMContentLoaded", () => {
       const term = searchInput.value.trim();
 
       if (term) {
+        // Highlight matches in content
         const walker = document.createTreeWalker(
           fragment,
           NodeFilter.SHOW_TEXT
@@ -100,10 +185,8 @@ document.addEventListener("DOMContentLoaded", () => {
         while ((node = walker.nextNode())) {
           const text = node.nodeValue;
           if (!text.trim()) continue;
-
           const html = highlight(text, term);
           if (html === text) continue;
-
           const span = document.createElement("span");
           span.innerHTML = html;
           node.parentNode.replaceChild(span, node);
@@ -113,16 +196,13 @@ document.addEventListener("DOMContentLoaded", () => {
       contentDiv.innerHTML = "";
       contentDiv.appendChild(fragment);
 
-      void contentDiv.offsetWidth; // trigger reflow
-      contentDiv.classList.add("fade-in");
-
-      if (key === "contact" && footer) {
-        footer.classList.add("visible");
-        document.querySelector(".main-content").style.paddingBottom = "48px";
-      }
-    }, 180);
+      // Trigger reflow for animation
+      void contentDiv.offsetWidth;
+      contentDiv.classList.add("fade-in", "slide-in");
+    }, 180); // Matches transition duration
   }
 
+  // Sidebar click handlers
   sidebarItems.forEach((item) => {
     item.addEventListener("click", () => {
       if (item.style.display === "none") return;
@@ -132,61 +212,104 @@ document.addEventListener("DOMContentLoaded", () => {
     });
   });
 
+  // Search input handler
   searchInput.addEventListener("input", (e) => filterNotes(e.target.value));
 
-  // Initial state
-  filterNotes("");
-  document.querySelector('#notes-list li[data-section="about"]').click();
-
-  /* Keyboard navigation */
+  // Keyboard navigation
   document.addEventListener("keydown", (e) => {
-    // Skip if user is typing in search field
     if (document.activeElement === searchInput) return;
+    if (!["ArrowUp", "ArrowDown", "Enter"].includes(e.key)) return;
+    e.preventDefault();
 
-    // Only handle ArrowUp / ArrowDown (and optionally Enter)
-    if (e.key !== "ArrowUp" && e.key !== "ArrowDown" && e.key !== "Enter")
-      return;
-
-    e.preventDefault(); // prevent page scroll
-
-    // Get currently visible items (in DOM order)
-    const visibleItems = [...sidebarItems].filter(
+    const visibleItems = Array.from(sidebarItems).filter(
       (item) => item.style.display !== "none"
     );
+    if (!visibleItems.length) return;
 
-    if (visibleItems.length === 0) return;
-
-    // Find current active (or default to first if none)
     let currentIndex = visibleItems.findIndex((item) =>
       item.classList.contains("active")
     );
     if (currentIndex === -1) currentIndex = 0;
 
     let nextIndex = currentIndex;
-
-    if (e.key === "ArrowUp") {
-      nextIndex = currentIndex - 1;
-      if (nextIndex < 0) nextIndex = 0; // or visibleItems.length - 1 for wrap-around
-    } else if (e.key === "ArrowDown") {
-      nextIndex = currentIndex + 1;
-      if (nextIndex >= visibleItems.length) nextIndex = visibleItems.length - 1; // or 0 for wrap
-    }
-
-    // If Enter → just load current (no move)
-    if (e.key === "Enter") {
-      nextIndex = currentIndex;
-    }
+    if (e.key === "ArrowUp") nextIndex = Math.max(0, currentIndex - 1);
+    if (e.key === "ArrowDown")
+      nextIndex = Math.min(visibleItems.length - 1, currentIndex + 1);
+    if (e.key === "Enter") nextIndex = currentIndex;
 
     if (nextIndex !== currentIndex || e.key === "Enter") {
-      // Remove active from all
       sidebarItems.forEach((i) => i.classList.remove("active"));
-      // Add to new one
       const targetItem = visibleItems[nextIndex];
       targetItem.classList.add("active");
-      // Scroll the sidebar item into view (nice UX)
       targetItem.scrollIntoView({ block: "nearest", behavior: "smooth" });
-      // Load the note
       loadNote(targetItem.dataset.section);
     }
   });
+
+  /**
+   * Reveals easter egg note in sidebar.
+   */
+  function revealEasterEgg() {
+    if (easterItemElement) return; // safety check
+
+    const easterItem = document.createElement("li");
+    easterItem.dataset.section = "easter";
+    easterItem.innerHTML = `<div class="note-title">Fun Facts</div><div class="note-preview"></div>`;
+    notesList.appendChild(easterItem);
+    easterItemElement = easterItem; // keep reference
+
+    // Add to noteData
+    const easterTemplate = document.getElementById("section-easter");
+    const plain = easterTemplate.content.textContent
+      .trim()
+      .replace(/\s+/g, " ");
+    noteData["easter"] = {
+      title: "Fun Facts",
+      lowerTitle: "fun facts",
+      plainContent: plain,
+      lowerContent: plain.toLowerCase(),
+      template: easterTemplate,
+    };
+
+    // Bind click handler
+    easterItem.addEventListener("click", () => {
+      Array.from(sidebarItems).forEach((i) => i.classList.remove("active"));
+      easterItem.classList.add("active");
+      loadNote("easter");
+    });
+
+    // Force re-filter to show it immediately
+    filterNotes(searchInput.value);
+  }
+
+  /**
+   * Removes the easter egg from sidebar and data when no longer needed.
+   */
+  function removeEasterEgg() {
+    if (!easterItemElement) return;
+
+    easterItemElement.remove();
+    easterItemElement = null;
+
+    // Clean up noteData
+    delete noteData["easter"];
+
+    // If currently viewing easter, switch to About (or first visible)
+    const active = notesList.querySelector("li.active");
+    if (active?.dataset.section === "easter") {
+      const aboutItem = notesList.querySelector('li[data-section="about"]');
+      if (aboutItem) {
+        Array.from(sidebarItems).forEach((el) => el.classList.remove("active"));
+        aboutItem.classList.add("active");
+        loadNote("about");
+      }
+    }
+
+    // Re-filter to update view
+    filterNotes(searchInput.value);
+  }
+
+  // Initial load
+  filterNotes("");
+  document.querySelector('#notes-list li[data-section="about"]').click();
 });
