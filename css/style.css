@@ -1,12 +1,12 @@
 :root {
   --bg-body: #1e1e1e;
   --bg-window: #1e1e1e;
-  --bg-sidebar: #252529;
-  --bg-main: #1e1e1e;
+  --bg-sidebar: #232321;
+  --bg-main: #1e1e1f;
   --border: #3a3a3e;
   --text-primary: #ffffff;
   --text-secondary: #a0a0a5;
-  --selection: #9c8026;
+  --selection: #9c8226;
   --title-bar: #2b2b2f;
 }
 
@@ -40,10 +40,11 @@ body {
 }
 
 .notes-window {
-  width: 100%;
-  max-width: 1100px;
-  height: 92vh;
-  max-height: 92vh;
+  position: absolute;
+  width: 1100px;
+  min-width: 380px;
+  height: 88vh;
+  min-height: 440px;
   background: var(--bg-window);
   border-radius: 12px;
   overflow: hidden;
@@ -51,8 +52,25 @@ body {
     0 0 0 1px rgba(255, 255, 255, 0.08) inset;
   display: flex;
   flex-direction: column;
+  user-select: none;
 }
 
+/* Timestamp above note title */
+.note-timestamp {
+  display: block;
+  text-align: center;
+  font-size: 13px;
+  color: var(--text-secondary);
+  margin-bottom: 15px;
+  font-weight: 500;
+  letter-spacing: -0.1px;
+}
+
+#note-content h1 {
+  margin-top: 5px;
+}
+
+/* Make title bar look draggable */
 .title-bar {
   height: 38px;
   background: var(--title-bar);
@@ -61,8 +79,25 @@ body {
   padding: 0 12px;
   border-bottom: 1px solid var(--border);
   position: relative;
+  cursor: default;
   -webkit-app-region: drag;
-  user-select: none;
+}
+
+/* When actually dragging */
+.notes-window.dragging {
+  box-shadow: 0 30px 100px rgba(0, 0, 0, 0.75),
+    0 0 0 1px rgba(255, 255, 255, 0.12) inset;
+  opacity: 0.98;
+}
+
+.resize-handle {
+  position: absolute;
+  right: 0;
+  bottom: 0;
+  width: 20px;
+  height: 20px;
+  cursor: nwse-resize;
+  z-index: 10;
 }
 
 .controls {
@@ -258,16 +293,22 @@ body {
   flex: 1;
   padding: 24px 32px;
   overflow-y: auto;
+  -webkit-overflow-scrolling: touch;
   background: var(--bg-main);
 }
 
 #note-content {
   opacity: 0;
-  transition: opacity 0.18s ease;
+  transform: translateX(20px); /* For slide-in */
+  transition: opacity 0.18s ease, transform 0.18s ease;
 }
 
 #note-content.fade-in {
   opacity: 1;
+}
+
+#note-content.slide-in {
+  transform: translateX(0);
 }
 
 #note-content h1 {
@@ -278,14 +319,23 @@ body {
 }
 
 #note-content p,
-#note-content ul {
+#note-content ul,
+#note-content ol {
   font-size: 15px;
   line-height: 1.55;
   color: #d0d0d5;
   margin: 0 0 16px;
+  font-family: inherit;
 }
 
-#note-content ul {
+#note-content a {
+  font-family: inherit;
+  font-weight: inherit;
+  font-size: inherit;
+}
+
+#note-content ul,
+#note-content ol {
   padding-left: 20px;
 }
 
@@ -304,99 +354,228 @@ body {
   display: block !important;
 }
 
-/* Make contact links look nice and consistent */
+/* Checklist style for skills/projects */
+ul.checklist {
+  list-style: none;
+  padding-left: 0;
+  margin: 0;
+}
+
+ul.checklist li {
+  position: relative;
+  padding-left: 32px; /* Space for checkbox */
+  min-height: 24px;
+  line-height: 1.6;
+  user-select: none;
+  cursor: default;
+}
+
+ul.checklist li::before {
+  content: "";
+  position: absolute;
+  left: 0;
+  top: 50%;
+  transform: translateY(-50%);
+  width: 20px;
+  height: 20px;
+  border: 2px solid #8e8e93; /* Gray outline for unchecked */
+  border-radius: 50%;
+  background: transparent;
+  transition: all 0.15s ease;
+  box-sizing: border-box;
+}
+
+/* Checked state */
+ul.checklist li.checked::before {
+  background: #fbb726;
+  border-color: #fbb726;
+  color: black;
+  font-size: 12px;
+  line-height: 15px;
+  text-align: center;
+  content: "✓";
+  font-weight: bold;
+}
+
+/* Hover effect for interactivity hint */
+ul.checklist li:hover::before {
+  border-color: #a0a0a5;
+}
+
+/* Dark mode adjustment */
+:root.dark ul.checklist li.checked::before {
+  background: #fbb726;
+}
+
+/* Contact links */
 .contact-link {
-  color: #60a5fa; /* nice blue – or use #3b82f6 for stronger contrast */
-  text-decoration: none;
-  transition: color 0.15s, text-decoration 0.15s;
+  color: #e2a727;
+  text-decoration: underline;
+  transition: color 0.15s ease;
+  display: inline-flex;
+  align-items: baseline;
+  gap: 3px;
 }
 
 .contact-link:hover,
 .contact-link:focus {
-  color: #93c5fd; /* lighter on hover */
+  color: #e2a727;
   text-decoration: underline;
+  text-decoration-color: #e2a727;
+  text-decoration-thickness: 1px;
 }
 
-/* Style the ↗ icon consistently */
+/* External icon */
 .external-icon {
-  font-size: 0.75rem; /* ≈12px */
-  vertical-align: super; /* raises it slightly like superscript */
-  margin-left: 4px;
-  color: var(--text-secondary); /* #a0a0a5 – subtle */
+  font-size: 0.8em;
+  color: inherit;
   opacity: 0.7;
+  vertical-align: baseline;
+  transition: opacity 0.15s ease;
 }
 
-.contact-link:hover .external-icon {
-  opacity: 1;
+.contact-link:hover .external-icon,
+.contact-link:focus .external-icon {
+  opacity: 0.95;
 }
 
-/* Optional: make the whole <p> feel more clickable */
-#note-content p:has(.contact-link) {
-  cursor: pointer;
+#note-content a:not(.contact-link) {
+  color: #e2a727;
+  text-decoration: none;
+  transition: color 0.15s ease;
+}
+
+#note-content a:not(.contact-link):hover,
+#note-content a:not(.contact-link):focus {
+  color: #e2a727;
+  text-decoration: underline;
+  text-underline-offset: 2px;
+  text-decoration-color: #e2a727;
+  text-decoration-thickness: 1px;
 }
 
 @media (max-width: 800px) {
   body {
-    background-image: none; /* remove subtle gradient – cleaner on small screens */
+    background-image: none;
     background: var(--bg-body);
+    height: 100vh;
+    align-items: flex-start;
+    display: block;
   }
 
   .notes-window {
+    position: static;
+    transform: none;
     width: 100%;
     height: 100vh;
     max-height: none;
     border-radius: 0;
-    box-shadow: none; /* no shadow needed on full-screen mobile */
+    box-shadow: none;
   }
 
   .title-bar {
-    height: 44px; /* taller on iOS-like feel */
+    height: 44px;
     padding: 0 16px;
+    cursor: default;
+    display: flex;
+    align-items: center;
+    transition: height 0.25s ease, opacity 0.2s ease;
+  }
+
+  .back-button {
+    display: none;
+    font-size: 17px;
+    font-weight: 600;
+    color: #000;
+    padding: 0 16px;
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    max-width: 70vw;
+  }
+
+  .title-bar.content-view:active::before {
+    opacity: 0.35;
+  }
+
+  .title-bar.content-view .back-button {
+    display: flex;
+    align-items: center;
+    margin-top: 50px;
+    margin-left: -13px;
+    margin-bottom: 30px;
+    gap: 4px;
+    color: #e2a82c;
+    font-size: 15px;
+    font-weight: 400;
+     padding-bottom: 10px;
+  }
+
+  .title-bar .back-button {
+    display: none;
+    color: #e2a82c;
+    font-size: 17px;
+    font-weight: 600;
+    align-items: center;
+    gap: 8px;
+  }
+
+  .title-bar.content-view {
+    height: 44px;
+    padding: 0 16px;
+    opacity: 1;
+    pointer-events: auto;
+    background: var(--bg-main) !important;
+    border-bottom: none !important;
   }
 
   .search-wrapper {
-    margin-left: 12px;
+    margin-left: auto; /* Adjusted for mobile */
   }
 
   #search-notes {
-    width: 100%;
+    width: 60%;
     max-width: 240px;
+    margin-left: 40%;
   }
 
   .content-wrapper {
     flex-direction: column;
-    overflow: hidden; /* important: prevent double scroll */
+    overflow: hidden;
+    height: calc(100vh - 44px);
   }
 
   .sidebar {
     width: 100%;
-    height: auto;
-    max-height: 45vh; /* ← key: limit height so content has space */
+    height: 100%;
     border-right: none;
-    border-bottom: 1px solid var(--border);
+    border-bottom: none;
     overflow-y: auto;
-    flex-shrink: 0; /* don't let it shrink too much */
+    flex-shrink: 0;
+    touch-action: pan-y;
+    background-color: var(--bg-main);
+  }
+
+  .sidebar-header {
+    display: block; /* Show header in mobile */
+    padding: 16px;
   }
 
   #notes-list {
-    display: flex;
-    flex-direction: row; /* horizontal scroll on very small screens */
-    flex-wrap: nowrap;
-    padding: 8px 0;
-    overflow-x: auto;
-    scroll-snap-type: x proximity;
-    -webkit-overflow-scrolling: touch; /* smooth iOS momentum scroll */
+    display: block;
+    padding: 0;
+    overflow-y: auto;
+    -webkit-overflow-scrolling: touch;
   }
 
   #notes-list li {
-    flex: 0 0 auto;
-    min-width: 140px; /* readable note titles */
-    max-width: 180px;
-    padding: 10px 14px;
-    margin: 0 6px;
-    border-radius: 10px;
-    background: rgba(255, 255, 255, 0.06);
-    text-align: center;
+    padding: 16px;
+    margin: 0;
+    border-bottom: 1px solid var(--border);
+    background: none;
+    text-align: left;
+    border-radius: 0;
+    touch-action: manipulation;
   }
 
   #notes-list li.active {
@@ -404,17 +583,18 @@ body {
   }
 
   .note-preview {
-    display: none !important; /* hide previews on mobile – too cramped */
-  }
-
-  .sidebar-header {
-    display: none; /* hide section headers on mobile */
+    display: block !important;
   }
 
   .main-content {
+    display: none;
     flex: 1 1 auto;
     overflow-y: auto;
-    padding: 20px 25px; /* tighter padding */
+    padding: 20px 25px;
+    -webkit-overflow-scrolling: touch;
+    position: relative;
+    background: var(--bg-main);
+    padding-top: 8px; 
   }
 
   #note-content h1 {
@@ -430,6 +610,30 @@ body {
 
   .no-results {
     padding: 20px 16px;
+    text-align: left;
+  }
+
+  /* Performance: reduce transitions on mobile */
+  #note-content {
+    transition-duration: 0.12s;
+  }
+
+  /* Checklist style */
+  ul.checklist li {
+    padding-left: 36px;
+  }
+  ul.checklist li::before {
+    width: 23px;
+    height: 23px;
+  }
+  ul.checklist li.checked::before {
+    font-size: 12px;
+    line-height: 20px;
+  }
+
+  .window-footer {
+    height: 44px;
+    padding: 0 25px;
   }
 }
 
@@ -438,24 +642,19 @@ body {
   bottom: 0;
   left: 0;
   right: 0;
-
   height: 36px;
   padding: 0 32px;
-
   display: flex;
   align-items: center;
   justify-content: center;
-
   font-size: 13px;
   color: var(--text-secondary);
   border-top: 1px solid var(--border);
   background: var(--bg-main);
-
-  /* Hidden by default */
   opacity: 0;
   visibility: hidden;
   transition: opacity 0.25s ease, visibility 0.25s ease;
-  pointer-events: none; /* prevents interaction when hidden */
+  pointer-events: none;
 }
 
 .window-footer.visible {
