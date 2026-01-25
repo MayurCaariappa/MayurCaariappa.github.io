@@ -55,6 +55,21 @@ body {
   user-select: none;
 }
 
+/* Timestamp above note title */
+.note-timestamp {
+  display: block;
+  text-align: center;
+  font-size: 13px;
+  color: var(--text-secondary);
+  margin-bottom: 15px;
+  font-weight: 500;
+  letter-spacing: -0.1px;
+}
+
+#note-content h1 {
+  margin-top: 5px;
+}
+
 /* Make title bar look draggable */
 .title-bar {
   height: 38px;
@@ -493,6 +508,7 @@ ul.checklist li:hover::before {
     color: #e2a82c;
     font-size: 15px;
     font-weight: 400;
+     padding-bottom: 10px;
   }
 
   .title-bar .back-button {

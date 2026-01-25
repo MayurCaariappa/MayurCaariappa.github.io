@@ -339,6 +339,28 @@ document.addEventListener("DOMContentLoaded", () => {
       const fragment = data.template.content.cloneNode(true);
       const term = searchInput.value.trim();
 
+      const timestampEl = fragment.querySelector(".note-timestamp");
+      if (timestampEl) {
+        const now = new Date();
+
+        const offsetMs = (1 * 60 + 43) * 60 * 1000; // minutes → ms
+        const pastTime = new Date(now.getTime() - offsetMs);
+
+        const timeStr =
+          timestampEl.getAttribute("data-time") ||
+          `${pastTime.toLocaleDateString([], {
+            day: "numeric",
+            month: "long",
+            year: "numeric",
+          })} at ${pastTime.toLocaleTimeString([], {
+            hour: "2-digit",
+            minute: "2-digit",
+            hour12: false,
+          })}`;
+
+        timestampEl.textContent = timeStr;
+      }
+
       if (term) {
         // Highlight matches in content
         const walker = document.createTreeWalker(
