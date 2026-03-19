@@ -16,9 +16,13 @@ document.addEventListener("DOMContentLoaded", () => {
 
   const isMobile = () => window.innerWidth <= MOBILE_BREAKPOINT;
   const noteData = buildNoteData(document.querySelectorAll("#notes-list li"));
+  const initialPath = `${window.location.pathname}${window.location.search}`;
 
-  let activeSection =
-    window.location.hash.replace("#", "") || getSelectedItem()?.dataset.section;
+  if (window.location.hash) {
+    history.replaceState(null, "", initialPath);
+  }
+
+  let activeSection = "about";
   let easterRevealed = false;
   let easterItemElement = null;
   let hasCenteredWindow = false;
@@ -79,7 +83,15 @@ document.addEventListener("DOMContentLoaded", () => {
     });
 
     searchInput.addEventListener("input", (event) => {
-      filterNotes(event.target.value);
+      const { selectionStart, selectionEnd, value } = event.target;
+      filterNotes(value);
+
+      if (document.activeElement !== searchInput) {
+        searchInput.focus({ preventScroll: true });
+        if (selectionStart !== null && selectionEnd !== null) {
+          searchInput.setSelectionRange(selectionStart, selectionEnd);
+        }
+      }
     });
 
     document.addEventListener("keydown", handleGlobalShortcuts);
@@ -459,7 +471,6 @@ document.addEventListener("DOMContentLoaded", () => {
 
     requestAnimationFrame(() => {
       contentDiv.classList.add("fade-in", "slide-in");
-      contentDiv.focus({ preventScroll: true });
     });
   }
 
