@@ -7,6 +7,7 @@
   --text-primary: #ffffff;
   --text-secondary: #a0a0a5;
   --selection: #9c8226;
+  --text-selection: rgba(226, 167, 39, 0.35);
   --title-bar: #2b2b2f;
 }
 
@@ -14,9 +15,15 @@
   box-sizing: border-box;
 }
 
+*::selection {
+  background: var(--text-selection);
+  color: #ffffff;
+}
+
 body {
-  font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica,
-    Arial, sans-serif;
+  font-family:
+    -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial,
+    sans-serif;
   background: var(--bg-body);
   color: var(--text-primary);
   margin: 0;
@@ -26,7 +33,8 @@ body {
   display: flex;
   justify-content: center;
   align-items: center;
-  background-image: radial-gradient(
+  background-image:
+    radial-gradient(
       circle at 25% 25%,
       rgba(60, 60, 80, 0.4) 0%,
       transparent 50%
@@ -48,7 +56,8 @@ body {
   background: var(--bg-window);
   border-radius: 12px;
   overflow: hidden;
-  box-shadow: 0 20px 70px rgba(0, 0, 0, 0.6),
+  box-shadow:
+    0 20px 70px rgba(0, 0, 0, 0.6),
     0 0 0 1px rgba(255, 255, 255, 0.08) inset;
   display: flex;
   flex-direction: column;
@@ -79,15 +88,29 @@ body {
   padding: 0 12px;
   border-bottom: 1px solid var(--border);
   position: relative;
-  cursor: default;
+  cursor: grab;
   -webkit-app-region: drag;
+}
+
+.title-bar button {
+  appearance: none;
+  border: 0;
+  margin: 0;
+  padding: 0;
+  font: inherit;
+  color: inherit;
 }
 
 /* When actually dragging */
 .notes-window.dragging {
-  box-shadow: 0 30px 100px rgba(0, 0, 0, 0.75),
+  box-shadow:
+    0 30px 100px rgba(0, 0, 0, 0.75),
     0 0 0 1px rgba(255, 255, 255, 0.12) inset;
   opacity: 0.98;
+}
+
+.notes-window.dragging .title-bar {
+  cursor: grabbing;
 }
 
 .resize-handle {
@@ -98,6 +121,19 @@ body {
   height: 20px;
   cursor: nwse-resize;
   z-index: 10;
+  background: linear-gradient(
+    135deg,
+    transparent 0,
+    transparent 42%,
+    rgba(160, 160, 165, 0.65) 42%,
+    rgba(160, 160, 165, 0.65) 46%,
+    transparent 46%,
+    transparent 60%,
+    rgba(160, 160, 165, 0.45) 60%,
+    rgba(160, 160, 165, 0.45) 64%,
+    transparent 64%
+  );
+  opacity: 0.85;
 }
 
 .controls {
@@ -112,6 +148,11 @@ body {
   border-radius: 50%;
   position: relative;
   transition: all 0.15s;
+  cursor: default;
+  flex: 0 0 12px;
+  border: none;
+  padding: 0;
+  background-clip: padding-box;
 }
 
 .control:hover {
@@ -166,6 +207,37 @@ body {
   font-weight: 500;
   color: var(--text-secondary);
   pointer-events: none;
+}
+
+.back-button {
+  display: none;
+  background: transparent;
+  align-items: center;
+  gap: 2px;
+  color: #e2a727;
+  -webkit-app-region: no-drag;
+  cursor: pointer;
+}
+
+.back-button:focus-visible,
+#search-notes:focus-visible {
+  outline: 2px solid rgba(226, 167, 39, 0.75);
+  outline-offset: 2px;
+}
+
+.sidebar li:focus-visible {
+  outline: none;
+}
+
+.back-icon {
+  font-size: 28px;
+  line-height: 1;
+  margin-top: -2px;
+}
+
+.back-label {
+  font-size: 17px;
+  line-height: 1;
 }
 
 .content-wrapper {
@@ -248,8 +320,18 @@ body {
   color: white;
 }
 
+.sidebar li[aria-selected="true"] {
+  background: var(--selection);
+  color: white;
+}
+
 .sidebar li.active .note-title,
 .sidebar li.active .note-preview {
+  color: inherit;
+}
+
+.sidebar li[aria-selected="true"] .note-title,
+.sidebar li[aria-selected="true"] .note-preview {
   color: inherit;
 }
 
@@ -295,12 +377,20 @@ body {
   overflow-y: auto;
   -webkit-overflow-scrolling: touch;
   background: var(--bg-main);
+  user-select: text;
 }
 
 #note-content {
   opacity: 0;
   transform: translateX(20px); /* For slide-in */
-  transition: opacity 0.18s ease, transform 0.18s ease;
+  transition:
+    opacity 0.18s ease,
+    transform 0.18s ease;
+  user-select: text;
+}
+
+#note-content:focus {
+  outline: none;
 }
 
 #note-content.fade-in {
@@ -366,8 +456,8 @@ ul.checklist li {
   padding-left: 32px; /* Space for checkbox */
   min-height: 24px;
   line-height: 1.6;
-  user-select: none;
-  cursor: default;
+  user-select: text;
+  cursor: pointer;
 }
 
 ul.checklist li::before {
@@ -479,19 +569,24 @@ ul.checklist li:hover::before {
     cursor: default;
     display: flex;
     align-items: center;
-    transition: height 0.25s ease, opacity 0.2s ease;
+    justify-content: space-between;
+    transition:
+      height 0.25s ease,
+      opacity 0.2s ease;
+    -webkit-app-region: no-drag;
+  }
+
+  .resize-handle {
+    display: none;
   }
 
   .back-button {
     display: none;
-    font-size: 17px;
-    font-weight: 600;
-    color: #000;
-    padding: 0 16px;
     white-space: nowrap;
     overflow: hidden;
     text-overflow: ellipsis;
     max-width: 70vw;
+    gap: 6px;
   }
 
   .title-bar.content-view:active::before {
@@ -501,23 +596,7 @@ ul.checklist li:hover::before {
   .title-bar.content-view .back-button {
     display: flex;
     align-items: center;
-    margin-top: 50px;
-    margin-left: -13px;
-    margin-bottom: 30px;
-    gap: 4px;
     color: #e2a82c;
-    font-size: 15px;
-    font-weight: 400;
-     padding-bottom: 10px;
-  }
-
-  .title-bar .back-button {
-    display: none;
-    color: #e2a82c;
-    font-size: 17px;
-    font-weight: 600;
-    align-items: center;
-    gap: 8px;
   }
 
   .title-bar.content-view {
@@ -534,9 +613,9 @@ ul.checklist li:hover::before {
   }
 
   #search-notes {
-    width: 60%;
-    max-width: 240px;
-    margin-left: 40%;
+    width: 130px;
+    max-width: 50vw;
+    margin-left: 0;
   }
 
   .content-wrapper {
@@ -554,6 +633,18 @@ ul.checklist li:hover::before {
     flex-shrink: 0;
     touch-action: pan-y;
     background-color: var(--bg-main);
+  }
+
+  .sidebar-header {
+    order: 0;
+  }
+
+  #no-results {
+    order: 1;
+  }
+
+  #notes-list {
+    order: 2;
   }
 
   .sidebar-header {
@@ -594,7 +685,7 @@ ul.checklist li:hover::before {
     -webkit-overflow-scrolling: touch;
     position: relative;
     background: var(--bg-main);
-    padding-top: 8px; 
+    padding-top: 12px;
   }
 
   #note-content h1 {
@@ -635,6 +726,23 @@ ul.checklist li:hover::before {
     height: 44px;
     padding: 0 25px;
   }
+
+  .notes-window[data-view="content"] .sidebar {
+    display: none;
+  }
+
+  .notes-window[data-view="content"] .main-content {
+    display: block;
+  }
+
+  .notes-window[data-view="content"] .title {
+    display: none;
+  }
+
+  .notes-window[data-view="content"] .search-wrapper,
+  .notes-window[data-view="content"] .controls {
+    display: none;
+  }
 }
 
 .window-footer {
@@ -653,7 +761,9 @@ ul.checklist li:hover::before {
   background: var(--bg-main);
   opacity: 0;
   visibility: hidden;
-  transition: opacity 0.25s ease, visibility 0.25s ease;
+  transition:
+    opacity 0.25s ease,
+    visibility 0.25s ease;
   pointer-events: none;
 }
 
@@ -661,4 +771,18 @@ ul.checklist li:hover::before {
   opacity: 1;
   visibility: visible;
   pointer-events: auto;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  #note-content,
+  .title-bar,
+  .control,
+  .contact-link,
+  #note-content a:not(.contact-link) {
+    transition: none;
+  }
+
+  html {
+    scroll-behavior: auto;
+  }
 }

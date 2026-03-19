@@ -1,16 +1,10 @@
 import { highlight, getBestSnippet, buildNoteData } from "./utils.js";
 
-/**
- * Initializes the portfolio app on DOM load.
- */
 document.addEventListener("DOMContentLoaded", () => {
-  // DOM elements
+  const MOBILE_BREAKPOINT = 800;
   const windowEl = document.querySelector(".notes-window");
   const titleBar = document.querySelector(".title-bar");
   const backButton = document.querySelector(".back-button");
-  const controls = document.querySelector(".controls");
-  const title = document.querySelector(".title");
-  const searchWrapper = document.querySelector(".search-wrapper");
   const resizeHandle = document.querySelector(".resize-handle");
   const contentDiv = document.getElementById("note-content");
   const searchInput = document.getElementById("search-notes");
@@ -20,221 +14,352 @@ document.addEventListener("DOMContentLoaded", () => {
   const mainContent = document.querySelector(".main-content");
   const sidebar = document.querySelector(".sidebar");
 
-  // Mobile detection
-  const isMobile = () => window.innerWidth <= 800;
+  const isMobile = () => window.innerWidth <= MOBILE_BREAKPOINT;
+  const noteData = buildNoteData(document.querySelectorAll("#notes-list li"));
+  const initialPath = `${window.location.pathname}${window.location.search}`;
 
-  // Proper initial centering for desktop
-  // Center window once on load (desktop only)
-  if (!isMobile()) {
-    function centerWindow() {
-      const w = windowEl.offsetWidth;
-      const h = windowEl.offsetHeight;
-
-      // Use viewport size
-      const vw = window.innerWidth;
-      const vh = window.innerHeight;
-
-      let left = Math.max(20, (vw - w) / 2);
-      let top = Math.max(20, (vh - h) / 2);
-
-      windowEl.style.left = `${left}px`;
-      windowEl.style.top = `${top}px`;
-      windowEl.style.margin = "0";
-      windowEl.style.transform = "none";
-    }
-
-    centerWindow();
-    window.addEventListener("load", centerWindow);
-    window.addEventListener("resize", centerWindow);
+  if (window.location.hash) {
+    history.replaceState(null, "", initialPath);
   }
 
-  // Dragging state
+  let activeSection = "about";
+  let easterRevealed = false;
+  let easterItemElement = null;
+  let hasCenteredWindow = false;
+
   let isDragging = false;
   let dragStartX = 0;
   let dragStartY = 0;
   let dragStartLeft = 0;
   let dragStartTop = 0;
 
-  // Resizing state
   let isResizing = false;
   let resizeStartX = 0;
   let resizeStartY = 0;
   let resizeStartWidth = 0;
   let resizeStartHeight = 0;
 
-  // Initialize dragging and resizing (desktop only)
   if (!isMobile()) {
+    centerWindow();
+    window.addEventListener("load", centerWindow, { once: true });
     initWindowDragging();
     initWindowResizing();
+  }
+
+  initSidebarA11y();
+  bindEvents();
+  filterNotes("");
+
+  if (!activateSection(activeSection, { updateHash: false, forceLoad: true })) {
+    activateSection("about", { updateHash: false, forceLoad: true });
+  }
+
+  syncResponsiveView();
+
+  function bindEvents() {
+    notesList.addEventListener("click", (event) => {
+      const item = event.target.closest("li");
+      if (!item || item.style.display === "none") return;
+      activateSection(item.dataset.section);
+    });
+
+    notesList.addEventListener("keydown", (event) => {
+      const item = event.target.closest("li");
+      if (!item) return;
+
+      if (event.key === "Enter" || event.key === " ") {
+        event.preventDefault();
+        activateSection(item.dataset.section);
+      }
+    });
+
+    backButton.addEventListener("click", () => {
+      if (!isMobile()) return;
+      setMobileView("list");
+      contentDiv.innerHTML = "";
+      contentDiv.classList.remove("fade-in", "slide-in");
+      footer.classList.remove("visible");
+      mainContent.style.paddingBottom = "0";
+    });
+
+    searchInput.addEventListener("input", (event) => {
+      const { selectionStart, selectionEnd, value } = event.target;
+      filterNotes(value);
+
+      if (document.activeElement !== searchInput) {
+        searchInput.focus({ preventScroll: true });
+        if (selectionStart !== null && selectionEnd !== null) {
+          searchInput.setSelectionRange(selectionStart, selectionEnd);
+        }
+      }
+    });
+
+    document.addEventListener("keydown", handleGlobalShortcuts);
+    window.addEventListener("hashchange", handleHashChange);
+    window.addEventListener("resize", syncResponsiveView);
+  }
+
+  function initSidebarA11y() {
+    notesList.querySelectorAll("li").forEach((item) => {
+      if (!item.hasAttribute("tabindex")) item.tabIndex = -1;
+      item.setAttribute(
+        "aria-selected",
+        item.classList.contains("active") ? "true" : "false"
+      );
+    });
+  }
+
+  function centerWindow() {
+    if (hasCenteredWindow) return;
+    const w = windowEl.offsetWidth;
+    const h = windowEl.offsetHeight;
+    const vw = window.innerWidth;
+    const vh = window.innerHeight;
+
+    const left = Math.max(20, (vw - w) / 2);
+    const top = Math.max(20, (vh - h) / 2);
+
+    windowEl.style.left = `${left}px`;
+    windowEl.style.top = `${top}px`;
+    windowEl.style.margin = "0";
+    windowEl.style.transform = "none";
+    hasCenteredWindow = true;
   }
 
   function initWindowDragging() {
     titleBar.addEventListener("pointerdown", startDrag);
 
-    function startDrag(e) {
-      // Skip if clicking on controls, search, or back button
-      if (e.target.closest(".controls, .search-wrapper, .back-button")) return;
+    function startDrag(event) {
+      if (
+        event.target.closest(".controls, .search-wrapper, .back-button") ||
+        isMobile()
+      ) {
+        return;
+      }
 
-      // Very important: capture current position **in viewport coordinates**
       const rect = windowEl.getBoundingClientRect();
-
       isDragging = true;
-      dragStartX = e.clientX;
-      dragStartY = e.clientY;
+      dragStartX = event.clientX;
+      dragStartY = event.clientY;
       dragStartLeft = rect.left;
       dragStartTop = rect.top;
 
       windowEl.classList.add("dragging");
       document.body.style.userSelect = "none";
-      e.preventDefault();
+      event.preventDefault();
     }
 
-    function onDragMove(e) {
-      if (!isDragging) return;
-      e.preventDefault();
+    window.addEventListener(
+      "pointermove",
+      (event) => {
+        if (!isDragging) return;
 
-      const dx = e.clientX - dragStartX;
-      const dy = e.clientY - dragStartY;
+        const dx = event.clientX - dragStartX;
+        const dy = event.clientY - dragStartY;
+        const titleHeight = titleBar.offsetHeight;
 
-      let newLeft = dragStartLeft + dx;
-      let newTop = dragStartTop + dy;
+        let nextLeft = dragStartLeft + dx;
+        let nextTop = dragStartTop + dy;
 
-      // Keep some margin so title bar doesn't go completely off-screen
-      const titleH = titleBar.offsetHeight;
-      newLeft = Math.max(
-        -windowEl.offsetWidth + 120,
-        Math.min(newLeft, window.innerWidth - 120)
-      );
-      newTop = Math.max(
-        -titleH + 40,
-        Math.min(newTop, window.innerHeight - titleH - 20)
-      );
+        nextLeft = Math.max(
+          -windowEl.offsetWidth + 120,
+          Math.min(nextLeft, window.innerWidth - 120)
+        );
+        nextTop = Math.max(
+          -titleHeight + 40,
+          Math.min(nextTop, window.innerHeight - titleHeight - 20)
+        );
 
-      windowEl.style.left = `${newLeft}px`;
-      windowEl.style.top = `${newTop}px`;
-    }
+        windowEl.style.left = `${nextLeft}px`;
+        windowEl.style.top = `${nextTop}px`;
+        event.preventDefault();
+      },
+      { passive: false }
+    );
 
-    function stopDrag() {
-      if (!isDragging) return;
-      isDragging = false;
-      windowEl.classList.remove("dragging");
-      document.body.style.userSelect = "";
-    }
-
-    window.addEventListener("pointermove", onDragMove, { passive: false });
     window.addEventListener("pointerup", stopDrag);
     window.addEventListener("pointercancel", stopDrag);
+  }
+
+  function stopDrag() {
+    if (!isDragging) return;
+    isDragging = false;
+    windowEl.classList.remove("dragging");
+    document.body.style.userSelect = "";
   }
 
   function initWindowResizing() {
     if (!resizeHandle) return;
 
-    resizeHandle.addEventListener("pointerdown", startResize);
+    resizeHandle.addEventListener("pointerdown", (event) => {
+      if (isMobile()) return;
 
-    function startResize(e) {
       isResizing = true;
-      resizeStartX = e.clientX;
-      resizeStartY = e.clientY;
+      resizeStartX = event.clientX;
+      resizeStartY = event.clientY;
       resizeStartWidth = windowEl.offsetWidth;
       resizeStartHeight = windowEl.offsetHeight;
 
       windowEl.classList.add("dragging");
       document.body.style.userSelect = "none";
-      e.preventDefault();
-    }
+      event.preventDefault();
+    });
 
-    function onResizeMove(e) {
-      if (!isResizing) return;
-      e.preventDefault();
+    window.addEventListener(
+      "pointermove",
+      (event) => {
+        if (!isResizing) return;
 
-      const dx = e.clientX - resizeStartX;
-      const dy = e.clientY - resizeStartY;
+        const dx = event.clientX - resizeStartX;
+        const dy = event.clientY - resizeStartY;
 
-      const newWidth = Math.max(360, resizeStartWidth + dx);
-      const newHeight = Math.max(420, resizeStartHeight + dy);
+        windowEl.style.width = `${Math.max(360, resizeStartWidth + dx)}px`;
+        windowEl.style.height = `${Math.max(420, resizeStartHeight + dy)}px`;
+        event.preventDefault();
+      },
+      { passive: false }
+    );
 
-      windowEl.style.width = `${newWidth}px`;
-      windowEl.style.height = `${newHeight}px`;
-    }
-
-    function stopResize() {
-      if (!isResizing) return;
-      isResizing = false;
-      windowEl.classList.remove("dragging");
-      document.body.style.userSelect = "";
-    }
-
-    window.addEventListener("pointermove", onResizeMove, { passive: false });
     window.addEventListener("pointerup", stopResize);
     window.addEventListener("pointercancel", stopResize);
   }
 
-  // Prepare note data
-  const noteData = buildNoteData(document.querySelectorAll("#notes-list li"));
+  function stopResize() {
+    if (!isResizing) return;
+    isResizing = false;
+    windowEl.classList.remove("dragging");
+    document.body.style.userSelect = "";
+  }
 
-  // Checklist persistence (skills section)
-  function initChecklist() {
-    const checklistItems = document.querySelectorAll(
-      "#note-content ul.checklist li"
+  function handleGlobalShortcuts(event) {
+    const isTyping =
+      document.activeElement === searchInput ||
+      document.activeElement?.matches("input, textarea");
+
+    if (event.key === "/" && !isTyping) {
+      event.preventDefault();
+      searchInput.focus();
+      searchInput.select();
+      return;
+    }
+
+    if (event.key === "Escape") {
+      if (document.activeElement === searchInput && searchInput.value) {
+        searchInput.value = "";
+        filterNotes("");
+        return;
+      }
+
+      if (isMobile() && windowEl.dataset.view === "content") {
+        backButton.click();
+      }
+      return;
+    }
+
+    if (isTyping) return;
+
+    const nextKeyMap = ["ArrowDown", "j", "J"];
+    const previousKeyMap = ["ArrowUp", "k", "K"];
+
+    if (nextKeyMap.includes(event.key)) {
+      event.preventDefault();
+      moveSelection(1);
+      return;
+    }
+
+    if (previousKeyMap.includes(event.key)) {
+      event.preventDefault();
+      moveSelection(-1);
+      return;
+    }
+
+    if (event.key === "Enter") {
+      const selected = getSelectedItem();
+      if (selected) {
+        event.preventDefault();
+        activateSection(selected.dataset.section);
+      }
+    }
+  }
+
+  function handleHashChange() {
+    const hashSection = window.location.hash.replace("#", "");
+    if (!hashSection || hashSection === activeSection) return;
+    activateSection(hashSection, { updateHash: false, forceLoad: true });
+  }
+
+  function moveSelection(direction) {
+    const visibleItems = getVisibleItems();
+    if (!visibleItems.length) return;
+
+    const currentIndex = Math.max(
+      0,
+      visibleItems.findIndex((item) => item.dataset.section === activeSection)
+    );
+    const nextIndex = Math.max(
+      0,
+      Math.min(visibleItems.length - 1, currentIndex + direction)
     );
 
-    checklistItems.forEach((li) => {
-      const skillId = li.dataset.skillId;
-      if (!skillId) return;
+    const target = visibleItems[nextIndex];
+    if (!target) return;
 
-      // Restore saved state
-      const isChecked =
-        localStorage.getItem(`skill-checked-${skillId}`) === "true";
-      if (isChecked) li.classList.add("checked");
-
-      // Make circle clickable
-      li.addEventListener("click", (e) => {
-        if (e.target.closest("a")) return;
-        li.classList.toggle("checked");
-        const nowChecked = li.classList.contains("checked");
-        localStorage.setItem(`skill-checked-${skillId}`, nowChecked);
-
-        li.style.background = nowChecked
-          ? "rgba(255, 204, 0, 0.08)"
-          : "transparent";
-        setTimeout(() => (li.style.background = ""), 300);
-      });
-    });
+    target.focus();
+    activateSection(target.dataset.section);
+    target.scrollIntoView({ block: "nearest", behavior: "smooth" });
   }
 
-  // Hook into loadNote to initialize checklist when skills loads
-  const originalLoadNote = loadNote;
-  loadNote = function (key) {
-    originalLoadNote.call(this, key);
-
-    // Delay slightly for DOM to settle
-    setTimeout(() => {
-      if (key === "skills") initChecklist();
-    }, 200);
-  };
-
-  // Also run on initial load if starting on skills
-  if (
-    document.querySelector("#notes-list li.active")?.dataset.section ===
-    "skills"
+  function activateSection(
+    key,
+    { updateHash = true, forceLoad = false } = {}
   ) {
-    setTimeout(initChecklist, 300);
+    const item = notesList.querySelector(`li[data-section="${key}"]`);
+    if (!item || item.style.display === "none") return false;
+
+    const changed = activeSection !== key;
+    activeSection = key;
+
+    notesList.querySelectorAll("li").forEach((entry) => {
+      const isSelected = entry.dataset.section === key;
+      entry.classList.toggle("active", isSelected);
+      entry.setAttribute("aria-selected", isSelected ? "true" : "false");
+      entry.tabIndex = isSelected ? 0 : -1;
+    });
+
+    if (changed || forceLoad) loadNote(key);
+
+    if (updateHash) {
+      history.replaceState(null, "", `#${key}`);
+    }
+
+    if (isMobile()) setMobileView("content");
+
+    item.scrollIntoView({ block: "nearest" });
+    return true;
   }
 
-  // Easter egg state
-  let easterRevealed = false;
-  let easterItemElement = null;
+  function setMobileView(view) {
+    if (!isMobile()) return;
+    windowEl.dataset.view = view;
+    titleBar.classList.toggle("content-view", view === "content");
+  }
 
-  /**
-   * Filters sidebar notes based on search term.
-   * @param {string} rawTerm - The raw search input.
-   */
+  function syncResponsiveView() {
+    if (isMobile()) {
+      setMobileView(windowEl.dataset.view === "content" ? "content" : "list");
+      return;
+    }
+
+    windowEl.dataset.view = "desktop";
+    titleBar.classList.remove("content-view");
+    sidebar.style.display = "";
+  }
+
   function filterNotes(rawTerm) {
     const term = rawTerm.trim();
     const lowerTerm = term.toLowerCase();
     let visibleCount = 0;
 
-    // Easter egg logic: reveal only once, remove when term doesn't match
     const shouldShowEaster = lowerTerm === "easter";
     if (shouldShowEaster && !easterRevealed) {
       revealEasterEgg();
@@ -244,22 +369,18 @@ document.addEventListener("DOMContentLoaded", () => {
       easterRevealed = false;
     }
 
-    document.querySelectorAll("#notes-list li").forEach((item) => {
+    notesList.querySelectorAll("li").forEach((item) => {
       const key = item.dataset.section;
       const data = noteData[key];
       if (!data) return;
 
       if (key === "easter") {
-        const shouldBeVisible = lowerTerm === "easter";
-        item.style.display = shouldBeVisible ? "" : "none";
-        if (!shouldBeVisible) {
-          visibleCount++;
-        }
-
+        const isVisible = lowerTerm === "easter";
         const previewEl = item.querySelector(".note-preview");
-        previewEl.innerHTML = shouldBeVisible ? "Easter egg unlocked!" : "";
-        previewEl.style.display = shouldBeVisible ? "block" : "none";
-        if (shouldBeVisible) visibleCount++;
+        item.style.display = isVisible ? "" : "none";
+        previewEl.textContent = isVisible ? "Easter egg unlocked!" : "";
+        previewEl.style.display = isVisible ? "block" : "none";
+        if (isVisible) visibleCount++;
         return;
       }
 
@@ -272,17 +393,11 @@ document.addEventListener("DOMContentLoaded", () => {
 
       const titleEl = item.querySelector(".note-title");
       const previewEl = item.querySelector(".note-preview");
-
       titleEl.innerHTML = highlight(data.title, matchTitle ? term : "");
 
-      let previewText = "";
-      if (matchContent) {
-        previewText = getBestSnippet(
-          data.plainContent,
-          term,
-          data.lowerContent
-        );
-      }
+      const previewText = matchContent
+        ? getBestSnippet(data.plainContent, term, data.lowerContent)
+        : "";
 
       previewEl.innerHTML = highlight(previewText, term);
       previewEl.style.display = previewText ? "block" : "none";
@@ -290,263 +405,143 @@ document.addEventListener("DOMContentLoaded", () => {
 
     noResults.classList.toggle("hidden", visibleCount > 0 || !term);
 
-    // Refresh current note if search cleared
-    if (!term && !isMobile()) {
-      const active = notesList.querySelector("li.active");
-      if (active) loadNote(active.dataset.section);
-    }
-
-    // Clear content if no results
     if (visibleCount === 0 && term) {
       contentDiv.innerHTML = "";
       contentDiv.classList.remove("fade-in", "slide-in");
+      return;
     }
 
-    // Auto-select first visible if active hidden
-    const active = notesList.querySelector("li.active");
-    if (active?.style.display === "none" && visibleCount > 0) {
-      const firstVisible = Array.from(notesList.querySelectorAll("li")).find(
-        (el) => el.style.display !== "none"
-      );
+    const activeItem = notesList.querySelector(`li[data-section="${activeSection}"]`);
+    if (!activeItem || activeItem.style.display === "none") {
+      const firstVisible = getVisibleItems()[0];
       if (firstVisible) {
-        document
-          .querySelectorAll("#notes-list li")
-          .forEach((el) => el.classList.remove("active"));
-        firstVisible.classList.add("active");
-        loadNote(firstVisible.dataset.section);
+        activateSection(firstVisible.dataset.section, {
+          updateHash: true,
+          forceLoad: true,
+        });
       }
+      return;
     }
+
+    if (!term) loadNote(activeSection);
   }
 
-  /**
-   * Loads and renders a note section.
-   * @param {string} key - The section key.
-   */
   function loadNote(key) {
+    const data = noteData[key];
+    if (!data) return;
+
     contentDiv.classList.remove("fade-in", "slide-in");
-    void contentDiv.offsetWidth; // reflow
+    void contentDiv.offsetWidth;
 
-    // Toggle footer for contact
-    if (footer) {
-      footer.classList.toggle("visible", key === "contact");
-      mainContent.style.paddingBottom = key === "contact" ? "48px" : "0";
+    const fragment = data.template.content.cloneNode(true);
+    const term = searchInput.value.trim();
+    const timestampEl = fragment.querySelector(".note-timestamp");
+
+    if (timestampEl?.dataset.time) {
+      timestampEl.textContent = timestampEl.dataset.time;
     }
 
-    setTimeout(() => {
-      const data = noteData[key];
-      if (!data) return;
+    if (term) {
+      const walker = document.createTreeWalker(fragment, NodeFilter.SHOW_TEXT);
+      const textNodes = [];
+      let node;
 
-      const fragment = data.template.content.cloneNode(true);
-      const term = searchInput.value.trim();
-
-      const timestampEl = fragment.querySelector(".note-timestamp");
-      if (timestampEl) {
-        const now = new Date();
-
-        const offsetMs = (1 * 60 + 43) * 60 * 1000; // minutes → ms
-        const pastTime = new Date(now.getTime() - offsetMs);
-
-        const timeStr =
-          timestampEl.getAttribute("data-time") ||
-          `${pastTime.toLocaleDateString([], {
-            day: "numeric",
-            month: "long",
-            year: "numeric",
-          })} at ${pastTime.toLocaleTimeString([], {
-            hour: "2-digit",
-            minute: "2-digit",
-            hour12: false,
-          })}`;
-
-        timestampEl.textContent = timeStr;
+      while ((node = walker.nextNode())) {
+        if (node.nodeValue.trim()) textNodes.push(node);
       }
 
-      if (term) {
-        // Highlight matches in content
-        const walker = document.createTreeWalker(
-          fragment,
-          NodeFilter.SHOW_TEXT
-        );
-        let node;
-        while ((node = walker.nextNode())) {
-          const text = node.nodeValue;
-          if (!text.trim()) continue;
-          const html = highlight(text, term);
-          if (html === text) continue;
-          const span = document.createElement("span");
-          span.innerHTML = html;
-          node.parentNode.replaceChild(span, node);
-        }
-      }
-
-      contentDiv.innerHTML = "";
-      contentDiv.appendChild(fragment);
-
-      // Trigger reflow for animation
-      void contentDiv.offsetWidth;
-      contentDiv.classList.add("fade-in", "slide-in");
-    }, 30);
-  }
-
-  // Event delegation for sidebar clicks (fixes desktop & handles dynamic easter egg)
-  notesList.addEventListener("click", (e) => {
-    const item = e.target.closest("li");
-    if (!item || item.style.display === "none") return;
-
-    document
-      .querySelectorAll("#notes-list li")
-      .forEach((i) => i.classList.remove("active"));
-    item.classList.add("active");
-
-    const key = item.dataset.section;
-    const noteTitle = item.querySelector(".note-title").textContent;
-
-    loadNote(key);
-
-    if (isMobile()) {
-      mainContent.style.display = "block";
-      sidebar.style.display = "none";
-      titleBar.classList.add("content-view");
-
-      backButton.innerHTML = `
-        <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="#e2a727" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round" style="margin-right: -4px;">
-            <path d="m15 18-6-6 6-6"></path>
-        </svg>
-        <span style="color: #e2a727; font-size: 17px;">Notes</span>
-      `;
-      backButton.style.display = "flex";
-      backButton.style.alignItems = "center";
-      backButton.style.gap = "8px";
-
-      title.style.display = "none";
-      searchWrapper.style.display = "none";
-      controls.style.display = "none";
+      textNodes.forEach((textNode) => {
+        const html = highlight(textNode.nodeValue, term);
+        if (html === textNode.nodeValue) return;
+        const span = document.createElement("span");
+        span.innerHTML = html;
+        textNode.parentNode.replaceChild(span, textNode);
+      });
     }
-  });
-
-  // Back button
-  backButton.addEventListener("click", () => {
-    if (!isMobile()) return;
-
-    mainContent.style.display = "none";
-    sidebar.style.display = "block";
-    titleBar.classList.remove("content-view");
-    backButton.style.display = "none";
-    title.style.display = "block";
-    searchWrapper.style.display = "block";
-    controls.style.display = "flex";
 
     contentDiv.innerHTML = "";
-    contentDiv.classList.remove("fade-in", "slide-in");
-    footer.classList.remove("visible");
-    mainContent.style.paddingBottom = "0";
-  });
+    contentDiv.appendChild(fragment);
 
-  // Search
-  searchInput.addEventListener("input", (e) => filterNotes(e.target.value));
+    footer.classList.toggle("visible", key === "contact");
+    mainContent.style.paddingBottom = key === "contact" ? "48px" : "0";
 
-  // Keyboard nav (desktop only)
-  if (!isMobile()) {
-    document.addEventListener("keydown", (e) => {
-      if (document.activeElement === searchInput) return;
-      if (!["ArrowUp", "ArrowDown", "Enter"].includes(e.key)) return;
-      e.preventDefault();
+    if (key === "skills") {
+      initChecklist();
+    }
 
-      const visibleItems = Array.from(notesList.querySelectorAll("li")).filter(
-        (item) => item.style.display !== "none"
-      );
-      if (!visibleItems.length) return;
-
-      let currentIndex = visibleItems.findIndex((item) =>
-        item.classList.contains("active")
-      );
-      if (currentIndex === -1) currentIndex = 0;
-
-      let nextIndex = currentIndex;
-      if (e.key === "ArrowUp") nextIndex = Math.max(0, currentIndex - 1);
-      if (e.key === "ArrowDown")
-        nextIndex = Math.min(visibleItems.length - 1, currentIndex + 1);
-      if (e.key === "Enter") nextIndex = currentIndex;
-
-      if (nextIndex !== currentIndex || e.key === "Enter") {
-        document
-          .querySelectorAll("#notes-list li")
-          .forEach((i) => i.classList.remove("active"));
-        const target = visibleItems[nextIndex];
-        target.classList.add("active");
-        target.scrollIntoView({ block: "nearest", behavior: "smooth" });
-        loadNote(target.dataset.section);
-      }
+    requestAnimationFrame(() => {
+      contentDiv.classList.add("fade-in", "slide-in");
     });
   }
 
-  /**
-   * Reveals easter egg note in sidebar.
-   */
+  function initChecklist() {
+    contentDiv.querySelectorAll("ul.checklist li").forEach((item) => {
+      const skillId = item.dataset.skillId;
+      if (!skillId) return;
+
+      const isChecked =
+        localStorage.getItem(`skill-checked-${skillId}`) === "true";
+      item.classList.toggle("checked", isChecked);
+
+      item.onclick = (event) => {
+        if (event.target.closest("a")) return;
+        item.classList.toggle("checked");
+        localStorage.setItem(
+          `skill-checked-${skillId}`,
+          String(item.classList.contains("checked"))
+        );
+      };
+    });
+  }
+
   function revealEasterEgg() {
-    if (easterItemElement) return; // safety check
+    if (easterItemElement) return;
+
+    const easterTemplate = document.getElementById("section-easter");
+    if (!easterTemplate) return;
 
     const easterItem = document.createElement("li");
     easterItem.dataset.section = "easter";
-    easterItem.innerHTML = `<div class="note-title">Fun Facts</div><div class="note-preview"></div>`;
+    easterItem.setAttribute("role", "option");
+    easterItem.setAttribute("aria-selected", "false");
+    easterItem.tabIndex = -1;
+    easterItem.innerHTML =
+      '<div class="note-title">Fun Facts</div><div class="note-preview"></div>';
+
     notesList.appendChild(easterItem);
-    easterItemElement = easterItem; // keep reference
+    easterItemElement = easterItem;
 
-    const easterTemplate = document.getElementById("section-easter"); // assume you have this in HTML
-    const plain = easterTemplate.content.textContent
-      .trim()
-      .replace(/\s+/g, " ");
-
-    noteData["easter"] = {
+    const plain = easterTemplate.content.textContent.trim().replace(/\s+/g, " ");
+    noteData.easter = {
       title: "Fun Facts",
       lowerTitle: "fun facts",
       plainContent: plain,
       lowerContent: plain.toLowerCase(),
       template: easterTemplate,
     };
-
-    filterNotes(searchInput.value);
   }
 
-  /**
-   * Removes the easter egg from sidebar and data when no longer needed.
-   */
   function removeEasterEgg() {
     if (!easterItemElement) return;
 
+    const wasActive = activeSection === "easter";
     easterItemElement.remove();
     easterItemElement = null;
+    delete noteData.easter;
 
-    // Clean up noteData
-    delete noteData["easter"];
-
-    // If currently viewing easter, switch to About (or first visible)
-    const active = notesList.querySelector("li.active");
-    if (active?.dataset.section === "easter") {
-      const aboutItem = notesList.querySelector('li[data-section="about"]');
-      if (aboutItem) {
-        document
-          .querySelectorAll("#notes-list li")
-          .forEach((el) => el.classList.remove("active"));
-        aboutItem.classList.add("active");
-        loadNote("about");
-      }
+    if (wasActive) {
+      activateSection("about", { updateHash: true, forceLoad: true });
     }
-
-    // Re-filter to update view
-    filterNotes(searchInput.value);
   }
 
-  // Initial load
-  filterNotes("");
-  if (isMobile()) {
-    mainContent.style.display = "none";
-    sidebar.style.display = "block";
-    controls.style.display = "flex";
-  } else {
-    const aboutItem = document.querySelector(
-      '#notes-list li[data-section="about"]'
+  function getVisibleItems() {
+    return Array.from(notesList.querySelectorAll("li")).filter(
+      (item) => item.style.display !== "none"
     );
-    if (aboutItem) aboutItem.click();
+  }
+
+  function getSelectedItem() {
+    return notesList.querySelector('li[aria-selected="true"]') ||
+      notesList.querySelector("li.active");
   }
 });

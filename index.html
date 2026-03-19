@@ -1,8 +1,24 @@
-<!DOCTYPE html>
+<!doctype html>
 <html lang="en" class="dark">
   <head>
     <meta charset="UTF-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <meta name="description" content="Mayur Caariappa's portfolio." />
+    <meta name="theme-color" content="#1e1e1f" />
+    <meta property="og:title" content="Mayur's Portfolio" />
+    <meta
+      property="og:description"
+      content="Mayur Caariappa's portfolio with experience, projects, skills, and contact details."
+    />
+    <meta property="og:type" content="website" />
+    <meta property="og:image" content="images/mayurcaariappa.gif" />
+    <meta name="twitter:card" content="summary_large_image" />
+    <meta name="twitter:title" content="Mayur's Portfolio" />
+    <meta
+      name="twitter:description"
+      content="Mayur Caariappa's portfolio with experience, projects, skills, and contact details."
+    />
+    <meta name="twitter:image" content="images/mayurcaariappa.gif" />
     <link rel="icon" type="image/gif" href="images/mayurcaariappa.gif" />
     <title>Mayur's Portfolio</title>
     <link rel="stylesheet" href="./css/style.css" />
@@ -22,13 +38,20 @@
     </script>
   </head>
   <body>
-    <div class="notes-window">
+    <div class="notes-window" data-view="list">
       <div class="title-bar">
-        <div class="back-button"></div>
-        <div class="controls">
-          <div class="control close"></div>
-          <div class="control minimize"></div>
-          <div class="control maximize"></div>
+        <button
+          class="back-button"
+          type="button"
+          aria-label="Back to notes list"
+        >
+          <span class="back-icon" aria-hidden="true">‹</span>
+          <span class="back-label">Notes</span>
+        </button>
+        <div class="controls" aria-hidden="true">
+          <button class="control close" type="button" tabindex="-1"></button>
+          <button class="control minimize" type="button" tabindex="-1"></button>
+          <button class="control maximize" type="button" tabindex="-1"></button>
         </div>
         <div class="title">Portfolio</div>
         <div class="search-wrapper">
@@ -37,44 +60,71 @@
             id="search-notes"
             placeholder="Search"
             autocomplete="off"
+            aria-label="Search notes"
           />
         </div>
       </div>
 
       <div class="content-wrapper">
-        <div class="sidebar">
+        <aside class="sidebar" aria-label="Portfolio sections">
           <div class="sidebar-header">On My Mac</div>
-          <ul id="notes-list">
-            <li class="active" data-section="about">
+          <ul id="notes-list" role="listbox" aria-label="Notes">
+            <li
+              class="active"
+              data-section="about"
+              role="option"
+              aria-selected="true"
+              tabindex="0"
+            >
               <div class="note-title">About</div>
               <div class="note-preview"></div>
             </li>
-            <li data-section="skills">
+            <li
+              data-section="skills"
+              role="option"
+              aria-selected="false"
+              tabindex="-1"
+            >
               <div class="note-title">Skills</div>
               <div class="note-preview"></div>
             </li>
-            <li data-section="resume">
+            <li
+              data-section="resume"
+              role="option"
+              aria-selected="false"
+              tabindex="-1"
+            >
               <div class="note-title">Resume</div>
               <div class="note-preview"></div>
             </li>
-            <li data-section="projects">
+            <li
+              data-section="projects"
+              role="option"
+              aria-selected="false"
+              tabindex="-1"
+            >
               <div class="note-title">Projects</div>
               <div class="note-preview"></div>
             </li>
-            <li data-section="contact">
+            <li
+              data-section="contact"
+              role="option"
+              aria-selected="false"
+              tabindex="-1"
+            >
               <div class="note-title">Contact</div>
               <div class="note-preview"></div>
             </li>
           </ul>
           <div id="no-results" class="no-results hidden">No matching notes</div>
-        </div>
+        </aside>
 
-        <div class="main-content">
-          <div id="note-content"></div>
+        <main class="main-content" aria-live="polite">
+          <div id="note-content" tabindex="-1"></div>
           <footer class="window-footer" id="contact-footer">
             © 2026 Mayur Caariappa. Bengaluru, India.
           </footer>
-        </div>
+        </main>
       </div>
       <div class="resize-handle"></div>
     </div>
@@ -127,7 +177,7 @@
     </template>
 
     <template id="section-resume">
-      <div class="note-timestamp"></div>
+      <div class="note-timestamp" data-time="24 January 2026 at 19:08"></div>
       <h1>Resume</h1>
       <p>
         <strong>Software Engineer 1</strong> — <em>Kaplan, Bengaluru</em> (April
@@ -147,7 +197,7 @@
             <li>
               Reduced GraphQL response times from
               <strong>7 s → 1.4 s</strong> (80% latency drop) for 10K+
-              concurrent users by archi- tecting field-level lazy loading,
+              concurrent users by architecting field-level lazy loading,
               Redis-backed caching, and optimized MongoDB aggregation pipelines
             </li>
             <li>
@@ -248,18 +298,18 @@
           >
             Remote Signing Service (RSDS)
           </a>
+          <ul>
+            <li>
+              Built a SpringBoot-based solution for cross-border digital
+              signature recognition, collaborating with international TSPs
+              (Trust Service Providers) from India, Japan, and the EU
+            </li>
+            <li>
+              Significantly boosted sales by actively participating in backend
+              development for RSDS
+            </li>
+          </ul>
         </li>
-        <ul>
-          <li>
-            Built a SpringBoot-based solution for cross-border digital signature
-            recognition, collaborating with international TSPs (Trust Service
-            Providers) from India, Japan, and the EU
-          </li>
-          <li>
-            Significantly boosted sales by actively participating in backend
-            development for RSDS
-          </li>
-        </ul>
         <li>
           <a
             href="https://qaserver-int.emudhra.net:18004/eMudhraDemos/"
@@ -269,18 +319,18 @@
           >
             eSign Service
           </a>
+          <ul>
+            <li>
+              Engineered customization features for ASPs (Application Service
+              Providers), allowing for personalized branding and enhancing
+              client satisfaction
+            </li>
+            <li>
+              Rigorously scrutinized and debugged REST APIs with Postman,
+              drastically slashing bug occurrences
+            </li>
+          </ul>
         </li>
-        <ul>
-          <li>
-            Engineered customization features for ASPs (Application Service
-            Providers), allowing for personalized branding and enhancing client
-            satisfaction
-          </li>
-          <li>
-            Rigorously scrutinized and debugged REST APIs with Postman,
-            drastically slashing bug occurrences
-          </li>
-        </ul>
       </ol>
       <br />
       <hr />
