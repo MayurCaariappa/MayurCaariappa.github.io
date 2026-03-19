@@ -7,11 +7,17 @@
   --text-primary: #ffffff;
   --text-secondary: #a0a0a5;
   --selection: #9c8226;
+  --text-selection: rgba(226, 167, 39, 0.35);
   --title-bar: #2b2b2f;
 }
 
 * {
   box-sizing: border-box;
+}
+
+*::selection {
+  background: var(--text-selection);
+  color: #ffffff;
 }
 
 body {
@@ -83,6 +89,16 @@ body {
   -webkit-app-region: drag;
 }
 
+.title-bar button {
+  appearance: none;
+  border: 0;
+  background: transparent;
+  margin: 0;
+  padding: 0;
+  font: inherit;
+  color: inherit;
+}
+
 /* When actually dragging */
 .notes-window.dragging {
   box-shadow: 0 30px 100px rgba(0, 0, 0, 0.75),
@@ -112,6 +128,7 @@ body {
   border-radius: 50%;
   position: relative;
   transition: all 0.15s;
+  cursor: default;
 }
 
 .control:hover {
@@ -166,6 +183,33 @@ body {
   font-weight: 500;
   color: var(--text-secondary);
   pointer-events: none;
+}
+
+.back-button {
+  display: none;
+  align-items: center;
+  gap: 2px;
+  color: #e2a727;
+  -webkit-app-region: no-drag;
+  cursor: pointer;
+}
+
+.back-button:focus-visible,
+.sidebar li:focus-visible,
+#search-notes:focus-visible {
+  outline: 2px solid rgba(226, 167, 39, 0.75);
+  outline-offset: 2px;
+}
+
+.back-icon {
+  font-size: 28px;
+  line-height: 1;
+  margin-top: -2px;
+}
+
+.back-label {
+  font-size: 17px;
+  line-height: 1;
 }
 
 .content-wrapper {
@@ -248,8 +292,18 @@ body {
   color: white;
 }
 
+.sidebar li[aria-selected="true"] {
+  background: var(--selection);
+  color: white;
+}
+
 .sidebar li.active .note-title,
 .sidebar li.active .note-preview {
+  color: inherit;
+}
+
+.sidebar li[aria-selected="true"] .note-title,
+.sidebar li[aria-selected="true"] .note-preview {
   color: inherit;
 }
 
@@ -295,12 +349,14 @@ body {
   overflow-y: auto;
   -webkit-overflow-scrolling: touch;
   background: var(--bg-main);
+  user-select: text;
 }
 
 #note-content {
   opacity: 0;
   transform: translateX(20px); /* For slide-in */
   transition: opacity 0.18s ease, transform 0.18s ease;
+  user-select: text;
 }
 
 #note-content.fade-in {
@@ -366,8 +422,8 @@ ul.checklist li {
   padding-left: 32px; /* Space for checkbox */
   min-height: 24px;
   line-height: 1.6;
-  user-select: none;
-  cursor: default;
+  user-select: text;
+  cursor: pointer;
 }
 
 ul.checklist li::before {
@@ -479,19 +535,18 @@ ul.checklist li:hover::before {
     cursor: default;
     display: flex;
     align-items: center;
+    justify-content: space-between;
     transition: height 0.25s ease, opacity 0.2s ease;
+    -webkit-app-region: no-drag;
   }
 
   .back-button {
     display: none;
-    font-size: 17px;
-    font-weight: 600;
-    color: #000;
-    padding: 0 16px;
     white-space: nowrap;
     overflow: hidden;
     text-overflow: ellipsis;
     max-width: 70vw;
+    gap: 0;
   }
 
   .title-bar.content-view:active::before {
@@ -501,23 +556,7 @@ ul.checklist li:hover::before {
   .title-bar.content-view .back-button {
     display: flex;
     align-items: center;
-    margin-top: 50px;
-    margin-left: -13px;
-    margin-bottom: 30px;
-    gap: 4px;
     color: #e2a82c;
-    font-size: 15px;
-    font-weight: 400;
-     padding-bottom: 10px;
-  }
-
-  .title-bar .back-button {
-    display: none;
-    color: #e2a82c;
-    font-size: 17px;
-    font-weight: 600;
-    align-items: center;
-    gap: 8px;
   }
 
   .title-bar.content-view {
@@ -534,9 +573,9 @@ ul.checklist li:hover::before {
   }
 
   #search-notes {
-    width: 60%;
-    max-width: 240px;
-    margin-left: 40%;
+    width: 160px;
+    max-width: 50vw;
+    margin-left: 0;
   }
 
   .content-wrapper {
@@ -594,7 +633,7 @@ ul.checklist li:hover::before {
     -webkit-overflow-scrolling: touch;
     position: relative;
     background: var(--bg-main);
-    padding-top: 8px; 
+    padding-top: 12px;
   }
 
   #note-content h1 {
@@ -635,6 +674,23 @@ ul.checklist li:hover::before {
     height: 44px;
     padding: 0 25px;
   }
+
+  .notes-window[data-view="content"] .sidebar {
+    display: none;
+  }
+
+  .notes-window[data-view="content"] .main-content {
+    display: block;
+  }
+
+  .notes-window[data-view="content"] .title {
+    display: none;
+  }
+
+  .notes-window[data-view="content"] .search-wrapper,
+  .notes-window[data-view="content"] .controls {
+    display: none;
+  }
 }
 
 .window-footer {
@@ -661,4 +717,18 @@ ul.checklist li:hover::before {
   opacity: 1;
   visibility: visible;
   pointer-events: auto;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  #note-content,
+  .title-bar,
+  .control,
+  .contact-link,
+  #note-content a:not(.contact-link) {
+    transition: none;
+  }
+
+  html {
+    scroll-behavior: auto;
+  }
 }
