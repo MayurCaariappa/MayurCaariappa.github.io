@@ -88,14 +88,13 @@ body {
   padding: 0 12px;
   border-bottom: 1px solid var(--border);
   position: relative;
-  cursor: default;
+  cursor: grab;
   -webkit-app-region: drag;
 }
 
 .title-bar button {
   appearance: none;
   border: 0;
-  background: transparent;
   margin: 0;
   padding: 0;
   font: inherit;
@@ -110,6 +109,10 @@ body {
   opacity: 0.98;
 }
 
+.notes-window.dragging .title-bar {
+  cursor: grabbing;
+}
+
 .resize-handle {
   position: absolute;
   right: 0;
@@ -118,6 +121,19 @@ body {
   height: 20px;
   cursor: nwse-resize;
   z-index: 10;
+  background: linear-gradient(
+    135deg,
+    transparent 0,
+    transparent 42%,
+    rgba(160, 160, 165, 0.65) 42%,
+    rgba(160, 160, 165, 0.65) 46%,
+    transparent 46%,
+    transparent 60%,
+    rgba(160, 160, 165, 0.45) 60%,
+    rgba(160, 160, 165, 0.45) 64%,
+    transparent 64%
+  );
+  opacity: 0.85;
 }
 
 .controls {
@@ -195,6 +211,7 @@ body {
 
 .back-button {
   display: none;
+  background: transparent;
   align-items: center;
   gap: 2px;
   color: #e2a727;
@@ -203,10 +220,13 @@ body {
 }
 
 .back-button:focus-visible,
-.sidebar li:focus-visible,
 #search-notes:focus-visible {
   outline: 2px solid rgba(226, 167, 39, 0.75);
   outline-offset: 2px;
+}
+
+.sidebar li:focus-visible {
+  outline: none;
 }
 
 .back-icon {
@@ -556,6 +576,10 @@ ul.checklist li:hover::before {
     -webkit-app-region: no-drag;
   }
 
+  .resize-handle {
+    display: none;
+  }
+
   .back-button {
     display: none;
     white-space: nowrap;
@@ -609,6 +633,18 @@ ul.checklist li:hover::before {
     flex-shrink: 0;
     touch-action: pan-y;
     background-color: var(--bg-main);
+  }
+
+  .sidebar-header {
+    order: 0;
+  }
+
+  #no-results {
+    order: 1;
+  }
+
+  #notes-list {
+    order: 2;
   }
 
   .sidebar-header {
