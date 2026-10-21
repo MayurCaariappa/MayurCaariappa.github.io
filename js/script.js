@@ -1,4 +1,5 @@
 import { highlight, getBestSnippet, buildNoteData } from "./utils.js";
+import { initJournalViewer } from "./journal.js";
 
 document.addEventListener("DOMContentLoaded", () => {
   const MOBILE_BREAKPOINT = 800;
@@ -77,6 +78,8 @@ document.addEventListener("DOMContentLoaded", () => {
       if (!isMobile()) return;
       setMobileView("list");
       contentDiv.innerHTML = "";
+      // Clear the active key so tapping the same note again reloads its content.
+      activeSection = "";
       contentDiv.classList.remove("fade-in", "slide-in");
       footer.classList.remove("visible");
       mainContent.style.paddingBottom = "0";
@@ -104,7 +107,7 @@ document.addEventListener("DOMContentLoaded", () => {
       if (!item.hasAttribute("tabindex")) item.tabIndex = -1;
       item.setAttribute(
         "aria-selected",
-        item.classList.contains("active") ? "true" : "false"
+        item.classList.contains("active") ? "true" : "false",
       );
     });
   }
@@ -163,18 +166,18 @@ document.addEventListener("DOMContentLoaded", () => {
 
         nextLeft = Math.max(
           -windowEl.offsetWidth + 120,
-          Math.min(nextLeft, window.innerWidth - 120)
+          Math.min(nextLeft, window.innerWidth - 120),
         );
         nextTop = Math.max(
           -titleHeight + 40,
-          Math.min(nextTop, window.innerHeight - titleHeight - 20)
+          Math.min(nextTop, window.innerHeight - titleHeight - 20),
         );
 
         windowEl.style.left = `${nextLeft}px`;
         windowEl.style.top = `${nextTop}px`;
         event.preventDefault();
       },
-      { passive: false }
+      { passive: false },
     );
 
     window.addEventListener("pointerup", stopDrag);
@@ -217,7 +220,7 @@ document.addEventListener("DOMContentLoaded", () => {
         windowEl.style.height = `${Math.max(420, resizeStartHeight + dy)}px`;
         event.preventDefault();
       },
-      { passive: false }
+      { passive: false },
     );
 
     window.addEventListener("pointerup", stopResize);
@@ -294,11 +297,11 @@ document.addEventListener("DOMContentLoaded", () => {
 
     const currentIndex = Math.max(
       0,
-      visibleItems.findIndex((item) => item.dataset.section === activeSection)
+      visibleItems.findIndex((item) => item.dataset.section === activeSection),
     );
     const nextIndex = Math.max(
       0,
-      Math.min(visibleItems.length - 1, currentIndex + direction)
+      Math.min(visibleItems.length - 1, currentIndex + direction),
     );
 
     const target = visibleItems[nextIndex];
@@ -309,10 +312,7 @@ document.addEventListener("DOMContentLoaded", () => {
     target.scrollIntoView({ block: "nearest", behavior: "smooth" });
   }
 
-  function activateSection(
-    key,
-    { updateHash = true, forceLoad = false } = {}
-  ) {
+  function activateSection(key, { updateHash = true, forceLoad = false } = {}) {
     const item = notesList.querySelector(`li[data-section="${key}"]`);
     if (!item || item.style.display === "none") return false;
 
@@ -372,6 +372,17 @@ document.addEventListener("DOMContentLoaded", () => {
     notesList.querySelectorAll("li").forEach((item) => {
       const key = item.dataset.section;
       const data = noteData[key];
+
+      if (key === "journal") {
+        const isVisible = lowerTerm === "easter";
+        const previewEl = item.querySelector(".note-preview");
+        item.style.display = isVisible ? "" : "none";
+        previewEl.textContent = isVisible ? "Your journal shelf" : "";
+        previewEl.style.display = isVisible ? "block" : "none";
+        if (isVisible) visibleCount++;
+        return;
+      }
+
       if (!data) return;
 
       if (key === "easter") {
@@ -411,7 +422,17 @@ document.addEventListener("DOMContentLoaded", () => {
       return;
     }
 
-    const activeItem = notesList.querySelector(`li[data-section="${activeSection}"]`);
+    // On mobile, the exact Easter-egg query is a way to reveal the two hidden
+    // entries. Keep the list visible so the user can choose Fun Facts or Journal
+    // instead of automatically opening the first match and hiding the sidebar.
+    if (shouldShowEaster && isMobile()) {
+      setMobileView("list");
+      return;
+    }
+
+    const activeItem = notesList.querySelector(
+      `li[data-section="${activeSection}"]`,
+    );
     if (!activeItem || activeItem.style.display === "none") {
       const firstVisible = getVisibleItems()[0];
       if (firstVisible) {
@@ -427,10 +448,22 @@ document.addEventListener("DOMContentLoaded", () => {
   }
 
   function loadNote(key) {
+    contentDiv.classList.remove("fade-in", "slide-in");
+
+    if (key === "journal") {
+      contentDiv.innerHTML = "";
+      initJournalViewer(contentDiv);
+      footer.classList.remove("visible");
+      mainContent.style.paddingBottom = "0";
+      requestAnimationFrame(() => {
+        contentDiv.classList.add("fade-in", "slide-in");
+      });
+      return;
+    }
+
     const data = noteData[key];
     if (!data) return;
 
-    contentDiv.classList.remove("fade-in", "slide-in");
     void contentDiv.offsetWidth;
 
     const fragment = data.template.content.cloneNode(true);
@@ -488,7 +521,7 @@ document.addEventListener("DOMContentLoaded", () => {
         item.classList.toggle("checked");
         localStorage.setItem(
           `skill-checked-${skillId}`,
-          String(item.classList.contains("checked"))
+          String(item.classList.contains("checked")),
         );
       };
     });
@@ -511,7 +544,18 @@ document.addEventListener("DOMContentLoaded", () => {
     notesList.appendChild(easterItem);
     easterItemElement = easterItem;
 
-    const plain = easterTemplate.content.textContent.trim().replace(/\s+/g, " ");
+    const journalItem = document.createElement("li");
+    journalItem.dataset.section = "journal";
+    journalItem.setAttribute("role", "option");
+    journalItem.setAttribute("aria-selected", "false");
+    journalItem.tabIndex = -1;
+    journalItem.innerHTML =
+      '<div class="note-title">Journal</div><div class="note-preview"></div>';
+    notesList.appendChild(journalItem);
+
+    const plain = easterTemplate.content.textContent
+      .trim()
+      .replace(/\s+/g, " ");
     noteData.easter = {
       title: "Fun Facts",
       lowerTitle: "fun facts",
@@ -524,8 +568,9 @@ document.addEventListener("DOMContentLoaded", () => {
   function removeEasterEgg() {
     if (!easterItemElement) return;
 
-    const wasActive = activeSection === "easter";
+    const wasActive = activeSection === "easter" || activeSection === "journal";
     easterItemElement.remove();
+    notesList.querySelector('li[data-section="journal"]')?.remove();
     easterItemElement = null;
     delete noteData.easter;
 
@@ -536,12 +581,14 @@ document.addEventListener("DOMContentLoaded", () => {
 
   function getVisibleItems() {
     return Array.from(notesList.querySelectorAll("li")).filter(
-      (item) => item.style.display !== "none"
+      (item) => item.style.display !== "none",
     );
   }
 
   function getSelectedItem() {
-    return notesList.querySelector('li[aria-selected="true"]') ||
-      notesList.querySelector("li.active");
+    return (
+      notesList.querySelector('li[aria-selected="true"]') ||
+      notesList.querySelector("li.active")
+    );
   }
 });

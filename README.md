@@ -6,11 +6,12 @@ A static portfolio inspired by the Apple Notes app on macOS and iPhone.
 
 - HTML
 - CSS
-- Vanilla JavaScript
+- Vanilla JavaScript (ES modules)
+- GitHub Pages hosting; no backend or database
 
 ## Local Usage
 
-Open `index.html` in a browser, or serve the folder with any simple static server.
+Open `index.html` in a browser, or serve the folder with any simple static server. Because the site uses JavaScript modules, a local static server is recommended for consistent browser behavior.
 
 ## Keyboard Shortcuts
 
@@ -19,9 +20,13 @@ Open `index.html` in a browser, or serve the folder with any simple static serve
 - `ArrowDown` or `j` moves to the next note
 - `ArrowUp` or `k` moves to the previous note
 - `Enter` opens the currently selected note
+- In the Journal reader, `←` and `→` move between two-page spreads
 
 ## Notes
 
 - The portfolio defaults to the `About` note on page reload.
 - Searching filters notes by title and content.
-- Typing `easter` in search reveals the hidden Fun Facts note.
+- Typing `easter` in search reveals the hidden Fun Facts note and the Journal tab.
+- The Journal is a read-only image viewer. Journal pages are static images committed to this repository; there is no backend, database, or journal editor.
+- Add cover images to `images/journals/covers/` and page images to `images/journals/pages/`.
+- Register journals and their page image paths in `js/journal-data.js`. Image paths are relative to `index.html`.

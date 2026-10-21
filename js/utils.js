@@ -58,9 +58,10 @@ export function buildNoteData(sidebarItems) {
     if (!template) return;
     const clone = template.content.cloneNode(true);
     const plain = clone.textContent.trim().replace(/\s+/g, " ");
+    const title = item.querySelector(".note-title").textContent;
     noteData[key] = {
-      title: item.querySelector(".note-title").textContent,
-      lowerTitle: item.querySelector(".note-title").textContent.toLowerCase(),
+      title,
+      lowerTitle: title.toLowerCase(),
       plainContent: plain,
       lowerContent: plain.toLowerCase(),
       template,
