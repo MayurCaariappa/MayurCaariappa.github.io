@@ -1,33 +1,62 @@
-import { highlight, getBestSnippet, buildNoteData } from "./utils.js";
-import { initJournalViewer } from "./journal.js";
+import {
+  highlight,
+  getBestSnippet,
+  buildNoteData,
+  createNoteEntry,
+  escapeHtml,
+  escapeRegExp,
+} from "./utils.js";
+import { journals, journalsUpdatedAt } from "./journal-data.js";
+
+const NOTE_ITEM = "li[data-section]";
+
+const HIDDEN_NOTE_PREVIEWS = {
+  easter: "Easter egg unlocked!",
+  journal: "Your journal shelf",
+};
 
 document.addEventListener("DOMContentLoaded", () => {
   const MOBILE_BREAKPOINT = 800;
+  const MIN_WINDOW_WIDTH = 380;
+  const MIN_WINDOW_HEIGHT = 440;
+  const VIEWPORT_MARGIN = 12;
+  const ARROW_SCROLL_STEP = 56;
+
   const windowEl = document.querySelector(".notes-window");
   const titleBar = document.querySelector(".title-bar");
+  const titleActions = document.querySelector(".title-actions");
+  const searchWrapper = document.querySelector(".search-wrapper");
+  const mobileSearchSlot = document.querySelector(".mobile-search-slot");
   const backButton = document.querySelector(".back-button");
   const resizeHandle = document.querySelector(".resize-handle");
   const contentDiv = document.getElementById("note-content");
   const searchInput = document.getElementById("search-notes");
   const noResults = document.getElementById("no-results");
   const notesList = document.getElementById("notes-list");
+  const notesCount = document.querySelector(".notes-count");
   const footer = document.getElementById("contact-footer");
   const mainContent = document.querySelector(".main-content");
   const sidebar = document.querySelector(".sidebar");
+  const dock = document.querySelector(".dock");
+  const dockButton = document.querySelector(".dock-item");
+  const reducedMotion = window.matchMedia("(prefers-reduced-motion: reduce)");
 
   const isMobile = () => window.innerWidth <= MOBILE_BREAKPOINT;
-  const noteData = buildNoteData(document.querySelectorAll("#notes-list li"));
-  const initialPath = `${window.location.pathname}${window.location.search}`;
+  const noteData = buildNoteData(notesList.querySelectorAll(NOTE_ITEM));
 
-  if (window.location.hash) {
-    history.replaceState(null, "", initialPath);
-  }
-
-  let activeSection = "about";
-  let easterRevealed = false;
-  let easterItemElement = null;
+  let activeSection = "";
+  // Last note opened; restored when a blank mobile list view widens to desktop.
+  let lastSection = "about";
+  // Last note the user picked (not one search auto-selected); restored when
+  // the search is cleared.
+  let chosenSection = "";
+  let hiddenNotesRevealed = false;
   let hasCenteredWindow = false;
   let teardownJournal = null;
+  // Incremented on every note load so a slow journal import can tell it is stale.
+  let loadToken = 0;
+  // Window position/size before "Zoom" filled the screen.
+  let unzoomedGeometry = null;
 
   let isDragging = false;
   let dragStartX = 0;
@@ -41,32 +70,41 @@ document.addEventListener("DOMContentLoaded", () => {
   let resizeStartWidth = 0;
   let resizeStartHeight = 0;
 
-  if (!isMobile()) {
-    centerWindow();
-    window.addEventListener("load", centerWindow, { once: true });
-    initWindowDragging();
-    initWindowResizing();
+  const initialSection = getSectionFromHash();
+  if (window.location.hash && !initialSection) {
+    history.replaceState(
+      null,
+      "",
+      `${window.location.pathname}${window.location.search}`,
+    );
   }
 
   initSidebarA11y();
   bindEvents();
-  filterNotes("");
+  // Always wire these up so a page first loaded at phone width can still be
+  // dragged and resized after it is widened; the handlers ignore mobile.
+  initWindowDragging();
+  initWindowResizing();
+  initWindowControls();
+  updateList("");
 
-  if (!activateSection(activeSection, { updateHash: false, forceLoad: true })) {
-    activateSection("about", { updateHash: false, forceLoad: true });
-  }
+  if (!isMobile()) centerWindow();
 
+  activateSection(initialSection || "about", {
+    updateHash: false,
+    forceLoad: true,
+  });
   syncResponsiveView();
 
   function bindEvents() {
     notesList.addEventListener("click", (event) => {
-      const item = event.target.closest("li");
-      if (!item || item.style.display === "none") return;
+      const item = event.target.closest(NOTE_ITEM);
+      if (!item || !isItemVisible(item)) return;
       activateSection(item.dataset.section);
     });
 
     notesList.addEventListener("keydown", (event) => {
-      const item = event.target.closest("li");
+      const item = event.target.closest(NOTE_ITEM);
       if (!item) return;
 
       if (event.key === "Enter" || event.key === " ") {
@@ -78,13 +116,9 @@ document.addEventListener("DOMContentLoaded", () => {
     backButton.addEventListener("click", () => {
       if (!isMobile()) return;
       setMobileView("list");
-      unmountJournal();
-      contentDiv.innerHTML = "";
+      clearContent();
       // Clear the active key so tapping the same note again reloads its content.
       activeSection = "";
-      contentDiv.classList.remove("fade-in", "slide-in");
-      footer.classList.remove("visible");
-      mainContent.style.paddingBottom = "0";
     });
 
     searchInput.addEventListener("input", (event) => {
@@ -99,13 +133,14 @@ document.addEventListener("DOMContentLoaded", () => {
       }
     });
 
+    contentDiv.addEventListener("click", handleCopyClick);
     document.addEventListener("keydown", handleGlobalShortcuts);
     window.addEventListener("hashchange", handleHashChange);
     window.addEventListener("resize", syncResponsiveView);
   }
 
   function initSidebarA11y() {
-    notesList.querySelectorAll("li").forEach((item) => {
+    notesList.querySelectorAll(NOTE_ITEM).forEach((item) => {
       if (!item.hasAttribute("tabindex")) item.tabIndex = -1;
       item.setAttribute(
         "aria-selected",
@@ -114,21 +149,139 @@ document.addEventListener("DOMContentLoaded", () => {
     });
   }
 
+  /* ------------------------------------------------------------------ */
+  /* Window position and size (desktop only)                            */
+  /* ------------------------------------------------------------------ */
+
   function centerWindow() {
-    if (hasCenteredWindow) return;
     const w = windowEl.offsetWidth;
     const h = windowEl.offsetHeight;
-    const vw = window.innerWidth;
-    const vh = window.innerHeight;
-
-    const left = Math.max(20, (vw - w) / 2);
-    const top = Math.max(20, (vh - h) / 2);
+    const left = Math.max(20, (window.innerWidth - w) / 2);
+    const top = Math.max(20, (window.innerHeight - h) / 2);
 
     windowEl.style.left = `${left}px`;
     windowEl.style.top = `${top}px`;
     windowEl.style.margin = "0";
-    windowEl.style.transform = "none";
     hasCenteredWindow = true;
+  }
+
+  /* ------------------------------------------------------------------ */
+  /* Traffic-light buttons and dock                                     */
+  /* ------------------------------------------------------------------ */
+
+  function initWindowControls() {
+    titleBar
+      .querySelector(".control.close")
+      .addEventListener("click", () => hideWindow("close"));
+    titleBar
+      .querySelector(".control.minimize")
+      .addEventListener("click", () => hideWindow("minimize"));
+    titleBar
+      .querySelector(".control.maximize")
+      .addEventListener("click", toggleZoom);
+
+    // Double-clicking the title bar zooms the window, as on macOS.
+    titleBar.addEventListener("dblclick", (event) => {
+      if (isMobile() || event.target.closest("button, a, input, .controls"))
+        return;
+      toggleZoom();
+    });
+
+    dockButton.addEventListener("click", showWindow);
+  }
+
+  function animateGeometry() {
+    if (reducedMotion.matches) return;
+    windowEl.classList.add("is-animating");
+    window.setTimeout(() => windowEl.classList.remove("is-animating"), 320);
+  }
+
+  function toggleZoom() {
+    if (isMobile()) return;
+    animateGeometry();
+
+    if (unzoomedGeometry) {
+      Object.assign(windowEl.style, unzoomedGeometry);
+      unzoomedGeometry = null;
+      windowEl.classList.remove("is-zoomed");
+      keepWindowInView();
+      return;
+    }
+
+    const { left, top, width, height } = windowEl.style;
+    unzoomedGeometry = { left, top, width, height };
+    windowEl.classList.add("is-zoomed");
+    fitZoomedWindow();
+  }
+
+  function fitZoomedWindow() {
+    windowEl.style.left = `${VIEWPORT_MARGIN}px`;
+    windowEl.style.top = `${VIEWPORT_MARGIN}px`;
+    windowEl.style.width = `${window.innerWidth - VIEWPORT_MARGIN * 2}px`;
+    windowEl.style.height = `${window.innerHeight - VIEWPORT_MARGIN * 2}px`;
+  }
+
+  function clearZoomState() {
+    unzoomedGeometry = null;
+    windowEl.classList.remove("is-zoomed");
+  }
+
+  /** Close and minimize both tuck the window into a dock icon. */
+  function hideWindow(kind) {
+    if (isMobile() || windowEl.classList.contains("is-hidden")) return;
+
+    dock.hidden = false;
+    const windowRect = windowEl.getBoundingClientRect();
+    const dockRect = dockButton.getBoundingClientRect();
+    const dx =
+      kind === "minimize"
+        ? dockRect.left + dockRect.width / 2 - (windowRect.left + windowRect.width / 2)
+        : 0;
+    const dy =
+      kind === "minimize"
+        ? dockRect.top + dockRect.height / 2 - (windowRect.top + windowRect.height / 2)
+        : 0;
+
+    windowEl.style.setProperty("--hide-x", `${dx}px`);
+    windowEl.style.setProperty("--hide-y", `${dy}px`);
+    windowEl.classList.toggle("is-closing", kind === "close");
+    windowEl.classList.add("is-hidden");
+    windowEl.setAttribute("aria-hidden", "true");
+    windowEl.inert = true;
+    dock.classList.add("is-visible");
+    dockButton.focus({ preventScroll: true });
+  }
+
+  function showWindow() {
+    windowEl.classList.remove("is-hidden", "is-closing");
+    windowEl.removeAttribute("aria-hidden");
+    windowEl.inert = false;
+    dock.classList.remove("is-visible");
+    window.setTimeout(
+      () => {
+        if (!windowEl.classList.contains("is-hidden")) dock.hidden = true;
+      },
+      reducedMotion.matches ? 0 : 320,
+    );
+    (findItem(activeSection) || searchInput).focus({ preventScroll: true });
+  }
+
+  /** Pulls the window back on screen after the browser window shrinks. */
+  function keepWindowInView() {
+    const rect = windowEl.getBoundingClientRect();
+    const maxLeft = Math.max(
+      VIEWPORT_MARGIN,
+      window.innerWidth - rect.width - VIEWPORT_MARGIN,
+    );
+    const maxTop = Math.max(
+      VIEWPORT_MARGIN,
+      window.innerHeight - rect.height - VIEWPORT_MARGIN,
+    );
+    const left = Math.min(Math.max(rect.left, VIEWPORT_MARGIN), maxLeft);
+    const top = Math.min(Math.max(rect.top, VIEWPORT_MARGIN), maxTop);
+
+    if (left !== rect.left) windowEl.style.left = `${left}px`;
+    if (top !== rect.top) windowEl.style.top = `${top}px`;
   }
 
   function initWindowDragging() {
@@ -136,13 +289,14 @@ document.addEventListener("DOMContentLoaded", () => {
 
     function startDrag(event) {
       if (
-        event.target.closest(".controls, .search-wrapper, .back-button") ||
+        event.target.closest(".controls, .title-actions, .back-button") ||
         isMobile()
       ) {
         return;
       }
 
       const rect = windowEl.getBoundingClientRect();
+      clearZoomState();
       isDragging = true;
       dragStartX = event.clientX;
       dragStartY = event.clientY;
@@ -199,6 +353,7 @@ document.addEventListener("DOMContentLoaded", () => {
     resizeHandle.addEventListener("pointerdown", (event) => {
       if (isMobile()) return;
 
+      clearZoomState();
       isResizing = true;
       resizeStartX = event.clientX;
       resizeStartY = event.clientY;
@@ -218,8 +373,8 @@ document.addEventListener("DOMContentLoaded", () => {
         const dx = event.clientX - resizeStartX;
         const dy = event.clientY - resizeStartY;
 
-        windowEl.style.width = `${Math.max(360, resizeStartWidth + dx)}px`;
-        windowEl.style.height = `${Math.max(420, resizeStartHeight + dy)}px`;
+        windowEl.style.width = `${Math.max(MIN_WINDOW_WIDTH, resizeStartWidth + dx)}px`;
+        windowEl.style.height = `${Math.max(MIN_WINDOW_HEIGHT, resizeStartHeight + dy)}px`;
         event.preventDefault();
       },
       { passive: false },
@@ -236,10 +391,18 @@ document.addEventListener("DOMContentLoaded", () => {
     document.body.style.userSelect = "";
   }
 
+  /* ------------------------------------------------------------------ */
+  /* Keyboard                                                           */
+  /* ------------------------------------------------------------------ */
+
   function handleGlobalShortcuts(event) {
-    const isTyping =
-      document.activeElement === searchInput ||
-      document.activeElement?.matches("input, textarea");
+    if (event.defaultPrevented || event.metaKey || event.ctrlKey || event.altKey)
+      return;
+
+    const target = event.target instanceof Element ? event.target : null;
+    const isTyping = Boolean(
+      target?.closest("input, textarea, select") || target?.isContentEditable,
+    );
 
     if (event.key === "/" && !isTyping) {
       event.preventDefault();
@@ -249,7 +412,7 @@ document.addEventListener("DOMContentLoaded", () => {
     }
 
     if (event.key === "Escape") {
-      if (document.activeElement === searchInput && searchInput.value) {
+      if (target === searchInput && searchInput.value) {
         searchInput.value = "";
         filterNotes("");
         return;
@@ -263,48 +426,83 @@ document.addEventListener("DOMContentLoaded", () => {
 
     if (isTyping) return;
 
-    const nextKeyMap = ["ArrowDown", "j", "J"];
-    const previousKeyMap = ["ArrowUp", "k", "K"];
+    const inSidebar = Boolean(target && notesList.contains(target));
+    const nothingFocused =
+      !target || target === document.body || target === document.documentElement;
 
-    if (nextKeyMap.includes(event.key)) {
+    if (event.key === "j" || event.key === "J") {
       event.preventDefault();
       moveSelection(1);
       return;
     }
 
-    if (previousKeyMap.includes(event.key)) {
+    if (event.key === "k" || event.key === "K") {
       event.preventDefault();
       moveSelection(-1);
       return;
     }
 
-    if (event.key === "Enter") {
+    if (event.key === "ArrowDown" || event.key === "ArrowUp") {
+      const direction = event.key === "ArrowDown" ? 1 : -1;
+
+      // In the list, arrows move between notes. Elsewhere they scroll the
+      // note; the browser already does that when focus is inside it.
+      if (inSidebar) {
+        event.preventDefault();
+        moveSelection(direction);
+      } else if (nothingFocused) {
+        event.preventDefault();
+        mainContent.scrollBy({ top: direction * ARROW_SCROLL_STEP });
+      }
+      return;
+    }
+
+    // Enter on links, buttons and list items keeps its normal behaviour.
+    if (event.key === "Enter" && nothingFocused) {
       const selected = getSelectedItem();
-      if (selected) {
+      if (selected && isItemVisible(selected)) {
         event.preventDefault();
         activateSection(selected.dataset.section);
       }
     }
   }
 
+  function getSectionFromHash() {
+    let key = "";
+    try {
+      key = decodeURIComponent(window.location.hash.slice(1));
+    } catch {
+      return "";
+    }
+    const item = key ? findItem(key) : null;
+    return item && isItemVisible(item) ? key : "";
+  }
+
   function handleHashChange() {
-    const hashSection = window.location.hash.replace("#", "");
+    const hashSection = getSectionFromHash();
     if (!hashSection || hashSection === activeSection) return;
     activateSection(hashSection, { updateHash: false, forceLoad: true });
   }
+
+  /* ------------------------------------------------------------------ */
+  /* Navigation                                                         */
+  /* ------------------------------------------------------------------ */
 
   function moveSelection(direction) {
     const visibleItems = getVisibleItems();
     if (!visibleItems.length) return;
 
-    const currentIndex = Math.max(
-      0,
-      visibleItems.findIndex((item) => item.dataset.section === activeSection),
+    const currentKey = activeSection || lastSection;
+    const currentIndex = visibleItems.findIndex(
+      (item) => item.dataset.section === currentKey,
     );
-    const nextIndex = Math.max(
-      0,
-      Math.min(visibleItems.length - 1, currentIndex + direction),
-    );
+    const nextIndex =
+      currentIndex === -1
+        ? 0
+        : Math.max(
+            0,
+            Math.min(visibleItems.length - 1, currentIndex + direction),
+          );
 
     const target = visibleItems[nextIndex];
     if (!target) return;
@@ -314,14 +512,19 @@ document.addEventListener("DOMContentLoaded", () => {
     target.scrollIntoView({ block: "nearest", behavior: "smooth" });
   }
 
-  function activateSection(key, { updateHash = true, forceLoad = false } = {}) {
-    const item = notesList.querySelector(`li[data-section="${key}"]`);
-    if (!item || item.style.display === "none") return false;
+  function activateSection(
+    key,
+    { updateHash = true, forceLoad = false, fromSearch = false } = {},
+  ) {
+    const item = findItem(key);
+    if (!item || !isItemVisible(item)) return false;
 
     const changed = activeSection !== key;
     activeSection = key;
+    lastSection = key;
+    if (!fromSearch) chosenSection = key;
 
-    notesList.querySelectorAll("li").forEach((entry) => {
+    notesList.querySelectorAll(NOTE_ITEM).forEach((entry) => {
       const isSelected = entry.dataset.section === key;
       entry.classList.toggle("active", isSelected);
       entry.setAttribute("aria-selected", isSelected ? "true" : "false");
@@ -331,7 +534,7 @@ document.addEventListener("DOMContentLoaded", () => {
     if (changed || forceLoad) loadNote(key);
 
     if (updateHash) {
-      history.replaceState(null, "", `#${key}`);
+      history.replaceState(null, "", `#${encodeURIComponent(key)}`);
     }
 
     if (isMobile()) setMobileView("content");
@@ -347,7 +550,10 @@ document.addEventListener("DOMContentLoaded", () => {
   }
 
   function syncResponsiveView() {
+    placeSearchField();
+
     if (isMobile()) {
+      if (windowEl.classList.contains("is-hidden")) showWindow();
       setMobileView(windowEl.dataset.view === "content" ? "content" : "list");
       return;
     }
@@ -355,45 +561,66 @@ document.addEventListener("DOMContentLoaded", () => {
     windowEl.dataset.view = "desktop";
     titleBar.classList.remove("content-view");
     sidebar.style.display = "";
-  }
 
-  function filterNotes(rawTerm) {
-    const term = rawTerm.trim();
-    const lowerTerm = term.toLowerCase();
-    let visibleCount = 0;
-
-    const shouldShowEaster = lowerTerm === "easter";
-    if (shouldShowEaster && !easterRevealed) {
-      revealEasterEgg();
-      easterRevealed = true;
-    } else if (!shouldShowEaster && easterRevealed) {
-      removeEasterEgg();
-      easterRevealed = false;
+    if (unzoomedGeometry) {
+      fitZoomedWindow();
+    } else if (hasCenteredWindow) {
+      keepWindowInView();
+    } else {
+      centerWindow();
     }
 
-    notesList.querySelectorAll("li").forEach((item) => {
+    // Desktop always shows a note; the mobile list view may have none open.
+    if (!activeSection) {
+      const lastItem = findItem(lastSection);
+      const fallback =
+        lastItem && isItemVisible(lastItem) ? lastItem : getVisibleItems()[0];
+      if (fallback) {
+        activateSection(fallback.dataset.section, {
+          updateHash: false,
+          forceLoad: true,
+        });
+      }
+    }
+  }
+
+  /** iOS Notes puts search under the large title; macOS keeps it in the toolbar. */
+  function placeSearchField() {
+    const target = isMobile() ? mobileSearchSlot : titleActions;
+    if (searchWrapper.parentElement === target) return;
+    const hadFocus = document.activeElement === searchInput;
+    target.append(searchWrapper);
+    if (hadFocus) searchInput.focus({ preventScroll: true });
+  }
+
+  /* ------------------------------------------------------------------ */
+  /* Search                                                             */
+  /* ------------------------------------------------------------------ */
+
+  /** Filters the sidebar and refreshes titles, previews, headers and count. */
+  function updateList(rawTerm) {
+    const term = rawTerm.trim();
+    const lowerTerm = term.toLowerCase();
+    const isEasterQuery = lowerTerm === "easter";
+    let visibleCount = 0;
+
+    // Once revealed, the hidden notes stay for the rest of the visit.
+    if (isEasterQuery) revealHiddenNotes();
+
+    notesList.querySelectorAll(NOTE_ITEM).forEach((item) => {
       const key = item.dataset.section;
       const data = noteData[key];
-
-      if (key === "journal") {
-        const isVisible = lowerTerm === "easter";
-        const previewEl = item.querySelector(".note-preview");
-        item.style.display = isVisible ? "" : "none";
-        previewEl.textContent = isVisible ? "Your journal shelf" : "";
-        previewEl.style.display = isVisible ? "block" : "none";
-        if (isVisible) visibleCount++;
-        return;
-      }
-
       if (!data) return;
 
-      if (key === "easter") {
-        const isVisible = lowerTerm === "easter";
-        const previewEl = item.querySelector(".note-preview");
-        item.style.display = isVisible ? "" : "none";
-        previewEl.textContent = isVisible ? "Easter egg unlocked!" : "";
-        previewEl.style.display = isVisible ? "block" : "none";
-        if (isVisible) visibleCount++;
+      const titleEl = item.querySelector(".note-title");
+      const previewEl = item.querySelector(".note-preview");
+
+      if (isEasterQuery) {
+        const preview = HIDDEN_NOTE_PREVIEWS[key] || "";
+        item.style.display = preview ? "" : "none";
+        titleEl.innerHTML = highlight(data.title, "");
+        renderPreview(previewEl, data, escapeHtml(preview));
+        if (preview) visibleCount++;
         return;
       }
 
@@ -404,77 +631,135 @@ document.addEventListener("DOMContentLoaded", () => {
       item.style.display = matches ? "" : "none";
       if (matches) visibleCount++;
 
-      const titleEl = item.querySelector(".note-title");
-      const previewEl = item.querySelector(".note-preview");
       titleEl.innerHTML = highlight(data.title, matchTitle ? term : "");
 
-      const previewText = matchContent
-        ? getBestSnippet(data.plainContent, term, data.lowerContent)
-        : "";
+      const previewHtml =
+        term && matchContent
+          ? highlight(
+              getBestSnippet(data.plainContent, term, data.lowerContent),
+              term,
+            )
+          : escapeHtml(data.excerpt);
+      renderPreview(previewEl, data, previewHtml);
+    });
 
-      previewEl.innerHTML = highlight(previewText, term);
-      previewEl.style.display = previewText ? "block" : "none";
+    notesList.querySelectorAll("[data-group-header]").forEach((header) => {
+      const group = header.dataset.groupHeader;
+      const hasVisibleNotes = Array.from(
+        notesList.querySelectorAll(`${NOTE_ITEM}[data-group="${group}"]`),
+      ).some(isItemVisible);
+      header.style.display = hasVisibleNotes ? "" : "none";
     });
 
     noResults.classList.toggle("hidden", visibleCount > 0 || !term);
-
-    if (visibleCount === 0 && term) {
-      unmountJournal();
-      contentDiv.innerHTML = "";
-      contentDiv.classList.remove("fade-in", "slide-in");
-      return;
-    }
-
-    // On mobile, the exact Easter-egg query is a way to reveal the two hidden
-    // entries. Keep the list visible so the user can choose Fun Facts or Journal
-    // instead of automatically opening the first match and hiding the sidebar.
-    if (shouldShowEaster && isMobile()) {
-      setMobileView("list");
-      return;
-    }
-
-    const activeItem = notesList.querySelector(
-      `li[data-section="${activeSection}"]`,
-    );
-    if (!activeItem || activeItem.style.display === "none") {
-      const firstVisible = getVisibleItems()[0];
-      if (firstVisible) {
-        activateSection(firstVisible.dataset.section, {
-          updateHash: true,
-          forceLoad: true,
-        });
-      }
-      return;
-    }
-
-    if (!term) loadNote(activeSection);
+    notesCount.textContent = `${visibleCount} ${visibleCount === 1 ? "Note" : "Notes"}`;
+    return visibleCount;
   }
+
+  function renderPreview(previewEl, data, html) {
+    const date = data.date
+      ? `<span class="note-date">${escapeHtml(data.date)}</span>`
+      : "";
+    previewEl.innerHTML = `${date}<span class="note-snippet">${html}</span>`;
+  }
+
+  function filterNotes(rawTerm) {
+    const term = rawTerm.trim();
+    const visibleCount = updateList(rawTerm);
+
+    // On mobile the search box lives in the list view: filter the list and
+    // let the user tap a result, rather than jumping into a note mid-typing.
+    if (isMobile()) return;
+
+    if (visibleCount === 0) {
+      clearContent();
+      return;
+    }
+
+    if (!term && chosenSection && chosenSection !== activeSection) {
+      const chosenItem = findItem(chosenSection);
+      if (chosenItem && isItemVisible(chosenItem)) {
+        activateSection(chosenSection, { forceLoad: true, fromSearch: true });
+        return;
+      }
+    }
+
+    const activeItem = findItem(activeSection);
+    if (!activeItem || !isItemVisible(activeItem)) {
+      const firstVisible = getVisibleItems()[0];
+      activateSection(firstVisible.dataset.section, {
+        updateHash: true,
+        forceLoad: true,
+        fromSearch: true,
+      });
+      return;
+    }
+
+    const isEmpty = !contentDiv.hasChildNodes();
+    if (activeSection === "journal") {
+      if (isEmpty) loadNote("journal");
+      return;
+    }
+
+    // Re-render the open note so its highlights follow the search term.
+    if (isEmpty || contentDiv.dataset.term !== term) {
+      loadNote(activeSection, { animate: isEmpty });
+    }
+  }
+
+  /* ------------------------------------------------------------------ */
+  /* Note content                                                       */
+  /* ------------------------------------------------------------------ */
 
   function unmountJournal() {
     teardownJournal?.();
     teardownJournal = null;
   }
 
-  function loadNote(key) {
+  function clearContent() {
     unmountJournal();
+    contentDiv.replaceChildren();
+    delete contentDiv.dataset.term;
     contentDiv.classList.remove("fade-in", "slide-in");
+    footer.classList.remove("visible");
+    mainContent.style.paddingBottom = "0";
+  }
+
+  function fadeInContent() {
+    contentDiv.classList.remove("fade-in", "slide-in");
+    // Flush styles so the transition starts from the hidden state.
+    void contentDiv.offsetWidth;
+    requestAnimationFrame(() => {
+      contentDiv.classList.add("fade-in", "slide-in");
+    });
+  }
+
+  function loadNote(key, { animate = true } = {}) {
+    const token = ++loadToken;
 
     if (key === "journal") {
-      contentDiv.innerHTML = "";
-      teardownJournal = initJournalViewer(contentDiv);
-      footer.classList.remove("visible");
-      mainContent.style.paddingBottom = "0";
-      requestAnimationFrame(() => {
-        contentDiv.classList.add("fade-in", "slide-in");
-      });
+      clearContent();
+      mainContent.scrollTop = 0;
+      // The journal viewer is only downloaded the first time it is opened.
+      import("./journal.js")
+        .then(({ initJournalViewer }) => {
+          if (token !== loadToken) return;
+          teardownJournal = initJournalViewer(contentDiv);
+          fadeInContent();
+        })
+        .catch(() => {
+          if (token !== loadToken) return;
+          contentDiv.textContent = "The journal couldn't be loaded. Please refresh and try again.";
+          fadeInContent();
+        });
       return;
     }
 
     const data = noteData[key];
-    if (!data) return;
+    if (!data?.template) return;
 
-    void contentDiv.offsetWidth;
-
+    unmountJournal();
+    const scrollTop = mainContent.scrollTop;
     const fragment = data.template.content.cloneNode(true);
     const term = searchInput.value.trim();
     const timestampEl = fragment.querySelector(".note-timestamp");
@@ -483,26 +768,10 @@ document.addEventListener("DOMContentLoaded", () => {
       timestampEl.textContent = timestampEl.dataset.time;
     }
 
-    if (term) {
-      const walker = document.createTreeWalker(fragment, NodeFilter.SHOW_TEXT);
-      const textNodes = [];
-      let node;
+    if (term) highlightFragment(fragment, term);
 
-      while ((node = walker.nextNode())) {
-        if (node.nodeValue.trim()) textNodes.push(node);
-      }
-
-      textNodes.forEach((textNode) => {
-        const html = highlight(textNode.nodeValue, term);
-        if (html === textNode.nodeValue) return;
-        const span = document.createElement("span");
-        span.innerHTML = html;
-        textNode.parentNode.replaceChild(span, textNode);
-      });
-    }
-
-    contentDiv.innerHTML = "";
-    contentDiv.appendChild(fragment);
+    contentDiv.replaceChildren(fragment);
+    contentDiv.dataset.term = term;
 
     footer.classList.toggle("visible", key === "contact");
     mainContent.style.paddingBottom = key === "contact" ? "48px" : "0";
@@ -511,87 +780,176 @@ document.addEventListener("DOMContentLoaded", () => {
       initChecklist();
     }
 
-    requestAnimationFrame(() => {
-      contentDiv.classList.add("fade-in", "slide-in");
+    if (animate) {
+      mainContent.scrollTop = 0;
+      fadeInContent();
+    } else {
+      mainContent.scrollTop = scrollTop;
+    }
+  }
+
+  function highlightFragment(fragment, term) {
+    const matcher = new RegExp(escapeRegExp(term), "i");
+    const walker = document.createTreeWalker(fragment, NodeFilter.SHOW_TEXT);
+    const textNodes = [];
+    let node;
+
+    while ((node = walker.nextNode())) {
+      if (matcher.test(node.nodeValue)) textNodes.push(node);
+    }
+
+    textNodes.forEach((textNode) => {
+      const template = document.createElement("template");
+      template.innerHTML = highlight(textNode.nodeValue, term);
+      textNode.replaceWith(template.content);
     });
   }
 
+  /** Skills read as completed checklist items unless the visitor unticks them. */
   function initChecklist() {
     contentDiv.querySelectorAll("ul.checklist li").forEach((item) => {
       const skillId = item.dataset.skillId;
       if (!skillId) return;
 
-      const isChecked =
-        localStorage.getItem(`skill-checked-${skillId}`) === "true";
-      item.classList.toggle("checked", isChecked);
+      const storageKey = `skill-checked-${skillId}`;
+      item.classList.toggle("checked", readStorage(storageKey) !== "false");
+      item.setAttribute("role", "checkbox");
+      item.tabIndex = 0;
+      const syncAria = () =>
+        item.setAttribute(
+          "aria-checked",
+          String(item.classList.contains("checked")),
+        );
+      syncAria();
+
+      const toggle = () => {
+        item.classList.toggle("checked");
+        syncAria();
+        writeStorage(storageKey, String(item.classList.contains("checked")));
+      };
 
       item.onclick = (event) => {
         if (event.target.closest("a")) return;
-        item.classList.toggle("checked");
-        localStorage.setItem(
-          `skill-checked-${skillId}`,
-          String(item.classList.contains("checked")),
-        );
+        // Don't toggle when the visitor is selecting text to copy.
+        if (String(window.getSelection?.() ?? "").length) return;
+        toggle();
+      };
+      item.onkeydown = (event) => {
+        if (event.key === " " || event.key === "Enter") {
+          event.preventDefault();
+          toggle();
+        }
       };
     });
   }
 
-  function revealEasterEgg() {
-    if (easterItemElement) return;
-
-    const easterTemplate = document.getElementById("section-easter");
-    if (!easterTemplate) return;
-
-    const easterItem = document.createElement("li");
-    easterItem.dataset.section = "easter";
-    easterItem.setAttribute("role", "option");
-    easterItem.setAttribute("aria-selected", "false");
-    easterItem.tabIndex = -1;
-    easterItem.innerHTML =
-      '<div class="note-title">Fun Facts</div><div class="note-preview"></div>';
-
-    notesList.appendChild(easterItem);
-    easterItemElement = easterItem;
-
-    const journalItem = document.createElement("li");
-    journalItem.dataset.section = "journal";
-    journalItem.setAttribute("role", "option");
-    journalItem.setAttribute("aria-selected", "false");
-    journalItem.tabIndex = -1;
-    journalItem.innerHTML =
-      '<div class="note-title">Journal</div><div class="note-preview"></div>';
-    notesList.appendChild(journalItem);
-
-    const plain = easterTemplate.content.textContent
-      .trim()
-      .replace(/\s+/g, " ");
-    noteData.easter = {
-      title: "Fun Facts",
-      lowerTitle: "fun facts",
-      plainContent: plain,
-      lowerContent: plain.toLowerCase(),
-      template: easterTemplate,
-    };
-  }
-
-  function removeEasterEgg() {
-    if (!easterItemElement) return;
-
-    const wasActive = activeSection === "easter" || activeSection === "journal";
-    easterItemElement.remove();
-    notesList.querySelector('li[data-section="journal"]')?.remove();
-    easterItemElement = null;
-    delete noteData.easter;
-
-    if (wasActive) {
-      activateSection("about", { updateHash: true, forceLoad: true });
+  function readStorage(key) {
+    try {
+      return localStorage.getItem(key);
+    } catch {
+      return null;
     }
   }
 
-  function getVisibleItems() {
-    return Array.from(notesList.querySelectorAll("li")).filter(
-      (item) => item.style.display !== "none",
+  function writeStorage(key, value) {
+    try {
+      localStorage.setItem(key, value);
+    } catch {
+      // Storage can be unavailable (e.g. private mode); the tick still shows.
+    }
+  }
+
+  async function handleCopyClick(event) {
+    const button = event.target.closest("[data-copy]");
+    if (!button) return;
+
+    const original = button.textContent;
+    try {
+      await navigator.clipboard.writeText(button.dataset.copy);
+      button.textContent = "Copied";
+    } catch {
+      button.textContent = "Press ⌘C";
+      const link = button.parentElement.querySelector("a");
+      if (link) window.getSelection()?.selectAllChildren(link);
+    }
+    window.setTimeout(() => {
+      button.textContent = original;
+    }, 1600);
+  }
+
+  /* ------------------------------------------------------------------ */
+  /* Hidden notes (Fun Facts + Journal)                                 */
+  /* ------------------------------------------------------------------ */
+
+  function revealHiddenNotes() {
+    if (hiddenNotesRevealed) return;
+
+    const easterTemplate = document.getElementById("section-easter");
+    if (!easterTemplate) return;
+    hiddenNotesRevealed = true;
+
+    notesList.append(
+      createNoteItem("easter", "Fun Facts"),
+      createNoteItem("journal", "Journal"),
     );
+
+    noteData.easter = createNoteEntry(
+      "Fun Facts",
+      easterTemplate.content.cloneNode(true),
+      {
+        template: easterTemplate,
+        timestamp:
+          easterTemplate.content.querySelector(".note-timestamp")?.dataset
+            .time ?? "",
+      },
+    );
+
+    const journalText = [
+      "A quiet place for notes, sketches, and moments worth keeping.",
+      ...journals.flatMap((journal) => [
+        journal?.title ?? "",
+        journal?.description ?? "",
+      ]),
+    ].join(" ");
+    noteData.journal = createNoteEntry("Journal", null, {
+      text: journalText,
+      timestamp: journalsUpdatedAt,
+    });
+  }
+
+  function createNoteItem(section, title) {
+    const item = document.createElement("li");
+    item.dataset.section = section;
+    item.dataset.group = "notes";
+    item.setAttribute("role", "option");
+    item.setAttribute("aria-selected", "false");
+    item.tabIndex = -1;
+
+    const titleEl = document.createElement("div");
+    titleEl.className = "note-title";
+    titleEl.textContent = title;
+    const previewEl = document.createElement("div");
+    previewEl.className = "note-preview";
+
+    item.append(titleEl, previewEl);
+    return item;
+  }
+
+  /* ------------------------------------------------------------------ */
+  /* Helpers                                                            */
+  /* ------------------------------------------------------------------ */
+
+  function findItem(key) {
+    if (!key) return null;
+    return notesList.querySelector(`li[data-section="${CSS.escape(key)}"]`);
+  }
+
+  function isItemVisible(item) {
+    return item.style.display !== "none";
+  }
+
+  function getVisibleItems() {
+    return Array.from(notesList.querySelectorAll(NOTE_ITEM)).filter(isItemVisible);
   }
 
   function getSelectedItem() {

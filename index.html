@@ -1,40 +1,129 @@
 <!doctype html>
-<html lang="en" class="dark">
+<html lang="en">
   <head>
     <meta charset="UTF-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-    <meta name="description" content="Mayur Caariappa's portfolio." />
-    <meta name="theme-color" content="#1e1e1f" />
-    <meta property="og:title" content="Mayur's Portfolio" />
+    <title>Mayur Caariappa — Software Engineer (Node.js · TypeScript · GraphQL)</title>
+    <meta
+      name="description"
+      content="Mayur Caariappa — full-stack engineer with 4+ years' experience. Cut GraphQL latency 80% for 10K+ concurrent users and migrated 600K+ live sessions with zero downtime. Node.js, TypeScript, GraphQL, MongoDB, Redis, AWS, Java/Spring Boot."
+    />
+    <link rel="canonical" href="https://mayurcaariappa.github.io/" />
+    <meta name="color-scheme" content="light dark" />
+    <meta
+      name="theme-color"
+      content="#2b2b2f"
+      media="(prefers-color-scheme: dark)"
+    />
+    <meta
+      name="theme-color"
+      content="#f2f1ef"
+      media="(prefers-color-scheme: light)"
+    />
+
+    <meta property="og:type" content="profile" />
+    <meta property="og:url" content="https://mayurcaariappa.github.io/" />
+    <meta
+      property="og:title"
+      content="Mayur Caariappa — Software Engineer"
+    />
     <meta
       property="og:description"
-      content="Mayur Caariappa's portfolio with experience, projects, skills, and contact details."
+      content="Full-stack engineer. 80% faster GraphQL for 10K+ users, 600K+ sessions migrated with zero downtime. Node.js · TypeScript · GraphQL · AWS."
     />
-    <meta property="og:type" content="website" />
-    <meta property="og:image" content="images/mayurcaariappa.gif" />
+    <meta
+      property="og:image"
+      content="https://mayurcaariappa.github.io/images/og-card.png"
+    />
+    <meta property="og:image:width" content="1200" />
+    <meta property="og:image:height" content="630" />
+    <meta
+      property="og:image:alt"
+      content="Mayur Caariappa — Software Engineer, styled as an Apple Notes window"
+    />
     <meta name="twitter:card" content="summary_large_image" />
-    <meta name="twitter:title" content="Mayur's Portfolio" />
+    <meta name="twitter:site" content="@MayurCaariappa" />
+    <meta
+      name="twitter:title"
+      content="Mayur Caariappa — Software Engineer"
+    />
     <meta
       name="twitter:description"
-      content="Mayur Caariappa's portfolio with experience, projects, skills, and contact details."
+      content="Full-stack engineer. 80% faster GraphQL for 10K+ users, 600K+ sessions migrated with zero downtime."
     />
-    <meta name="twitter:image" content="images/mayurcaariappa.gif" />
-    <link rel="icon" type="image/gif" href="images/mayurcaariappa.gif" />
-    <title>Mayur's Portfolio</title>
+    <meta
+      name="twitter:image"
+      content="https://mayurcaariappa.github.io/images/og-card.png"
+    />
+
+    <link rel="icon" type="image/png" sizes="32x32" href="images/favicon-32.png" />
+    <link rel="apple-touch-icon" href="images/apple-touch-icon.png" />
     <link rel="stylesheet" href="./css/style.css" />
-    <!-- Google tag (gtag.js) -->
-    <script
-      async
-      src="https://www.googletagmanager.com/gtag/js?id=G-466GVB5J40"
-    ></script>
+    <link rel="modulepreload" href="./js/script.js" />
+    <link rel="modulepreload" href="./js/utils.js" />
+    <link rel="modulepreload" href="./js/journal-data.js" />
+
+    <script type="application/ld+json">
+      {
+        "@context": "https://schema.org",
+        "@type": "Person",
+        "name": "Mayur Caariappa",
+        "jobTitle": "Software Engineer",
+        "url": "https://mayurcaariappa.github.io/",
+        "email": "mailto:mayurcaariappa10@gmail.com",
+        "image": "https://mayurcaariappa.github.io/images/og-card.png",
+        "address": {
+          "@type": "PostalAddress",
+          "addressLocality": "Glasgow",
+          "addressRegion": "Scotland",
+          "addressCountry": "GB"
+        },
+        "worksFor": { "@type": "Organization", "name": "Kaplan" },
+        "alumniOf": {
+          "@type": "CollegeOrUniversity",
+          "name": "PES College of Engineering"
+        },
+        "knowsAbout": [
+          "Node.js",
+          "TypeScript",
+          "GraphQL",
+          "MongoDB",
+          "PostgreSQL",
+          "Redis",
+          "AWS",
+          "Java",
+          "Spring Boot"
+        ],
+        "sameAs": [
+          "https://www.linkedin.com/in/MayurCaariappa",
+          "https://github.com/mayurcaariappa",
+          "https://x.com/MayurCaariappa"
+        ]
+      }
+    </script>
+
+    <!-- Google tag (gtag.js), loaded once the page is idle so it never delays first paint. -->
     <script>
       window.dataLayer = window.dataLayer || [];
       function gtag() {
         dataLayer.push(arguments);
       }
       gtag("js", new Date());
-
       gtag("config", "G-466GVB5J40");
+
+      window.addEventListener("load", () => {
+        const loadAnalytics = () => {
+          const script = document.createElement("script");
+          script.async = true;
+          script.src = "https://www.googletagmanager.com/gtag/js?id=G-466GVB5J40";
+          document.head.append(script);
+        };
+        if ("requestIdleCallback" in window) {
+          requestIdleCallback(loadAnalytics, { timeout: 4000 });
+        } else {
+          setTimeout(loadAnalytics, 2000);
+        }
+      });
     </script>
   </head>
   <body>
@@ -48,30 +137,81 @@
           <span class="back-icon" aria-hidden="true">‹</span>
           <span class="back-label">Notes</span>
         </button>
-        <div class="controls" aria-hidden="true">
-          <button class="control close" type="button" tabindex="-1"></button>
-          <button class="control minimize" type="button" tabindex="-1"></button>
-          <button class="control maximize" type="button" tabindex="-1"></button>
+        <div class="controls">
+          <button
+            class="control close"
+            type="button"
+            tabindex="-1"
+            aria-label="Close window"
+            title="Close"
+          ></button>
+          <button
+            class="control minimize"
+            type="button"
+            tabindex="-1"
+            aria-label="Minimize window"
+            title="Minimize"
+          ></button>
+          <button
+            class="control maximize"
+            type="button"
+            tabindex="-1"
+            aria-label="Zoom window"
+            title="Zoom"
+          ></button>
         </div>
         <div class="title">Portfolio</div>
-        <div class="search-wrapper">
-          <input
-            type="search"
-            id="search-notes"
-            placeholder="Search"
-            autocomplete="off"
-            aria-label="Search notes"
-          />
+        <div class="title-actions">
+          <a
+            class="toolbar-button"
+            href="docs/MayurCaariappa_Resume.pdf"
+            target="_blank"
+            rel="noopener noreferrer"
+            title="Open résumé (PDF)"
+          >
+            <svg
+              class="toolbar-icon"
+              viewBox="0 0 24 24"
+              aria-hidden="true"
+              focusable="false"
+            >
+              <path d="M12 3v12" />
+              <path d="M7.5 10.5 12 15l4.5-4.5" />
+              <path d="M5 15v3.5A1.5 1.5 0 0 0 6.5 20h11a1.5 1.5 0 0 0 1.5-1.5V15" />
+            </svg>
+            <span class="toolbar-label">Résumé</span>
+          </a>
+          <div class="search-wrapper">
+            <input
+              type="search"
+              id="search-notes"
+              placeholder="Search"
+              autocomplete="off"
+              aria-label="Search notes"
+            />
+          </div>
         </div>
       </div>
 
       <div class="content-wrapper">
         <aside class="sidebar" aria-label="Portfolio sections">
+          <div class="mobile-header">
+            <h2 class="mobile-title">Notes</h2>
+            <div class="mobile-search-slot"></div>
+          </div>
           <div class="sidebar-header">On My Mac</div>
           <ul id="notes-list" role="listbox" aria-label="Notes">
             <li
+              class="list-group-header"
+              data-group-header="pinned"
+              aria-hidden="true"
+            >
+              Pinned
+            </li>
+            <li
               class="active"
               data-section="about"
+              data-group="pinned"
               role="option"
               aria-selected="true"
               tabindex="0"
@@ -80,25 +220,25 @@
               <div class="note-preview"></div>
             </li>
             <li
-              data-section="skills"
+              data-section="resume"
+              data-group="pinned"
               role="option"
               aria-selected="false"
               tabindex="-1"
             >
-              <div class="note-title">Skills</div>
+              <div class="note-title">Experience</div>
               <div class="note-preview"></div>
             </li>
             <li
-              data-section="resume"
-              role="option"
-              aria-selected="false"
-              tabindex="-1"
+              class="list-group-header"
+              data-group-header="notes"
+              aria-hidden="true"
             >
-              <div class="note-title">Resume</div>
-              <div class="note-preview"></div>
+              Notes
             </li>
             <li
               data-section="projects"
+              data-group="notes"
               role="option"
               aria-selected="false"
               tabindex="-1"
@@ -107,7 +247,18 @@
               <div class="note-preview"></div>
             </li>
             <li
+              data-section="skills"
+              data-group="notes"
+              role="option"
+              aria-selected="false"
+              tabindex="-1"
+            >
+              <div class="note-title">Skills</div>
+              <div class="note-preview"></div>
+            </li>
+            <li
               data-section="contact"
+              data-group="notes"
               role="option"
               aria-selected="false"
               tabindex="-1"
@@ -117,71 +268,100 @@
             </li>
           </ul>
           <div id="no-results" class="no-results hidden">No matching notes</div>
+          <div class="notes-count" aria-live="polite"></div>
         </aside>
 
         <main class="main-content" aria-live="polite">
           <div id="note-content" tabindex="-1"></div>
           <footer class="window-footer" id="contact-footer">
-            © 2026 Mayur Caariappa. Bengaluru, India.
+            © 2026 Mayur Caariappa · Glasgow, Scotland
           </footer>
         </main>
       </div>
-      <div class="resize-handle"></div>
+      <div class="resize-handle" aria-hidden="true"></div>
+    </div>
+
+    <div class="dock" hidden>
+      <button class="dock-item" type="button" aria-label="Reopen portfolio" title="Portfolio">
+        <span class="dock-icon" aria-hidden="true"></span>
+        <span class="dock-indicator" aria-hidden="true"></span>
+      </button>
     </div>
 
     <template id="section-about">
-      <div class="note-timestamp" data-time="25 January 2026 at 13:30"></div>
+      <div class="note-timestamp" data-time="21 October 2026 at 16:45"></div>
       <h1>About</h1>
       <p>
-        Hello, I'm <strong>Mayur Caariappa</strong> — a
-        <strong>Software Engineer</strong> from Bengaluru, Karnataka.
+        Hi, I'm <strong>Mayur Caariappa</strong> — a full-stack
+        <strong>Software Engineer</strong> with <strong>4+ years</strong> of
+        experience building products used by
+        <strong>200+ institutions</strong> and handling
+        <strong>1M+ onboardings a year</strong>.
       </p>
       <p>
-        As a Software Engineer with a diverse skill set across
-        <strong>MERN stack</strong>, <strong>Java</strong>, and
-        <strong>Spring Boot</strong>, I am passionate about building impactful
-        software solutions. I bring a proven track record of delivering complex
-        projects, such as secure email automation and digital signature
-        services, that enhance both user experience and system performance.
+        <strong>Based in Glasgow, Scotland</strong>
       </p>
       <p>
-        Driven by continuous learning, I thrive in environments that challenge
-        me to grow professionally, contributing to team goals and innovating
-        with a user-centric mindset. Currently, I’m exploring opportunities that
-        align with my skills and commitment to impactful development.
+        At <strong>Kaplan</strong>, I work on Atom Educator, where I cut GraphQL
+        response times by <strong>80% (7 s → 1.4 s)</strong> for 10K+
+        concurrent users and migrated
+        <strong>600K+ live test sessions with zero downtime</strong>. Before
+        that, at <strong>eMudhra</strong>, I architected an Aadhaar eSign SDK and
+        remote signing service processing
+        <strong>10M+ digital signatures a month</strong>, and built
+        SEBI-compliant digital onboarding.
       </p>
-    </template>
-
-    <template id="section-skills">
-      <div class="note-timestamp" data-time="23 January 2026 at 09:24"></div>
-      <h1>Skills</h1>
-      <ul class="checklist">
-        <li data-skill-id="languages">
-          Languages: TypeScript, JavaScript, Java, SQL
-        </li>
-        <li data-skill-id="backend">
-          Backend & APIs: Node.js (Express, Fastify), GraphQL, REST, Spring
-          Boot, Microservices
-        </li>
-        <li data-skill-id="databases">
-          Databases: PostgreSQL, MongoDB, Redis, Elasticsearch
-        </li>
-        <li data-skill-id="frontend">
-          Frontend: React.js, Angular, Next.js, Thymeleaf
-        </li>
-        <li data-skill-id="cloud">
-          Cloud & DevOps: AWS (ECS, Lambda, S3), Docker, Kubernetes, CI/CD
-          (GitHub Actions, Jenkins)
-        </li>
-      </ul>
+      <p>
+        <strong>Stack:</strong> TypeScript, Node.js, GraphQL, MongoDB,
+        PostgreSQL, Redis, AWS, Java and Spring Boot.
+      </p>
+      <p>
+        <strong>Open to:</strong> SDE-2 / Senior backend or full-stack roles in
+        Glasgow, Edinburgh or remote.
+      </p>
+      <p>
+        <a href="mailto:mayurcaariappa10@gmail.com" class="contact-link"
+          >Email me</a
+        >
+        ·
+        <a
+          href="docs/MayurCaariappa_Resume.pdf"
+          target="_blank"
+          rel="noopener noreferrer"
+          class="contact-link"
+          >Résumé (PDF)</a
+        >
+        ·
+        <a
+          href="https://www.linkedin.com/in/MayurCaariappa"
+          target="_blank"
+          rel="noopener noreferrer"
+          class="contact-link"
+          >LinkedIn</a
+        >
+      </p>
+      <p class="note-aside" data-preview-skip>
+        psst — try searching <em>easter</em>.
+      </p>
     </template>
 
     <template id="section-resume">
-      <div class="note-timestamp" data-time="15 May 2026 at 20:22"></div>
-      <h1>Resume</h1>
-      <p>
-        <strong>Software Engineer 1</strong> — <em>Kaplan, Bengaluru</em> (April
+      <div class="note-timestamp" data-time="21 October 2026 at 16:45"></div>
+      <h1>Experience</h1>
+      <p class="note-actions" data-preview-skip>
+        <a
+          href="docs/MayurCaariappa_Resume.pdf"
+          target="_blank"
+          rel="noopener noreferrer"
+          class="contact-link"
+          >Download résumé (PDF)</a
+        >
+      </p>
+
+      <p class="role">
+        <strong>Software Engineer 1</strong> — <em>Kaplan, Bangalore</em> (April
         2025 – Present)
+        <span class="stack-line">Node.js · TypeScript · AWS · GraphQL · PostgreSQL · Redis · Elasticsearch</span>
       </p>
       <ol>
         <li>
@@ -190,56 +370,57 @@
             target="_blank"
             rel="noopener noreferrer"
             class="contact-link"
+            >Atom Educator</a
           >
-            Atom Educator
-          </a>
           <ul>
             <li>
-              Engineered <strong>Deep Linking Assignment Scheduler</strong> for
-              LMS integration of Kaplan assignments, driving adoption across
-              <strong>200+ institutions</strong>, reducing
-              <strong>setup time by 70%</strong>, and unlocking a new revenue
+              Engineered a <strong>Deep Linking Assignment Scheduler</strong>
+              for LMS integration of Kaplan assignments, driving adoption across
+              <strong>200+ institutions</strong>, cutting
+              <strong>setup time by 70%</strong> and unlocking a new revenue
               channel.
             </li>
             <li>
               Reduced GraphQL response times from
               <strong>7 s → 1.4 s</strong> (80% latency drop) for 10K+
               concurrent users by architecting field-level lazy loading,
-              Redis-backed caching, and optimized MongoDB aggregation pipelines
+              Redis-backed caching and optimized MongoDB aggregation pipelines.
             </li>
             <li>
-              Designed and executed a
+              Owned the end-to-end
               <strong
-                >zero-downtime migration of 600K+ live testing sessions (< 55
-                min)</strong
+                >zero-downtime migration of 600K+ live testing sessions in under
+                55 minutes</strong
               >
-              using batched processing, idempotency guards, and selective Redis
-              backfill — prevented any student data loss during platform cutover
+              using batched processing, idempotency guards and selective Redis
+              backfill, with no student data lost during the platform cutover.
             </li>
             <li>
-              Ideated and developed <strong>Engagement Dashboard</strong> for
-              faculties to analyze MCAT and PPI student performance, enabling
-              comparative insights at individual and cohort levels through KPIs,
-              visualizations, and filtering options
+              Designed and delivered an <strong>Engagement Dashboard</strong>
+              with cohort-level performance insights, real-time KPIs and
+              advanced filters, helping MCAT educators make data-driven
+              decisions at scale.
             </li>
             <li>
-              Designed an effective
-              <strong>faculty experience charter</strong> for Nursing/Healthcare
-              professionals, boosting engagement via custom quiz builder, test
-              scheduler, and reporting suite
+              Designed and built <strong>faculty tools</strong> for nursing and
+              healthcare educators: a custom quiz builder, test scheduler and
+              reporting suite.
             </li>
+            <li>
+          <strong>Interviewer:</strong> conducted technical interviews for
+          Software Engineer 1 hiring at Kaplan.
+        </li>
           </ul>
         </li>
       </ol>
-      <br />
 
       <hr />
-      <br />
-      <p>
-        <strong>Software Engineer</strong> —
-        <em>eMudhra Limited, Bengaluru</em> (August 2022 – April 2025)
-      </p>
 
+      <p class="role">
+        <strong>Software Engineer</strong> —
+        <em>eMudhra Limited, Bangalore</em> (August 2022 – April 2025)
+        <span class="stack-line">Java · Spring Boot · Node.js · REST APIs · AWS · MongoDB · React.js</span>
+      </p>
       <ol>
         <li>
           <a
@@ -247,73 +428,69 @@
             target="_blank"
             rel="noopener noreferrer"
             class="contact-link"
+            >Instigo</a
           >
-            Instigo
-          </a>
           <ul>
             <li>
-              Architected Instigo—a SEBI-compliant Digital Onboarding &
-              eKYC-as-a-Service platform (outsourced by NDML)—enabling instant
-              demat/trading account openings for major Indian brokerages and
-              international clients including <strong>LankaPay</strong>
+              Architected Instigo, a SEBI-compliant digital onboarding and
+              eKYC-as-a-Service platform (outsourced by NDML), enabling instant
+              demat and trading account opening for major Indian brokerages and
+              international clients including <strong>LankaPay</strong>.
             </li>
             <li>
-              Streamlined <strong>1M+ annual onboardings</strong> with real-time
-              verifications and liveliness checks.
+              Streamlined <strong>1M+ onboardings a year</strong> with real-time
+              verification and liveness checks.
             </li>
             <li>
-              Also developed the Governance Model (Back Office) portal for CAs
-              to review, approve, and reject applications
+              Built the back-office governance portal that CAs use to review,
+              approve and reject applications.
             </li>
           </ul>
         </li>
-
         <li>
           <a
             href="https://emsign.com/secure-email-certificate"
             target="_blank"
             rel="noopener noreferrer"
             class="contact-link"
+            >emSign S/MIME Automation Plugin</a
           >
-            emSign S/MIME Automation Plugin
-          </a>
           <ul>
             <li>
-              Spearheaded development of emSign S/MIME certificate enrollment,
-              installation, and configuration for Microsoft Outlook
+              Led development of the emSign S/MIME plugin, shipped as both a
+              <strong>Microsoft Outlook add-in</strong> and a
+              <strong>dedicated desktop application</strong> that handle
+              certificate auto-enrollment, silent installation and Outlook
+              auto-configuration.
             </li>
             <li>
-              Slashed enterprise onboarding from
-              <strong>30 min → < 60 s</strong>, via silent RSA/ECDSA certificate
-              enrollment and auto-keystore injection — achieved
-              <strong>90% reduction in config errors</strong> and
-              <strong>75% drop in support tickets</strong>
-            </li>
-            <li>
-              Engineered features like auto-enrollment, silent installation, and
-              auto-configuration, enhancing user experience
+              Cut enterprise onboarding from
+              <strong>30 min → under 60 s</strong> with silent RSA/ECDSA
+              certificate enrollment and automatic keystore injection, achieving
+              a <strong>90% reduction in configuration errors</strong> and a
+              <strong>75% drop in support tickets</strong>.
             </li>
           </ul>
         </li>
-
         <li>
           <a
             href="https://qaserver-int.emudhra.net:18004/G20PilotDemo/index"
             target="_blank"
             rel="noopener noreferrer"
             class="contact-link"
+            >Remote Signing Service (RSDS)</a
           >
-            Remote Signing Service (RSDS)
-          </a>
           <ul>
             <li>
-              Built a SpringBoot-based solution for cross-border digital
-              signature recognition, collaborating with international TSPs
-              (Trust Service Providers) from India, Japan, and the EU
+              Architected the <strong>Aadhaar eSign Java SDK</strong> and
+              Remote Signing Service, processing
+              <strong>10M+ digital signatures a month</strong> and reducing
+              client integration time from months to days.
             </li>
             <li>
-              Significantly boosted sales by actively participating in backend
-              development for RSDS
+              Built a Spring Boot backend for cross-border digital signature
+              recognition, working with Trust Service Providers (TSPs) from
+              India, Japan and the EU.
             </li>
           </ul>
         </li>
@@ -323,141 +500,82 @@
             target="_blank"
             rel="noopener noreferrer"
             class="contact-link"
+            >eSign Service</a
           >
-            eSign Service
-          </a>
           <ul>
             <li>
-              Engineered customization features for ASPs (Application Service
-              Providers), allowing for personalized branding and enhancing
-              client satisfaction
-            </li>
-            <li>
-              Rigorously scrutinized and debugged REST APIs with Postman,
-              drastically slashing bug occurrences
+              Built customization features that let Application Service
+              Providers (ASPs) apply their own branding.
             </li>
           </ul>
         </li>
       </ol>
-      <br />
+
       <hr />
-      <br />
-      <strong>Education</strong><br /><br />
+
+      <p class="role">
+        <strong>Backend Engineer (Freelance)</strong> —
+        <em>WiseBin</em>
+        <span class="stack-line">Node.js · TypeScript · AWS · Multi-tenant SaaS · RBAC · JWT</span>
+      </p>
+      <ol>
+        <li>
+          <a
+            href="https://wisebin.in/"
+            target="_blank"
+            rel="noopener noreferrer"
+            class="contact-link"
+            >WiseBin</a
+          >
+          <ul>
+            <li>
+              As the <strong>sole backend engineer</strong>, built a
+              multi-tenant waste-management SaaS serving
+              <strong>65+ enterprise clients</strong>, covering order lifecycle
+              management, truck logistics and audit workflows.
+            </li>
+            <li>
+              Cut manual operations by <strong>80%</strong> by automating pickup
+              scheduling, driver workflows and report generation (CSV/PDF).
+            </li>
+            <li>
+              Implemented RBAC-secured JWT authentication across multiple user
+              roles.
+            </li>
+          </ul>
+        </li>
+      </ol>
+
+      <hr />
+
+      <p class="role"><strong>Education</strong></p>
       <ul>
         <li>
           <strong>Bachelor of Engineering (ECE)</strong> —
           <em>PES College of Engineering</em> (2015 – 2019)
         </li>
-        <li>
-          <strong>PUC (PCME)</strong> —
-          <em>Sadvidya Semi-Residential College</em> (2013 – 2015)
-        </li>
       </ul>
-      <br />
     </template>
 
     <template id="section-projects">
-      <div class="note-timestamp" data-time="14 May 2026 at 20:22"></div>
+      <div class="note-timestamp" data-time="21 October 2026 at 16:45"></div>
       <h1>Projects</h1>
-      <p>
-        <a
-          href="https://nit.kaptest.com/"
-          target="_blank"
-          rel="noopener noreferrer"
-          class="contact-link"
-        >
-          Atom Educator</a
-        ><br />
-        The Portal empowers Nursing and Healthcare faculty to effortlessly
-        create assessments, customize quizzes, manage cohorts and access
-        detailed student report cards.
-      </p>
-      <p>
-        <a
-          href="https://instigo-qa.emsigner.com/InstigoV2/testdp"
-          target="_blank"
-          rel="noopener noreferrer"
-          class="contact-link"
-        >
-          Instigo</a
-        ><br />
-        Instigo enables users to complete eKYC for opening demat and trading
-        accounts, review terms & conditions, and submit applications.
-      </p>
-      <p>
-        <a
-          href="https://emsign.com/secure-email-certificate"
-          target="_blank"
-          rel="noopener noreferrer"
-          class="contact-link"
-        >
-          emSign S/MIME Automation</a
-        ><br />
-        Enterprise-grade application for email security with automatic S/MIME
-        certificate issuance, silent installation, and seamless Outlook
-        configuration.
-      </p>
-      <p>
-        <a
-          href="https://kyc-qa.emsigner.com/"
-          target="_blank"
-          rel="noopener noreferrer"
-          class="contact-link"
-        >
-          KYC Systems</a
-        ><br />
-        KYC Systems simplifies the KYC verification by utilizing services such
-        as Aadhaar, DigiLocker, and PAN for Indian users, along with Veridas and
-        eID for users worldwide.
-      </p>
-      <p>
-        <a
-          href="https://qaserver-int.emudhra.net:18004/G20PilotDemo/index"
-          target="_blank"
-          rel="noopener noreferrer"
-          class="contact-link"
-        >
-          G20 Pilot</a
-        ><br />
-        The G20 Pilot is a cross-border digital signature platform integrating
-        with TSPs from India, Japan, and the EU, showcasing mutual recognition
-        of digital signatures.
-      </p>
-      <br />
-      <hr />
-      <br />
-      <h1>Personal Projects</h1>
-      <p>
-        <a
-          href="https://github.com/MayurCaariappa/Office-Metaverse"
-          target="_blank"
-          rel="noopener noreferrer"
-          class="contact-link"
-        >
-          Office-Metaverse</a
-        ><br />
-        The Office Metaverse is a <strong>2D virtual workspace</strong> built
-        with the Phaser game engine and MERN stack, where users interact via
-        unique avatars. It features movement, text, video, voice chat, and
-        real-time status visibility. Future plans include adding community
-        discussions.
-      </p>
+      <p>Products I've built on my own, followed by the products I've worked on.</p>
+
+      <h2>Freelance &amp; personal</h2>
       <p>
         <a
           href="https://wisebin.in/"
           target="_blank"
           rel="noopener noreferrer"
           class="contact-link"
+          >WiseBin</a
         >
-          WiseBin</a
-        ><br />
-        WiseBin is a
-        <strong>Waste Management SaaS platform</strong> independently built with
-        a multi-tenant architecture, serving 65+ enterprise clients with
-        comprehensive order lifecycle management, truck logistics, and audit
-        workflows tracking. This reduced manual ops by 80% by automating pickup
-        scheduling, driver workflows, and report generation (CSV/PDF);
-        implemented RBAC-secured JWT auth, across multiple user roles.
+        <span class="project-meta">Freelance · sole backend engineer</span>
+        A multi-tenant <strong>waste-management SaaS</strong> serving 65+
+        enterprise clients: order lifecycle, truck logistics and audit
+        workflows. Automating pickup scheduling, driver workflows and CSV/PDF
+        reports cut manual operations by 80%.
       </p>
       <p>
         <a
@@ -465,74 +583,188 @@
           target="_blank"
           rel="noopener noreferrer"
           class="contact-link"
+          >Be Living</a
         >
-          Be Living</a
-        ><br />
-        Developed a <strong>Health and Fitness Tracking Platform</strong> that
-        helps users track nutrition, workouts, personal health metrics, and
-        wellness goals. Built scalable REST APIs using Node.js, TypeScript,
-        Express, Prisma, and PostgreSQL, implementing JWT-based authentication,
-        OTP verification, user onboarding, and reward points management.
-        Deployed and managed the backend on AWS EC2 using Docker.
+        <span class="project-meta"
+          >Node.js · TypeScript · Express · Prisma · PostgreSQL · AWS EC2 ·
+          Docker</span
+        >
+        Backend for a <strong>health and fitness tracking platform</strong>
+        covering nutrition, workouts, health metrics and wellness goals. Built
+        the REST APIs with JWT authentication, OTP verification, user onboarding
+        and reward points, and deployed it on AWS EC2 with Docker.
+      </p>
+      <p>
+        <a
+          href="https://github.com/MayurCaariappa/Office-Metaverse"
+          target="_blank"
+          rel="noopener noreferrer"
+          class="contact-link"
+          >Office-Metaverse</a
+        >
+        <span class="project-meta">Phaser · MERN stack</span>
+        A <strong>2D virtual workspace</strong> where people move around as
+        avatars and talk over text, video and voice chat, with real-time status
+        visibility.
+      </p>
+
+      <hr />
+
+      <h2>Work products</h2>
+      <p>
+        <a
+          href="https://nit.kaptest.com/"
+          target="_blank"
+          rel="noopener noreferrer"
+          class="contact-link"
+          >Atom Educator</a
+        >
+        <span class="project-meta">Kaplan</span>
+        Lets nursing and healthcare faculty create assessments, customize
+        quizzes, manage cohorts and view detailed student report cards.
+      </p>
+      <p>
+        <a
+          href="https://instigo-qa.emsigner.com/InstigoV2/testdp"
+          target="_blank"
+          rel="noopener noreferrer"
+          class="contact-link"
+          >Instigo</a
+        >
+        <span class="project-meta">eMudhra</span>
+        eKYC for opening demat and trading accounts: verification, terms and
+        conditions, and application submission.
+      </p>
+      <p>
+        <a
+          href="https://emsign.com/secure-email-certificate"
+          target="_blank"
+          rel="noopener noreferrer"
+          class="contact-link"
+          >emSign S/MIME Automation</a
+        >
+        <span class="project-meta">eMudhra</span>
+        An Outlook add-in and desktop app for enterprise email security:
+        automatic S/MIME certificate issuance, silent installation and seamless
+        Outlook configuration.
+      </p>
+      <p>
+        <a
+          href="https://kyc-qa.emsigner.com/"
+          target="_blank"
+          rel="noopener noreferrer"
+          class="contact-link"
+          >KYC Systems</a
+        >
+        <span class="project-meta">eMudhra</span>
+        KYC verification using Aadhaar, DigiLocker and PAN for Indian users, and
+        Veridas and eID for users worldwide.
+      </p>
+      <p>
+        <a
+          href="https://qaserver-int.emudhra.net:18004/G20PilotDemo/index"
+          target="_blank"
+          rel="noopener noreferrer"
+          class="contact-link"
+          >G20 Pilot</a
+        >
+        <span class="project-meta">eMudhra</span>
+        A cross-border digital signature platform integrating TSPs from India,
+        Japan and the EU to show mutual recognition of digital signatures.
       </p>
     </template>
 
+    <template id="section-skills">
+      <div class="note-timestamp" data-time="21 October 2026 at 16:45"></div>
+      <h1>Skills</h1>
+      <ul class="checklist">
+        <li data-skill-id="languages">
+          <strong>Languages:</strong> TypeScript, JavaScript, Java, SQL
+        </li>
+        <li data-skill-id="backend">
+          <strong>Backend &amp; APIs:</strong> Node.js (Express, Fastify),
+          GraphQL, REST, Spring Boot, microservices
+        </li>
+        <li data-skill-id="frontend">
+          <strong>Frontend:</strong> React, Next.js, Angular
+        </li>
+        <li data-skill-id="databases">
+          <strong>Databases &amp; caching:</strong> PostgreSQL, MongoDB, Redis,
+          Elasticsearch
+        </li>
+        <li data-skill-id="cloud">
+          <strong>Cloud &amp; DevOps:</strong> AWS (ECS, EKS, Lambda, S3, EC2),
+          Docker, Kubernetes, CI/CD (GitHub Actions, Jenkins)
+        </li>
+      </ul>
+    </template>
+
     <template id="section-contact">
-      <div class="note-timestamp" data-time="15 May 2026 at 20:22"></div>
+      <div class="note-timestamp" data-time="21 October 2026 at 16:45"></div>
       <h1>Contact</h1>
-
       <p>
-        <a href="mailto:mayurcaariappa10@gmail.com" class="contact-link">
-          Email
-        </a>
+        Open to <strong>SDE-2 / Senior backend or full-stack roles</strong> in
+        Glasgow, Edinburgh or remote.
       </p>
-
       <p>
+        Based in Glasgow, Scotland.
+      </p>
+      <p class="contact-row">
+        <span class="contact-label">Email</span>
+        <a href="mailto:mayurcaariappa10@gmail.com" class="contact-link"
+          >mayurcaariappa10@gmail.com</a
+        >
+        <button
+          class="copy-button"
+          type="button"
+          data-copy="mayurcaariappa10@gmail.com"
+        >
+          Copy
+        </button>
+      </p>
+      <p class="contact-row">
+        <span class="contact-label">LinkedIn</span>
         <a
           href="https://www.linkedin.com/in/MayurCaariappa"
           target="_blank"
           rel="noopener noreferrer"
           class="contact-link"
+          >MayurCaariappa</a
         >
-          LinkedIn
-        </a>
       </p>
-
-      <p>
+      <p class="contact-row">
+        <span class="contact-label">GitHub</span>
         <a
           href="https://github.com/mayurcaariappa"
           target="_blank"
           rel="noopener noreferrer"
           class="contact-link"
+          >MayurCaariappa</a
         >
-          GitHub
-        </a>
       </p>
-
-      <p>
+      <p class="contact-row">
+        <span class="contact-label">X</span>
         <a
           href="https://x.com/MayurCaariappa"
           target="_blank"
           rel="noopener noreferrer"
           class="contact-link"
+          >MayurCaariappa</a
         >
-          X
-        </a>
       </p>
-
-      <p>
+      <p class="contact-row">
+        <span class="contact-label">Résumé</span>
         <a
           href="docs/MayurCaariappa_Resume.pdf"
           target="_blank"
           rel="noopener noreferrer"
           class="contact-link"
+          >Download PDF</a
         >
-          CV
-        </a>
       </p>
     </template>
 
-    <template id="section-easter">
+        <template id="section-easter">
       <div class="note-timestamp" data-time="25 January 2026 at 13:30"></div>
       <h1>Fun Facts</h1>
 
@@ -634,6 +866,6 @@
       </ol>
       <br /><br />
     </template>
-    <script type="module" src="./js/script.js" defer></script>
+    <script type="module" src="./js/script.js"></script>
   </body>
 </html>

@@ -1,4 +1,5 @@
 :root {
+  color-scheme: dark;
   --bg-body: #1e1e1e;
   --bg-window: #1e1e1e;
   --bg-sidebar: #232321;
@@ -6,9 +7,76 @@
   --border: #3a3a3e;
   --text-primary: #ffffff;
   --text-secondary: #a0a0a5;
+  --text-body: #d0d0d5;
+  --text-tertiary: #8e8e93;
+  --text-quaternary: #6e6e73;
   --selection: #9c8226;
+  --selection-text: #ffffff;
   --text-selection: rgba(226, 167, 39, 0.35);
   --title-bar: #2b2b2f;
+  --accent: #e2a727;
+  --hover: rgba(255, 255, 255, 0.08);
+  --focus-ring: rgba(226, 167, 39, 0.75);
+  --focus-ring-on-selection: rgba(255, 255, 255, 0.85);
+  --search-bg: #2c2c30;
+  --search-border: #3a3a40;
+  --search-focus-border: #515154;
+  --search-focus-ring: rgba(81, 81, 84, 0.25);
+  --backdrop-glow-1: rgba(60, 60, 80, 0.4);
+  --backdrop-glow-2: rgba(40, 40, 70, 0.3);
+  --window-shadow:
+    0 20px 70px rgba(0, 0, 0, 0.6), 0 0 0 1px rgba(255, 255, 255, 0.08) inset;
+  --window-shadow-active:
+    0 30px 100px rgba(0, 0, 0, 0.75), 0 0 0 1px rgba(255, 255, 255, 0.12) inset;
+  --ios-bg: #141414;
+  --ios-row: #232325;
+  --ios-separator: #3a3a3c;
+  --ios-search-bg: #2c2c2e;
+  --ios-bar-bg: rgba(20, 20, 20, 0.82);
+  --dock-bg: rgba(40, 40, 44, 0.55);
+  --dock-border: rgba(255, 255, 255, 0.14);
+}
+
+/* macOS Notes light appearance, used when the visitor's system is in light mode. */
+@media (prefers-color-scheme: light) {
+  :root {
+    color-scheme: light;
+    --bg-body: #e6e6e9;
+    --bg-window: #ffffff;
+    --bg-sidebar: #f6f5f3;
+    --bg-main: #ffffff;
+    --border: #dedde0;
+    --text-primary: #1d1d1f;
+    --text-secondary: #6e6e73;
+    --text-body: #2c2c2e;
+    --text-tertiary: #86868b;
+    --text-quaternary: #98989d;
+    --selection: #f5d565;
+    --selection-text: #1d1d1f;
+    --text-selection: rgba(226, 167, 39, 0.3);
+    --title-bar: #f2f1ef;
+    --accent: #a06a00;
+    --hover: rgba(0, 0, 0, 0.05);
+    --focus-ring: rgba(160, 106, 0, 0.65);
+    --focus-ring-on-selection: rgba(29, 29, 31, 0.7);
+    --search-bg: #ffffff;
+    --search-border: #d4d4d8;
+    --search-focus-border: #b5b5ba;
+    --search-focus-ring: rgba(0, 0, 0, 0.06);
+    --backdrop-glow-1: rgba(255, 255, 255, 0.75);
+    --backdrop-glow-2: rgba(196, 198, 214, 0.55);
+    --window-shadow:
+      0 20px 60px rgba(0, 0, 0, 0.18), 0 0 0 1px rgba(0, 0, 0, 0.08);
+    --window-shadow-active:
+      0 30px 90px rgba(0, 0, 0, 0.25), 0 0 0 1px rgba(0, 0, 0, 0.1);
+    --ios-bg: #f2f2f7;
+    --ios-row: #ffffff;
+    --ios-separator: #e5e5ea;
+    --ios-search-bg: #e4e4e9;
+    --ios-bar-bg: rgba(242, 242, 247, 0.85);
+    --dock-bg: rgba(255, 255, 255, 0.55);
+    --dock-border: rgba(0, 0, 0, 0.08);
+  }
 }
 
 * {
@@ -17,7 +85,7 @@
 
 *::selection {
   background: var(--text-selection);
-  color: #ffffff;
+  color: inherit;
 }
 
 body {
@@ -29,6 +97,7 @@ body {
   margin: 0;
   padding: 0;
   height: 100vh;
+  height: 100dvh;
   overflow: hidden;
   display: flex;
   justify-content: center;
@@ -36,12 +105,12 @@ body {
   background-image:
     radial-gradient(
       circle at 25% 25%,
-      rgba(60, 60, 80, 0.4) 0%,
+      var(--backdrop-glow-1) 0%,
       transparent 50%
     ),
     radial-gradient(
       circle at 75% 75%,
-      rgba(40, 40, 70, 0.3) 0%,
+      var(--backdrop-glow-2) 0%,
       transparent 50%
     );
   background-size: 100% 100%;
@@ -49,16 +118,19 @@ body {
 
 .notes-window {
   position: absolute;
-  width: 1100px;
+  width: min(1100px, calc(100vw - 40px));
   min-width: 380px;
+  /* Also caps a size set by dragging the resize handle. */
+  max-width: calc(100vw - 24px);
   height: 88vh;
+  height: 88dvh;
   min-height: 440px;
+  max-height: calc(100vh - 24px);
+  max-height: calc(100dvh - 24px);
   background: var(--bg-window);
   border-radius: 12px;
   overflow: hidden;
-  box-shadow:
-    0 20px 70px rgba(0, 0, 0, 0.6),
-    0 0 0 1px rgba(255, 255, 255, 0.08) inset;
+  box-shadow: var(--window-shadow);
   display: flex;
   flex-direction: column;
   user-select: none;
@@ -103,9 +175,7 @@ body {
 
 /* When actually dragging */
 .notes-window.dragging {
-  box-shadow:
-    0 30px 100px rgba(0, 0, 0, 0.75),
-    0 0 0 1px rgba(255, 255, 255, 0.12) inset;
+  box-shadow: var(--window-shadow-active);
   opacity: 0.98;
 }
 
@@ -214,19 +284,25 @@ body {
   background: transparent;
   align-items: center;
   gap: 2px;
-  color: #e2a727;
+  color: var(--accent);
   -webkit-app-region: no-drag;
   cursor: pointer;
 }
 
 .back-button:focus-visible,
 #search-notes:focus-visible {
-  outline: 2px solid rgba(226, 167, 39, 0.75);
+  outline: 2px solid var(--focus-ring);
   outline-offset: 2px;
 }
 
 .sidebar li:focus-visible {
-  outline: none;
+  outline: 2px solid var(--focus-ring);
+  outline-offset: -2px;
+}
+
+.sidebar li.active:focus-visible,
+.sidebar li[aria-selected="true"]:focus-visible {
+  outline-color: var(--focus-ring-on-selection);
 }
 
 .back-icon {
@@ -246,19 +322,63 @@ body {
   overflow: hidden;
 }
 
-/* Search in top-right */
-.search-wrapper {
+/* Toolbar actions in the top-right: résumé button and search */
+.title-actions {
+  display: flex;
+  align-items: center;
+  gap: 10px;
   margin-left: auto;
   -webkit-app-region: no-drag;
   z-index: 1;
 }
 
+.toolbar-button {
+  display: inline-flex;
+  align-items: center;
+  gap: 5px;
+  height: 28px;
+  padding: 0 9px;
+  border-radius: 6px;
+  color: var(--text-secondary);
+  font-size: 13px;
+  font-weight: 500;
+  text-decoration: none;
+  white-space: nowrap;
+  transition:
+    background 0.15s ease,
+    color 0.15s ease;
+}
+
+.toolbar-button:hover {
+  background: var(--hover);
+  color: var(--text-primary);
+}
+
+.toolbar-button:focus-visible {
+  outline: 2px solid var(--focus-ring);
+  outline-offset: 1px;
+}
+
+.toolbar-icon {
+  width: 16px;
+  height: 16px;
+  fill: none;
+  stroke: currentColor;
+  stroke-width: 1.8;
+  stroke-linecap: round;
+  stroke-linejoin: round;
+}
+
+.search-wrapper {
+  -webkit-app-region: no-drag;
+}
+
 #search-notes {
   width: 180px;
   padding: 5px 10px 5px 28px;
-  border: 1px solid #3a3a40;
+  border: 1px solid var(--search-border);
   border-radius: 6px;
-  background: #2c2c30
+  background: var(--search-bg)
     url('data:image/svg+xml;utf8,<svg xmlns="http://www.w3.org/2000/svg" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="%238e8e93" stroke-width="2"><circle cx="11" cy="11" r="8"/><line x1="21" y1="21" x2="16.65" y2="16.65"/></svg>')
     no-repeat 10px center;
   background-size: 14px;
@@ -267,20 +387,20 @@ body {
 }
 
 #search-notes::placeholder {
-  color: #8e8e93;
+  color: var(--text-tertiary);
 }
 
 #search-notes:focus {
   outline: none;
-  border-color: #515154;
-  box-shadow: 0 0 0 3px rgba(81, 81, 84, 0.25);
+  border-color: var(--search-focus-border);
+  box-shadow: 0 0 0 3px var(--search-focus-ring);
 }
 
 /* No results message */
 .no-results {
   padding: 12px 16px;
   font-size: 13px;
-  color: #8e8e93;
+  color: var(--text-tertiary);
   text-align: center;
 }
 
@@ -304,25 +424,35 @@ body {
   list-style: none;
 }
 
-.sidebar li {
+.sidebar li[data-section] {
   padding: 9px 16px;
   cursor: pointer;
   transition: background 0.15s;
   user-select: none;
 }
 
-.sidebar li:hover {
-  background: rgba(255, 255, 255, 0.08);
+.sidebar li[data-section]:hover {
+  background: var(--hover);
+}
+
+/* "Pinned" / "Notes" section labels, as in the macOS Notes list */
+.list-group-header {
+  padding: 12px 16px 5px;
+  color: var(--text-secondary);
+  font-size: 12px;
+  font-weight: 600;
+  cursor: default;
+  user-select: none;
 }
 
 .sidebar li.active {
   background: var(--selection);
-  color: white;
+  color: var(--selection-text);
 }
 
 .sidebar li[aria-selected="true"] {
   background: var(--selection);
-  color: white;
+  color: var(--selection-text);
 }
 
 .sidebar li.active .note-title,
@@ -337,20 +467,30 @@ body {
 
 .note-title {
   font-size: 14px;
-  font-weight: 500;
+  font-weight: 600;
   color: var(--text-primary);
   margin-bottom: 2px;
 }
 
 .note-preview {
   font-size: 12px;
-  color: #8e8e93;
+  color: var(--text-tertiary);
   line-height: 1.3;
   margin-top: 2px;
   white-space: nowrap;
   overflow: hidden;
   text-overflow: ellipsis;
-  display: none;
+}
+
+.note-date {
+  margin-right: 6px;
+  color: var(--text-primary);
+  font-variant-numeric: tabular-nums;
+}
+
+.sidebar li.active .note-date,
+.sidebar li[aria-selected="true"] .note-date {
+  color: inherit;
 }
 
 .highlight {
@@ -364,7 +504,7 @@ body {
   padding: 14px 16px 8px;
   font-size: 11px;
   font-weight: 600;
-  color: #6e6e73;
+  color: var(--text-quaternary);
   text-transform: uppercase;
   letter-spacing: 0.5px;
 }
@@ -413,7 +553,7 @@ body {
 #note-content ol {
   font-size: 15px;
   line-height: 1.55;
-  color: #d0d0d5;
+  color: var(--text-body);
   margin: 0 0 16px;
   font-family: inherit;
 }
@@ -440,8 +580,91 @@ body {
   border-radius: 2px;
 }
 
-.note-preview[style*="block"] {
-  display: block !important;
+#note-content h2 {
+  margin: 26px 0 12px;
+  color: var(--text-primary);
+  font-size: 19px;
+  font-weight: 600;
+}
+
+#note-content hr {
+  margin: 26px 0;
+  border: 0;
+  border-top: 1px solid var(--border);
+}
+
+#note-content .role {
+  margin-bottom: 10px;
+}
+
+.stack-line,
+.project-meta {
+  display: block;
+  margin-top: 2px;
+  color: var(--text-tertiary);
+  font-size: 13px;
+}
+
+.project-meta {
+  margin-bottom: 3px;
+}
+
+#note-content .note-actions {
+  margin-top: -6px;
+}
+
+#note-content .note-aside {
+  margin-top: 26px;
+  color: var(--text-tertiary);
+  font-size: 13px;
+}
+
+/* Contact rows: label, link, optional copy button */
+#note-content .contact-row {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: baseline;
+  column-gap: 12px;
+  row-gap: 4px;
+  margin-bottom: 12px;
+}
+
+.contact-label {
+  min-width: 70px;
+  color: var(--text-tertiary);
+  font-size: 13px;
+}
+
+.copy-button {
+  appearance: none;
+  padding: 2px 9px;
+  border: 1px solid var(--border);
+  border-radius: 6px;
+  background: var(--hover);
+  color: var(--text-secondary);
+  font: inherit;
+  font-size: 12px;
+  cursor: pointer;
+}
+
+.copy-button:hover {
+  color: var(--text-primary);
+}
+
+.copy-button:focus-visible,
+ul.checklist li:focus-visible {
+  outline: 2px solid var(--focus-ring);
+  outline-offset: 2px;
+  border-radius: 6px;
+}
+
+/* A small arrow marks links that open in a new tab. */
+#note-content a[target="_blank"]::after {
+  content: "↗";
+  margin-left: 1px;
+  font-size: 0.72em;
+  opacity: 0.6;
+  text-decoration: none;
 }
 
 /* Checklist style for skills/projects */
@@ -492,14 +715,9 @@ ul.checklist li:hover::before {
   border-color: #a0a0a5;
 }
 
-/* Dark mode adjustment */
-:root.dark ul.checklist li.checked::before {
-  background: #fbb726;
-}
-
 /* Contact links */
 .contact-link {
-  color: #e2a727;
+  color: var(--accent);
   text-decoration: underline;
   transition: color 0.15s ease;
   display: inline-flex;
@@ -509,39 +727,160 @@ ul.checklist li:hover::before {
 
 .contact-link:hover,
 .contact-link:focus {
-  color: #e2a727;
+  color: var(--accent);
   text-decoration: underline;
-  text-decoration-color: #e2a727;
+  text-decoration-color: var(--accent);
   text-decoration-thickness: 1px;
 }
 
-/* External icon */
-.external-icon {
-  font-size: 0.8em;
-  color: inherit;
-  opacity: 0.7;
-  vertical-align: baseline;
-  transition: opacity 0.15s ease;
-}
-
-.contact-link:hover .external-icon,
-.contact-link:focus .external-icon {
-  opacity: 0.95;
-}
-
 #note-content a:not(.contact-link) {
-  color: #e2a727;
+  color: var(--accent);
   text-decoration: none;
   transition: color 0.15s ease;
 }
 
 #note-content a:not(.contact-link):hover,
 #note-content a:not(.contact-link):focus {
-  color: #e2a727;
+  color: var(--accent);
   text-decoration: underline;
   text-underline-offset: 2px;
-  text-decoration-color: #e2a727;
+  text-decoration-color: var(--accent);
   text-decoration-thickness: 1px;
+}
+
+/* Mobile-only pieces of the iOS layout */
+.mobile-header,
+.notes-count {
+  display: none;
+}
+
+/* Window zoom, minimize and close */
+.notes-window {
+  transition:
+    transform 0.38s cubic-bezier(0.32, 0.72, 0, 1),
+    opacity 0.3s ease,
+    visibility 0s;
+}
+
+.notes-window.is-animating {
+  transition:
+    left 0.28s ease,
+    top 0.28s ease,
+    width 0.28s ease,
+    height 0.28s ease;
+}
+
+.notes-window.is-hidden {
+  visibility: hidden;
+  opacity: 0;
+  pointer-events: none;
+  transform: translate(var(--hide-x, 0), var(--hide-y, 0)) scale(0.08);
+  transition:
+    transform 0.38s cubic-bezier(0.4, 0, 0.6, 1),
+    opacity 0.32s ease,
+    visibility 0s linear 0.38s;
+}
+
+.notes-window.is-hidden.is-closing {
+  transform: scale(0.96);
+  transition:
+    transform 0.18s ease,
+    opacity 0.18s ease,
+    visibility 0s linear 0.18s;
+}
+
+.dock {
+  position: fixed;
+  z-index: 50;
+  bottom: 10px;
+  left: 50%;
+  padding: 6px 8px 5px;
+  border: 1px solid var(--dock-border);
+  border-radius: 18px;
+  background: var(--dock-bg);
+  -webkit-backdrop-filter: blur(24px) saturate(1.6);
+  backdrop-filter: blur(24px) saturate(1.6);
+  box-shadow: 0 10px 30px rgba(0, 0, 0, 0.3);
+  opacity: 0;
+  transform: translate(-50%, 24px);
+  transition:
+    opacity 0.25s ease,
+    transform 0.25s ease;
+}
+
+.dock[hidden] {
+  display: none;
+}
+
+.dock.is-visible {
+  opacity: 1;
+  transform: translate(-50%, 0);
+}
+
+.dock-item {
+  appearance: none;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 4px;
+  padding: 0;
+  border: 0;
+  background: none;
+  cursor: pointer;
+}
+
+.dock-item:focus-visible {
+  outline: 2px solid var(--focus-ring);
+  outline-offset: 4px;
+  border-radius: 14px;
+}
+
+/* A CSS-drawn Notes app icon */
+.dock-icon {
+  position: relative;
+  width: 52px;
+  height: 52px;
+  overflow: hidden;
+  border-radius: 12px;
+  background: linear-gradient(to bottom, #fcd84e 0, #f5c32c 27%, #ffffff 27%);
+  box-shadow:
+    inset 0 0 0 1px rgba(0, 0, 0, 0.08),
+    0 2px 6px rgba(0, 0, 0, 0.25);
+  transition: transform 0.2s ease;
+}
+
+.dock-icon::before {
+  position: absolute;
+  top: 27%;
+  right: 0;
+  left: 0;
+  border-top: 1px dashed rgba(0, 0, 0, 0.18);
+  content: "";
+}
+
+.dock-icon::after {
+  position: absolute;
+  top: 21px;
+  right: 7px;
+  bottom: 6px;
+  left: 7px;
+  background: repeating-linear-gradient(
+    to bottom,
+    transparent 0 6px,
+    #d9d9de 6px 7px
+  );
+  content: "";
+}
+
+.dock-item:hover .dock-icon {
+  transform: translateY(-5px) scale(1.06);
+}
+
+.dock-indicator {
+  width: 4px;
+  height: 4px;
+  border-radius: 50%;
+  background: var(--text-secondary);
 }
 
 @media (max-width: 800px) {
@@ -549,15 +888,21 @@ ul.checklist li:hover::before {
     background-image: none;
     background: var(--bg-body);
     height: 100vh;
+    height: 100dvh;
     align-items: flex-start;
     display: block;
   }
 
+  /* !important overrides any desktop size left inline by window resizing. */
   .notes-window {
     position: static;
     transform: none;
-    width: 100%;
-    height: 100vh;
+    width: 100% !important;
+    min-width: 0;
+    max-width: none;
+    height: 100vh !important;
+    height: 100dvh !important;
+    min-height: 0;
     max-height: none;
     border-radius: 0;
     box-shadow: none;
@@ -596,7 +941,7 @@ ul.checklist li:hover::before {
   .title-bar.content-view .back-button {
     display: flex;
     align-items: center;
-    color: #e2a82c;
+    color: var(--accent);
   }
 
   .title-bar.content-view {
@@ -608,20 +953,22 @@ ul.checklist li:hover::before {
     border-bottom: none !important;
   }
 
-  .search-wrapper {
-    margin-left: auto; /* Adjusted for mobile */
+  /* iOS Notes: no window controls; a large title and search sit above the list. */
+  .controls,
+  .notes-window[data-view="list"] .title {
+    display: none;
   }
 
-  #search-notes {
-    width: 130px;
-    max-width: 50vw;
-    margin-left: 0;
+  .notes-window[data-view="list"] .title-bar {
+    border-bottom: none;
+    background: var(--ios-bg);
   }
 
   .content-wrapper {
     flex-direction: column;
     overflow: hidden;
     height: calc(100vh - 44px);
+    height: calc(100dvh - 44px);
   }
 
   .sidebar {
@@ -632,11 +979,42 @@ ul.checklist li:hover::before {
     overflow-y: auto;
     flex-shrink: 0;
     touch-action: pan-y;
-    background-color: var(--bg-main);
+    background-color: var(--ios-bg);
+  }
+
+  .mobile-header {
+    display: block;
+    order: -1;
+    padding: 2px 16px 4px;
+  }
+
+  .mobile-title {
+    margin: 0 0 10px;
+    color: var(--text-primary);
+    font-size: 32px;
+    font-weight: 700;
+    letter-spacing: -0.02em;
+  }
+
+  /* 16px text stops iOS Safari zooming in when the field is focused. */
+  .mobile-search-slot #search-notes {
+    width: 100%;
+    max-width: none;
+    height: 36px;
+    padding: 8px 12px 8px 32px;
+    border: 0;
+    border-radius: 10px;
+    background-color: var(--ios-search-bg);
+    background-position: 11px center;
+    font-size: 16px;
+  }
+
+  .mobile-search-slot #search-notes:focus {
+    box-shadow: 0 0 0 2px var(--focus-ring);
   }
 
   .sidebar-header {
-    order: 0;
+    display: none;
   }
 
   #no-results {
@@ -644,37 +1022,84 @@ ul.checklist li:hover::before {
   }
 
   #notes-list {
-    order: 2;
-  }
-
-  .sidebar-header {
-    display: block; /* Show header in mobile */
-    padding: 16px;
-  }
-
-  #notes-list {
     display: block;
-    padding: 0;
-    overflow-y: auto;
-    -webkit-overflow-scrolling: touch;
+    flex: none;
+    order: 2;
+    padding: 0 16px 16px;
   }
 
-  #notes-list li {
-    padding: 16px;
+  .list-group-header {
+    padding: 18px 4px 8px;
+    color: var(--text-primary);
+    font-size: 20px;
+    font-weight: 700;
+  }
+
+  #notes-list li[data-section] {
+    position: relative;
     margin: 0;
-    border-bottom: 1px solid var(--border);
-    background: none;
+    padding: 12px 16px;
+    background: var(--ios-row);
     text-align: left;
-    border-radius: 0;
     touch-action: manipulation;
   }
 
-  #notes-list li.active {
+  #notes-list li[data-section]::after {
+    position: absolute;
+    right: 0;
+    bottom: 0;
+    left: 16px;
+    border-bottom: 0.5px solid var(--ios-separator);
+    content: "";
+  }
+
+  /* Each group is an inset, rounded block like iOS grouped lists. */
+  #notes-list .list-group-header + li[data-section] {
+    border-top-left-radius: 10px;
+    border-top-right-radius: 10px;
+  }
+
+  #notes-list li[data-section]:has(+ .list-group-header),
+  #notes-list li[data-section]:last-child {
+    border-bottom-left-radius: 10px;
+    border-bottom-right-radius: 10px;
+  }
+
+  #notes-list li[data-section]:has(+ .list-group-header)::after,
+  #notes-list li[data-section]:last-child::after {
+    display: none;
+  }
+
+  #notes-list li[data-section].active {
     background: var(--selection);
   }
 
+  .note-title {
+    font-size: 16px;
+  }
+
   .note-preview {
-    display: block !important;
+    font-size: 14px;
+  }
+
+  .notes-count {
+    display: block;
+    position: sticky;
+    bottom: 0;
+    order: 3;
+    margin-top: auto;
+    padding: 10px 16px calc(10px + env(safe-area-inset-bottom));
+    border-top: 0.5px solid var(--ios-separator);
+    background: var(--ios-bar-bg);
+    -webkit-backdrop-filter: blur(18px);
+    backdrop-filter: blur(18px);
+    color: var(--text-secondary);
+    font-size: 12px;
+    text-align: center;
+  }
+
+  .dock {
+    display: none !important;
   }
 
   .main-content {
@@ -778,7 +1203,12 @@ ul.checklist li:hover::before {
   .title-bar,
   .control,
   .contact-link,
-  #note-content a:not(.contact-link) {
+  #note-content a:not(.contact-link),
+  .notes-window,
+  .notes-window.is-hidden,
+  .notes-window.is-animating,
+  .dock,
+  .dock-icon {
     transition: none;
   }
 
@@ -792,7 +1222,7 @@ ul.checklist li:hover::before {
 /* -------------------------------------------------------------------------- */
 .journal-app {
   --journal-paper: #f6f1e7;
-  --journal-accent: #e2a727;
+  --journal-accent: var(--accent);
   display: flow-root;
   /* Lifted pages may project slightly outside the book; keep that from
      creating scrollbars in the note pane. */

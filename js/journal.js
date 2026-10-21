@@ -11,6 +11,8 @@ const DRAG_THRESHOLD = 6;
 
 const reducedMotion = window.matchMedia("(prefers-reduced-motion: reduce)");
 const decodeCache = new Map();
+// The open journal and spread, so remounting the viewer resumes reading.
+const savedView = { journalId: null, spread: 0 };
 
 const clamp = (value, min, max) => Math.min(max, Math.max(min, value));
 const easeInOutSine = (t) => 0.5 - 0.5 * Math.cos(Math.PI * t);
@@ -101,7 +103,17 @@ export function initJournalViewer(container) {
   resizeObserver.observe(scrollParent);
   document.addEventListener("keydown", onKeyDown);
 
-  renderLibrary();
+  const resumeJournal = Array.isArray(journals)
+    ? journals.find(
+        (journal) =>
+          isValidJournal(journal) && journal.id === savedView.journalId,
+      )
+    : null;
+  if (resumeJournal) {
+    openJournal(resumeJournal, savedView.spread);
+  } else {
+    renderLibrary();
+  }
 
   return function destroy() {
     document.removeEventListener("keydown", onKeyDown);
@@ -142,6 +154,7 @@ export function initJournalViewer(container) {
     reader = null;
     drag = null;
     state.journal = null;
+    savedView.journalId = null;
     root.replaceChildren();
 
     if (journalsUpdatedAt) {
@@ -215,7 +228,7 @@ export function initJournalViewer(container) {
   /* Reader                                                             */
   /* ------------------------------------------------------------------ */
 
-  function openJournal(journal) {
+  function openJournal(journal, startSpread = 0) {
     stopFlip();
     state.journal = journal;
     state.spread = 0;
@@ -279,7 +292,14 @@ export function initJournalViewer(container) {
     book.addEventListener("pointercancel", onPointerCancel);
     book.addEventListener("dragstart", (event) => event.preventDefault());
 
-    showSpread(0);
+    // Spreads start on even page indexes; clamp a resumed spread into range.
+    const lastIndex = Math.max(0, journal.pages.length - 1);
+    const maxSpread = lastIndex - (lastIndex % 2);
+    const spread = Math.min(
+      Math.max(0, startSpread - (startSpread % 2)),
+      maxSpread,
+    );
+    showSpread(spread);
     layoutBook();
 
     if (!reader.ratio) {
@@ -354,6 +374,8 @@ export function initJournalViewer(container) {
 
   function updateControls() {
     if (!reader) return;
+    savedView.journalId = state.journal.id;
+    savedView.spread = state.spread;
     const total = state.journal.pages.length;
     const first = state.spread + 1;
     const last = Math.min(state.spread + 2, total);
