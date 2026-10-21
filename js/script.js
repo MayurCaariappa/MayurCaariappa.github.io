@@ -27,6 +27,7 @@ document.addEventListener("DOMContentLoaded", () => {
   let easterRevealed = false;
   let easterItemElement = null;
   let hasCenteredWindow = false;
+  let teardownJournal = null;
 
   let isDragging = false;
   let dragStartX = 0;
@@ -77,6 +78,7 @@ document.addEventListener("DOMContentLoaded", () => {
     backButton.addEventListener("click", () => {
       if (!isMobile()) return;
       setMobileView("list");
+      unmountJournal();
       contentDiv.innerHTML = "";
       // Clear the active key so tapping the same note again reloads its content.
       activeSection = "";
@@ -417,6 +419,7 @@ document.addEventListener("DOMContentLoaded", () => {
     noResults.classList.toggle("hidden", visibleCount > 0 || !term);
 
     if (visibleCount === 0 && term) {
+      unmountJournal();
       contentDiv.innerHTML = "";
       contentDiv.classList.remove("fade-in", "slide-in");
       return;
@@ -447,12 +450,18 @@ document.addEventListener("DOMContentLoaded", () => {
     if (!term) loadNote(activeSection);
   }
 
+  function unmountJournal() {
+    teardownJournal?.();
+    teardownJournal = null;
+  }
+
   function loadNote(key) {
+    unmountJournal();
     contentDiv.classList.remove("fade-in", "slide-in");
 
     if (key === "journal") {
       contentDiv.innerHTML = "";
-      initJournalViewer(contentDiv);
+      teardownJournal = initJournalViewer(contentDiv);
       footer.classList.remove("visible");
       mainContent.style.paddingBottom = "0";
       requestAnimationFrame(() => {
