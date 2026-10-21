@@ -235,11 +235,15 @@ document.addEventListener("DOMContentLoaded", () => {
     const dockRect = dockButton.getBoundingClientRect();
     const dx =
       kind === "minimize"
-        ? dockRect.left + dockRect.width / 2 - (windowRect.left + windowRect.width / 2)
+        ? dockRect.left +
+          dockRect.width / 2 -
+          (windowRect.left + windowRect.width / 2)
         : 0;
     const dy =
       kind === "minimize"
-        ? dockRect.top + dockRect.height / 2 - (windowRect.top + windowRect.height / 2)
+        ? dockRect.top +
+          dockRect.height / 2 -
+          (windowRect.top + windowRect.height / 2)
         : 0;
 
     windowEl.style.setProperty("--hide-x", `${dx}px`);
@@ -396,7 +400,12 @@ document.addEventListener("DOMContentLoaded", () => {
   /* ------------------------------------------------------------------ */
 
   function handleGlobalShortcuts(event) {
-    if (event.defaultPrevented || event.metaKey || event.ctrlKey || event.altKey)
+    if (
+      event.defaultPrevented ||
+      event.metaKey ||
+      event.ctrlKey ||
+      event.altKey
+    )
       return;
 
     const target = event.target instanceof Element ? event.target : null;
@@ -428,7 +437,9 @@ document.addEventListener("DOMContentLoaded", () => {
 
     const inSidebar = Boolean(target && notesList.contains(target));
     const nothingFocused =
-      !target || target === document.body || target === document.documentElement;
+      !target ||
+      target === document.body ||
+      target === document.documentElement;
 
     if (event.key === "j" || event.key === "J") {
       event.preventDefault();
@@ -749,7 +760,8 @@ document.addEventListener("DOMContentLoaded", () => {
         })
         .catch(() => {
           if (token !== loadToken) return;
-          contentDiv.textContent = "The journal couldn't be loaded. Please refresh and try again.";
+          contentDiv.textContent =
+            "The journal couldn't be loaded. Please refresh and try again.";
           fadeInContent();
         });
       return;
@@ -949,7 +961,9 @@ document.addEventListener("DOMContentLoaded", () => {
   }
 
   function getVisibleItems() {
-    return Array.from(notesList.querySelectorAll(NOTE_ITEM)).filter(isItemVisible);
+    return Array.from(notesList.querySelectorAll(NOTE_ITEM)).filter(
+      isItemVisible,
+    );
   }
 
   function getSelectedItem() {
