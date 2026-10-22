@@ -5,6 +5,7 @@ import {
   createNoteEntry,
   escapeHtml,
   escapeRegExp,
+  formatListDate,
 } from "./utils.js";
 import { journals, journalsUpdatedAt } from "./journal-data.js";
 
@@ -15,18 +16,39 @@ const HIDDEN_NOTE_PREVIEWS = {
   journal: "Your journal shelf",
 };
 
+const FOLDERS = [
+  { id: "all", label: "All Notes", icon: "folder" },
+  { id: "case-studies", label: "Case Studies", icon: "folder" },
+  { id: "deleted", label: "Recently Deleted", icon: "trash" },
+];
+
+const FOLDER_ICONS = {
+  folder:
+    '<svg viewBox="0 0 24 24" aria-hidden="true" focusable="false"><path d="M3.5 7.5A1.5 1.5 0 0 1 5 6h4.2l1.8 2H19a1.5 1.5 0 0 1 1.5 1.5v8A1.5 1.5 0 0 1 19 19H5a1.5 1.5 0 0 1-1.5-1.5Z"/></svg>',
+  trash:
+    '<svg viewBox="0 0 24 24" aria-hidden="true" focusable="false"><path d="M5 7h14M10 7V5h4v2M7 7l1 12h8l1-12"/></svg>',
+  lock: '<svg viewBox="0 0 24 24" aria-hidden="true" focusable="false"><rect x="5.5" y="10.5" width="13" height="9.5" rx="2"/><path d="M8.5 10.5V8a3.5 3.5 0 0 1 7 0v2.5"/></svg>',
+};
+
+// A playful easter egg, not a secret: the same word also works in search.
+const LOCK_ANSWER = "easter";
+const LOCKED_PREVIEW = "Locked";
+
 document.addEventListener("DOMContentLoaded", () => {
   const MOBILE_BREAKPOINT = 800;
   const MIN_WINDOW_WIDTH = 380;
   const MIN_WINDOW_HEIGHT = 440;
   const VIEWPORT_MARGIN = 12;
   const ARROW_SCROLL_STEP = 56;
+  // The folders column appears once the window is wide enough for three panes.
+  const FOLDERS_PANE_MIN_WIDTH = 1020;
 
   const windowEl = document.querySelector(".notes-window");
   const titleBar = document.querySelector(".title-bar");
   const titleActions = document.querySelector(".title-actions");
   const searchWrapper = document.querySelector(".search-wrapper");
   const mobileSearchSlot = document.querySelector(".mobile-search-slot");
+  const mobileTitle = document.querySelector(".mobile-title");
   const backButton = document.querySelector(".back-button");
   const resizeHandle = document.querySelector(".resize-handle");
   const contentDiv = document.getElementById("note-content");
@@ -37,12 +59,32 @@ document.addEventListener("DOMContentLoaded", () => {
   const footer = document.getElementById("contact-footer");
   const mainContent = document.querySelector(".main-content");
   const sidebar = document.querySelector(".sidebar");
+  const sidebarHeader = document.querySelector(".sidebar-header");
+  const folderList = document.querySelector(".folder-list");
+  const tagList = document.querySelector(".tag-list");
+  const scopeBar = document.querySelector(".scope-bar");
+  const galleryView = document.querySelector(".gallery-view");
+  const galleryButton = document.querySelector(".gallery-toggle");
+  const shareButton = document.querySelector(".share-button");
+  const toast = document.querySelector(".toast");
   const dock = document.querySelector(".dock");
   const dockButton = document.querySelector(".dock-item");
   const reducedMotion = window.matchMedia("(prefers-reduced-motion: reduce)");
 
   const isMobile = () => window.innerWidth <= MOBILE_BREAKPOINT;
+  adoptPrerenderedNotes();
   const noteData = buildNoteData(notesList.querySelectorAll(NOTE_ITEM));
+  const allTags = collectTags();
+  // The locked note's text stays out of previews and search until unlocked.
+  const lockedEntry = noteData.private;
+  if (lockedEntry) {
+    noteData.private = {
+      ...lockedEntry,
+      plainContent: "",
+      lowerContent: "",
+      excerpt: LOCKED_PREVIEW,
+    };
+  }
 
   let activeSection = "";
   // Last note opened; restored when a blank mobile list view widens to desktop.
@@ -51,9 +93,14 @@ document.addEventListener("DOMContentLoaded", () => {
   // the search is cleared.
   let chosenSection = "";
   let hiddenNotesRevealed = false;
+  let privateUnlocked = false;
+  let activeFolder = "all";
+  let activeTag = "";
+  let galleryMode = false;
+  let toastTimer = 0;
   let hasCenteredWindow = false;
   let teardownJournal = null;
-  // Incremented on every note load so a slow journal import can tell it is stale.
+  // Incremented on every note load so slow lazy imports can tell they are stale.
   let loadToken = 0;
   // Window position/size before "Zoom" filled the screen.
   let unzoomedGeometry = null;
@@ -86,11 +133,12 @@ document.addEventListener("DOMContentLoaded", () => {
   initWindowDragging();
   initWindowResizing();
   initWindowControls();
+  initFoldersPane();
   updateList("");
 
   if (!isMobile()) centerWindow();
 
-  activateSection(initialSection || "about", {
+  openNote(initialSection || "about", {
     updateHash: false,
     forceLoad: true,
   });
@@ -134,6 +182,14 @@ document.addEventListener("DOMContentLoaded", () => {
     });
 
     contentDiv.addEventListener("click", handleCopyClick);
+    contentDiv.addEventListener("click", handleTagClick);
+    folderList.addEventListener("click", handleScopeClick);
+    tagList.addEventListener("click", handleScopeClick);
+    scopeBar.addEventListener("click", handleScopeClick);
+    galleryView.addEventListener("click", handleGalleryClick);
+    galleryButton.addEventListener("click", () => setGalleryMode(!galleryMode));
+    shareButton.addEventListener("click", shareCurrentNote);
+    document.addEventListener("click", trackLinkClick);
     document.addEventListener("keydown", handleGlobalShortcuts);
     window.addEventListener("hashchange", handleHashChange);
     window.addEventListener("resize", syncResponsiveView);
@@ -293,8 +349,9 @@ document.addEventListener("DOMContentLoaded", () => {
 
     function startDrag(event) {
       if (
-        event.target.closest(".controls, .title-actions, .back-button") ||
-        isMobile()
+        event.target.closest(
+          ".controls, .title-actions, .back-button, .gallery-toggle",
+        ) || isMobile()
       ) {
         return;
       }
@@ -427,6 +484,11 @@ document.addEventListener("DOMContentLoaded", () => {
         return;
       }
 
+      if (galleryMode) {
+        setGalleryMode(false);
+        return;
+      }
+
       if (isMobile() && windowEl.dataset.view === "content") {
         backButton.click();
       }
@@ -485,14 +547,34 @@ document.addEventListener("DOMContentLoaded", () => {
     } catch {
       return "";
     }
-    const item = key ? findItem(key) : null;
-    return item && isItemVisible(item) ? key : "";
+    // Any existing note can be linked to; openNote() widens the scope if needed.
+    return key && findItem(key) ? key : "";
   }
 
   function handleHashChange() {
     const hashSection = getSectionFromHash();
     if (!hashSection || hashSection === activeSection) return;
-    activateSection(hashSection, { updateHash: false, forceLoad: true });
+    if (galleryMode) setGalleryMode(false);
+    openNote(hashSection, { updateHash: false, forceLoad: true });
+  }
+
+  /** Opens a note, clearing search or switching folder if it's filtered out. */
+  function openNote(key, options) {
+    const item = findItem(key);
+    if (!item) return false;
+
+    if (!isItemVisible(item)) {
+      const folder = item.dataset.folder || "notes";
+      searchInput.value = "";
+      activeTag = "";
+      activeFolder =
+        folder === "deleted" ||
+        (folder === "case-studies" && activeFolder === "case-studies")
+          ? folder
+          : "all";
+      updateList("");
+    }
+    return activateSection(key, options);
   }
 
   /* ------------------------------------------------------------------ */
@@ -543,6 +625,7 @@ document.addEventListener("DOMContentLoaded", () => {
     });
 
     if (changed || forceLoad) loadNote(key);
+    if (changed) track("view_note", { note: key });
 
     if (updateHash) {
       history.replaceState(null, "", `#${encodeURIComponent(key)}`);
@@ -565,6 +648,7 @@ document.addEventListener("DOMContentLoaded", () => {
 
     if (isMobile()) {
       if (windowEl.classList.contains("is-hidden")) showWindow();
+      if (galleryMode) setGalleryMode(false);
       setMobileView(windowEl.dataset.view === "content" ? "content" : "list");
       return;
     }
@@ -635,22 +719,24 @@ document.addEventListener("DOMContentLoaded", () => {
         return;
       }
 
-      const matchTitle = data.lowerTitle.includes(lowerTerm);
-      const matchContent = data.lowerContent.includes(lowerTerm);
-      const matches = !term || matchTitle || matchContent;
+      // Search looks across every folder, like Notes; otherwise the current
+      // folder or tag decides what's listed.
+      const matchTitle = Boolean(term) && data.lowerTitle.includes(lowerTerm);
+      const matchContent =
+        Boolean(term) && data.lowerContent.includes(lowerTerm);
+      const matches = term ? matchTitle || matchContent : isInScope(item);
 
       item.style.display = matches ? "" : "none";
       if (matches) visibleCount++;
 
       titleEl.innerHTML = highlight(data.title, matchTitle ? term : "");
 
-      const previewHtml =
-        term && matchContent
-          ? highlight(
-              getBestSnippet(data.plainContent, term, data.lowerContent),
-              term,
-            )
-          : escapeHtml(data.excerpt);
+      const previewHtml = matchContent
+        ? highlight(
+            getBestSnippet(data.plainContent, term, data.lowerContent),
+            term,
+          )
+        : escapeHtml(data.excerpt);
       renderPreview(previewEl, data, previewHtml);
     });
 
@@ -664,12 +750,34 @@ document.addEventListener("DOMContentLoaded", () => {
 
     noResults.classList.toggle("hidden", visibleCount > 0 || !term);
     notesCount.textContent = `${visibleCount} ${visibleCount === 1 ? "Note" : "Notes"}`;
+
+    const heading = term
+      ? "Search"
+      : activeTag
+        ? `#${activeTag}`
+        : FOLDERS.find((folder) => folder.id === activeFolder).label;
+    sidebarHeader.textContent = heading;
+    mobileTitle.textContent =
+      term || (activeFolder === "all" && !activeTag) ? "Notes" : heading;
+
+    renderScopeControls();
+    if (galleryMode) renderGallery();
     return visibleCount;
   }
 
+  function isInScope(item) {
+    const folder = item.dataset.folder || "notes";
+    if (activeTag) {
+      return folder !== "deleted" && getTags(item).includes(activeTag);
+    }
+    if (activeFolder === "all") return folder !== "deleted";
+    return folder === activeFolder;
+  }
+
   function renderPreview(previewEl, data, html) {
-    const date = data.date
-      ? `<span class="note-date">${escapeHtml(data.date)}</span>`
+    const label = formatListDate(data.dateValue);
+    const date = label
+      ? `<span class="note-date">${escapeHtml(label)}</span>`
       : "";
     previewEl.innerHTML = `${date}<span class="note-snippet">${html}</span>`;
   }
@@ -680,7 +788,8 @@ document.addEventListener("DOMContentLoaded", () => {
 
     // On mobile the search box lives in the list view: filter the list and
     // let the user tap a result, rather than jumping into a note mid-typing.
-    if (isMobile()) return;
+    // The gallery shows results itself.
+    if (isMobile() || galleryMode) return;
 
     if (visibleCount === 0) {
       clearContent();
@@ -771,6 +880,12 @@ document.addEventListener("DOMContentLoaded", () => {
     if (!data?.template) return;
 
     unmountJournal();
+
+    if (key === "private" && !privateUnlocked) {
+      renderLockScreen();
+      return;
+    }
+
     const scrollTop = mainContent.scrollTop;
     const fragment = data.template.content.cloneNode(true);
     const term = searchInput.value.trim();
@@ -779,6 +894,9 @@ document.addEventListener("DOMContentLoaded", () => {
     if (timestampEl?.dataset.time) {
       timestampEl.textContent = timestampEl.dataset.time;
     }
+
+    const tags = getTags(findItem(key));
+    if (tags.length) fragment.append(createTagRow(tags));
 
     if (term) highlightFragment(fragment, term);
 
@@ -790,6 +908,16 @@ document.addEventListener("DOMContentLoaded", () => {
 
     if (key === "skills") {
       initChecklist();
+    }
+
+    const activity = contentDiv.querySelector(".github-activity");
+    if (activity) {
+      // Loaded on demand; the plain link stays if the request fails.
+      import("./github-activity.js")
+        .then(({ renderGithubActivity }) =>
+          renderGithubActivity(activity, () => token === loadToken),
+        )
+        .catch(() => {});
     }
 
     if (animate) {
@@ -876,6 +1004,7 @@ document.addEventListener("DOMContentLoaded", () => {
     if (!button) return;
 
     const original = button.textContent;
+    track("copy_email", { note: activeSection });
     try {
       await navigator.clipboard.writeText(button.dataset.copy);
       button.textContent = "Copied";
@@ -900,7 +1029,11 @@ document.addEventListener("DOMContentLoaded", () => {
     if (!easterTemplate) return;
     hiddenNotesRevealed = true;
 
-    notesList.append(
+    // Revealed notes join the regular "Notes" group, above Recently Deleted.
+    const deletedHeader = notesList.querySelector(
+      '[data-group-header="deleted"]',
+    );
+    deletedHeader.before(
       createNoteItem("easter", "Fun Facts"),
       createNoteItem("journal", "Journal"),
     );
@@ -933,6 +1066,7 @@ document.addEventListener("DOMContentLoaded", () => {
     const item = document.createElement("li");
     item.dataset.section = section;
     item.dataset.group = "notes";
+    item.dataset.folder = "notes";
     item.setAttribute("role", "option");
     item.setAttribute("aria-selected", "false");
     item.tabIndex = -1;
@@ -950,6 +1084,286 @@ document.addEventListener("DOMContentLoaded", () => {
   /* ------------------------------------------------------------------ */
   /* Helpers                                                            */
   /* ------------------------------------------------------------------ */
+
+  /**
+   * About ships as real HTML (for search engines and no-JS visitors); turn it
+   * into a template like the other notes so it renders the same way.
+   */
+  function adoptPrerenderedNotes() {
+    contentDiv.querySelectorAll("[data-prerendered]").forEach((article) => {
+      const template = document.createElement("template");
+      template.id = `section-${article.dataset.prerendered}`;
+      template.innerHTML = article.innerHTML;
+      document.body.append(template);
+    });
+  }
+
+  function getTags(item) {
+    return (item?.dataset.tags || "").split(/\s+/).filter(Boolean);
+  }
+
+  function collectTags() {
+    const tags = new Set();
+    notesList
+      .querySelectorAll(`${NOTE_ITEM}[data-tags]`)
+      .forEach((item) => getTags(item).forEach((tag) => tags.add(tag)));
+    return [...tags].sort();
+  }
+
+  function createTagRow(tags) {
+    const row = document.createElement("p");
+    row.className = "note-tags";
+    row.dataset.previewSkip = "";
+    tags.forEach((tag) => {
+      const button = document.createElement("button");
+      button.type = "button";
+      button.className = "tag-pill";
+      button.dataset.tag = tag;
+      button.textContent = `#${tag}`;
+      button.title = `Show notes tagged #${tag}`;
+      row.append(button);
+    });
+    return row;
+  }
+
+  /* ------------------------------------------------------------------ */
+  /* Folders and tags                                                   */
+  /* ------------------------------------------------------------------ */
+
+  function initFoldersPane() {
+    const update = () => {
+      const wide =
+        !isMobile() && windowEl.offsetWidth >= FOLDERS_PANE_MIN_WIDTH;
+      windowEl.classList.toggle("has-folders", wide);
+    };
+    new ResizeObserver(update).observe(windowEl);
+    update();
+  }
+
+  function countInFolder(folderId) {
+    return Array.from(notesList.querySelectorAll(NOTE_ITEM)).filter((item) => {
+      const folder = item.dataset.folder || "notes";
+      return folderId === "all" ? folder !== "deleted" : folder === folderId;
+    }).length;
+  }
+
+  /** Renders the folders column and the compact chip bar from one source. */
+  function renderScopeControls() {
+    const searching = Boolean(searchInput.value.trim());
+    const folderButtons = FOLDERS.map((folder) => {
+      const isActive = !searching && !activeTag && activeFolder === folder.id;
+      return `<li><button type="button" class="folder-item${isActive ? " is-active" : ""}" data-folder="${folder.id}" aria-pressed="${isActive}">${FOLDER_ICONS[folder.icon]}<span class="folder-label">${escapeHtml(folder.label)}</span><span class="folder-count">${countInFolder(folder.id)}</span></button></li>`;
+    }).join("");
+    const tagButtons = allTags
+      .map((tag) => {
+        const isActive = !searching && activeTag === tag;
+        return `<button type="button" class="tag-pill${isActive ? " is-active" : ""}" data-tag="${escapeHtml(tag)}" aria-pressed="${isActive}">#${escapeHtml(tag)}</button>`;
+      })
+      .join("");
+
+    folderList.innerHTML = folderButtons;
+    tagList.innerHTML = tagButtons;
+
+    const chips = FOLDERS.map((folder) => {
+      const isActive = !searching && !activeTag && activeFolder === folder.id;
+      return `<button type="button" class="scope-chip${isActive ? " is-active" : ""}" data-folder="${folder.id}" aria-pressed="${isActive}">${escapeHtml(folder.id === "all" ? "All" : folder.label)}</button>`;
+    }).join("");
+    scopeBar.innerHTML = chips + tagButtons.replaceAll("tag-pill", "scope-chip tag-chip");
+  }
+
+  function handleScopeClick(event) {
+    const button = event.target.closest("[data-folder], [data-tag]");
+    if (!button) return;
+    if (button.dataset.tag !== undefined) {
+      const tag = button.dataset.tag;
+      setScope("all", activeTag === tag ? "" : tag);
+    } else {
+      setScope(button.dataset.folder, "");
+    }
+  }
+
+  function handleTagClick(event) {
+    const button = event.target.closest(".note-tags [data-tag]");
+    if (!button) return;
+    setScope("all", button.dataset.tag);
+    if (isMobile()) {
+      setMobileView("list");
+      sidebar.scrollTop = 0;
+    }
+  }
+
+  function setScope(folder, tag) {
+    activeFolder = folder;
+    activeTag = tag;
+    searchInput.value = "";
+    updateList("");
+    track("filter_notes", { folder, tag });
+
+    if (isMobile() || galleryMode) return;
+    const activeItem = findItem(activeSection);
+    if (!activeItem || !isItemVisible(activeItem)) {
+      const first = getVisibleItems()[0];
+      if (first) {
+        activateSection(first.dataset.section, { forceLoad: true });
+      } else {
+        clearContent();
+      }
+    }
+  }
+
+  /* ------------------------------------------------------------------ */
+  /* Gallery view                                                       */
+  /* ------------------------------------------------------------------ */
+
+  function setGalleryMode(on) {
+    if (on && isMobile()) return;
+    galleryMode = on;
+    windowEl.classList.toggle("is-gallery", on);
+    galleryView.hidden = !on;
+    galleryButton.setAttribute("aria-pressed", String(on));
+    galleryButton.setAttribute(
+      "aria-label",
+      on ? "Show notes as list" : "Show notes as gallery",
+    );
+    if (on) {
+      renderGallery();
+      track("gallery_view");
+    } else if (!activeSection || !contentDiv.hasChildNodes()) {
+      const first = getVisibleItems()[0];
+      if (first) activateSection(first.dataset.section, { forceLoad: true });
+    }
+  }
+
+  function renderGallery() {
+    const cards = getVisibleItems().map((item) => {
+      const key = item.dataset.section;
+      const data = noteData[key];
+      const isLocked = key === "private" && !privateUnlocked;
+      const preview = isLocked
+        ? `<span class="gallery-lock">${FOLDER_ICONS.lock}</span>`
+        : `<span class="gallery-thumb-title">${escapeHtml(data.title)}</span><span class="gallery-thumb-text">${escapeHtml(data.excerpt)}</span>`;
+      const date = formatListDate(data.dateValue);
+      return `<button type="button" class="gallery-card${key === activeSection ? " is-active" : ""}" data-section="${escapeHtml(key)}"><span class="gallery-thumb">${preview}</span><span class="gallery-title">${escapeHtml(data.title)}</span><span class="gallery-date">${escapeHtml(date)}</span></button>`;
+    });
+    galleryView.innerHTML = cards.length
+      ? `<div class="gallery-grid">${cards.join("")}</div>`
+      : '<p class="gallery-empty">No notes</p>';
+  }
+
+  function handleGalleryClick(event) {
+    const card = event.target.closest(".gallery-card");
+    if (!card) return;
+    setGalleryMode(false);
+    openNote(card.dataset.section, { forceLoad: true });
+  }
+
+  /* ------------------------------------------------------------------ */
+  /* Locked note                                                        */
+  /* ------------------------------------------------------------------ */
+
+  function renderLockScreen() {
+    contentDiv.dataset.term = "";
+    footer.classList.remove("visible");
+    mainContent.style.paddingBottom = "0";
+    contentDiv.innerHTML = `
+      <div class="lock-screen">
+        <span class="lock-icon">${FOLDER_ICONS.lock}</span>
+        <h2>This note is locked.</h2>
+        <p>Enter the note's password to view it.</p>
+        <form class="lock-form">
+          <input type="password" class="lock-input" placeholder="Password" aria-label="Note password" autocomplete="off" required />
+          <button type="submit" class="lock-submit">OK</button>
+        </form>
+        <p class="lock-hint" hidden>Hint: 🥚 What do you hunt for in spring?</p>
+      </div>`;
+
+    const form = contentDiv.querySelector(".lock-form");
+    const input = contentDiv.querySelector(".lock-input");
+    form.addEventListener("submit", (event) => {
+      event.preventDefault();
+      if (input.value.trim().toLowerCase() === LOCK_ANSWER) {
+        unlockPrivateNote();
+        return;
+      }
+      input.value = "";
+      contentDiv.querySelector(".lock-hint").hidden = false;
+      form.classList.remove("is-wrong");
+      void form.offsetWidth;
+      form.classList.add("is-wrong");
+      track("unlock_attempt", { success: false });
+    });
+
+    mainContent.scrollTop = 0;
+    fadeInContent();
+    if (!isMobile()) input.focus({ preventScroll: true });
+  }
+
+  function unlockPrivateNote() {
+    privateUnlocked = true;
+    if (lockedEntry) noteData.private = lockedEntry;
+    findItem("private")?.removeAttribute("data-locked");
+    revealHiddenNotes();
+    updateList(searchInput.value);
+    loadNote("private");
+    track("unlock_attempt", { success: true });
+  }
+
+  /* ------------------------------------------------------------------ */
+  /* Share, toast and analytics                                         */
+  /* ------------------------------------------------------------------ */
+
+  async function shareCurrentNote() {
+    const key = activeSection || lastSection || "about";
+    const title = noteData[key]?.title ?? "Portfolio";
+    const url = `${window.location.origin}${window.location.pathname}#${encodeURIComponent(key)}`;
+    track("share_note", { note: key });
+
+    // Phones get the native share sheet, like the Notes share button.
+    if (navigator.share && isMobile()) {
+      try {
+        await navigator.share({ title: `${title} · Mayur Caariappa`, url });
+        return;
+      } catch (error) {
+        if (error?.name === "AbortError") return;
+      }
+    }
+
+    try {
+      await navigator.clipboard.writeText(url);
+      showToast(`Link to “${title}” copied`);
+    } catch {
+      showToast(url);
+    }
+  }
+
+  function showToast(message) {
+    toast.textContent = message;
+    toast.classList.add("is-visible");
+    window.clearTimeout(toastTimer);
+    toastTimer = window.setTimeout(
+      () => toast.classList.remove("is-visible"),
+      2200,
+    );
+  }
+
+  /** Sends a Google Analytics event if analytics has loaded. */
+  function track(name, params = {}) {
+    if (typeof window.gtag === "function") window.gtag("event", name, params);
+  }
+
+  function trackLinkClick(event) {
+    const link = event.target.closest("a[href]");
+    if (!link) return;
+    const href = link.getAttribute("href");
+    const note = activeSection || "none";
+    if (href.endsWith(".pdf")) {
+      track("resume_download", { note });
+    } else if (href.startsWith("mailto:")) {
+      track("email_click", { note });
+    } else if (link.target === "_blank") {
+      track("outbound_click", { note, url: link.href });
+    }
+  }
 
   function findItem(key) {
     if (!key) return null;

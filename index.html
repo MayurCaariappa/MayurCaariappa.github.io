@@ -60,6 +60,14 @@
     />
     <link rel="apple-touch-icon" href="images/apple-touch-icon.png" />
     <link rel="stylesheet" href="./css/style.css" />
+    <noscript>
+      <style>
+        #note-content {
+          opacity: 1 !important;
+          transform: none !important;
+        }
+      </style>
+    </noscript>
     <link rel="modulepreload" href="./js/script.js" />
     <link rel="modulepreload" href="./js/utils.js" />
     <link rel="modulepreload" href="./js/journal-data.js" />
@@ -162,8 +170,46 @@
             title="Zoom"
           ></button>
         </div>
+        <button
+          class="toolbar-button icon-only gallery-toggle"
+          type="button"
+          aria-pressed="false"
+          aria-label="Show notes as gallery"
+          title="Gallery view"
+        >
+          <svg
+            class="toolbar-icon"
+            viewBox="0 0 24 24"
+            aria-hidden="true"
+            focusable="false"
+          >
+            <rect x="4" y="4" width="7" height="7" rx="1.5" />
+            <rect x="13" y="4" width="7" height="7" rx="1.5" />
+            <rect x="4" y="13" width="7" height="7" rx="1.5" />
+            <rect x="13" y="13" width="7" height="7" rx="1.5" />
+          </svg>
+        </button>
         <div class="title">Portfolio</div>
         <div class="title-actions">
+          <button
+            class="toolbar-button icon-only share-button"
+            type="button"
+            aria-label="Share this note"
+            title="Share"
+          >
+            <svg
+              class="toolbar-icon"
+              viewBox="0 0 24 24"
+              aria-hidden="true"
+              focusable="false"
+            >
+              <path d="M12 15V3.5" />
+              <path d="M8 7.5 12 3.5l4 4" />
+              <path
+                d="M8.5 10.5H7A1.5 1.5 0 0 0 5.5 12v7A1.5 1.5 0 0 0 7 20.5h10a1.5 1.5 0 0 0 1.5-1.5v-7a1.5 1.5 0 0 0-1.5-1.5h-1.5"
+              />
+            </svg>
+          </button>
           <a
             class="toolbar-button"
             href="docs/MayurCaariappa_Resume.pdf"
@@ -198,12 +244,23 @@
       </div>
 
       <div class="content-wrapper">
+        <nav class="folders-pane" aria-label="Folders and tags">
+          <div class="folders-title">On My Mac</div>
+          <ul class="folder-list"></ul>
+          <div class="folders-title">Tags</div>
+          <div class="tag-list"></div>
+        </nav>
         <aside class="sidebar" aria-label="Portfolio sections">
           <div class="mobile-header">
             <h2 class="mobile-title">Notes</h2>
             <div class="mobile-search-slot"></div>
           </div>
-          <div class="sidebar-header">On My Mac</div>
+          <div
+            class="scope-bar"
+            role="toolbar"
+            aria-label="Folders and tags"
+          ></div>
+          <div class="sidebar-header" aria-live="polite">All Notes</div>
           <ul id="notes-list" role="listbox" aria-label="Notes">
             <li
               class="list-group-header"
@@ -212,10 +269,10 @@
             >
               Pinned
             </li>
-            <li
-              class="active"
+            <li class="active"
               data-section="about"
               data-group="pinned"
+              data-folder="notes"
               role="option"
               aria-selected="true"
               tabindex="0"
@@ -224,13 +281,70 @@
               <div class="note-preview"></div>
             </li>
             <li
+              data-section="skills"
+              data-group="pinned"
+              data-folder="notes"
+              data-tags="backend"
+              role="option"
+              aria-selected="false"
+              tabindex="-1"
+            >
+              <div class="note-title">Skills</div>
+              <div class="note-preview"></div>
+            </li>
+            <li
               data-section="resume"
               data-group="pinned"
+              data-folder="notes"
+              data-tags="backend edtech fintech"
               role="option"
               aria-selected="false"
               tabindex="-1"
             >
               <div class="note-title">Experience</div>
+              <div class="note-preview"></div>
+            </li>
+            <li
+              class="list-group-header"
+              data-group-header="case-studies"
+              aria-hidden="true"
+            >
+              Case Studies
+            </li>
+            <li
+              data-section="case-migration"
+              data-group="case-studies"
+              data-folder="case-studies"
+              data-tags="migrations redis edtech"
+              role="option"
+              aria-selected="false"
+              tabindex="-1"
+            >
+              <div class="note-title">Migrating 600K live sessions</div>
+              <div class="note-preview"></div>
+            </li>
+            <li
+              data-section="case-graphql"
+              data-group="case-studies"
+              data-folder="case-studies"
+              data-tags="performance redis edtech"
+              role="option"
+              aria-selected="false"
+              tabindex="-1"
+            >
+              <div class="note-title">GraphQL: 7 s → 1.4 s</div>
+              <div class="note-preview"></div>
+            </li>
+            <li
+              data-section="case-signatures"
+              data-group="case-studies"
+              data-folder="case-studies"
+              data-tags="fintech backend"
+              role="option"
+              aria-selected="false"
+              tabindex="-1"
+            >
+              <div class="note-title">10M+ digital signatures a month</div>
               <div class="note-preview"></div>
             </li>
             <li
@@ -243,6 +357,8 @@
             <li
               data-section="projects"
               data-group="notes"
+              data-folder="notes"
+              data-tags="saas"
               role="option"
               aria-selected="false"
               tabindex="-1"
@@ -251,23 +367,97 @@
               <div class="note-preview"></div>
             </li>
             <li
-              data-section="skills"
+              data-section="kind-words"
               data-group="notes"
+              data-folder="notes"
+              data-tags="hiring"
               role="option"
               aria-selected="false"
               tabindex="-1"
             >
-              <div class="note-title">Skills</div>
+              <div class="note-title">Kind Words</div>
+              <div class="note-preview"></div>
+            </li>
+            <li
+              data-section="now"
+              data-group="notes"
+              data-folder="notes"
+              role="option"
+              aria-selected="false"
+              tabindex="-1"
+            >
+              <div class="note-title">Now</div>
               <div class="note-preview"></div>
             </li>
             <li
               data-section="contact"
               data-group="notes"
+              data-folder="notes"
+              data-tags="hiring"
               role="option"
               aria-selected="false"
               tabindex="-1"
             >
               <div class="note-title">Contact</div>
+              <div class="note-preview"></div>
+            </li>
+            <li
+              data-section="private"
+              data-group="notes"
+              data-folder="notes"
+              data-locked
+              role="option"
+              aria-selected="false"
+              tabindex="-1"
+            >
+              <div class="note-title">Private</div>
+              <div class="note-preview"></div>
+            </li>
+            <li
+              class="list-group-header"
+              data-group-header="deleted"
+              aria-hidden="true"
+            >
+              Recently Deleted
+            </li>
+            <li
+              class="list-banner"
+              data-group-header="deleted"
+              aria-hidden="true"
+            >
+              Notes are deleted forever after 30 days.
+            </li>
+            <li
+              data-section="deleted-website"
+              data-group="deleted"
+              data-folder="deleted"
+              role="option"
+              aria-selected="false"
+              tabindex="-1"
+            >
+              <div class="note-title">my-first-website.html</div>
+              <div class="note-preview"></div>
+            </li>
+            <li
+              data-section="deleted-todo"
+              data-group="deleted"
+              data-folder="deleted"
+              role="option"
+              aria-selected="false"
+              tabindex="-1"
+            >
+              <div class="note-title">// TODO: fix later</div>
+              <div class="note-preview"></div>
+            </li>
+            <li
+              data-section="deleted-console"
+              data-group="deleted"
+              data-folder="deleted"
+              role="option"
+              aria-selected="false"
+              tabindex="-1"
+            >
+              <div class="note-title">console.log(&quot;here&quot;)</div>
               <div class="note-preview"></div>
             </li>
           </ul>
@@ -276,12 +466,92 @@
         </aside>
 
         <main class="main-content" aria-live="polite">
-          <div id="note-content" tabindex="-1"></div>
+          <div class="print-header" aria-hidden="true">
+            Mayur Caariappa · Software Engineer · Glasgow, Scotland ·
+            mayurcaariappa10@gmail.com · mayurcaariappa.github.io
+          </div>
+          <div id="note-content" tabindex="-1">
+          <article data-prerendered="about">
+            <div class="note-timestamp" data-time="22 October 2026 at 21:40">
+              22 October 2026 at 21:40
+            </div>
+            <h1>About</h1>
+            <p>
+              Hi, I'm <strong>Mayur Caariappa</strong> — a full-stack
+              <strong>Software Engineer</strong> with <strong>4+ years</strong>
+              of experience building products used by
+              <strong>200+ institutions</strong> and handling
+              <strong>1M+ onboardings a year</strong>.
+            </p>
+            <p>
+              <strong>Based in Glasgow, Scotland</strong>
+            </p>
+            <p>
+              At <strong>Kaplan</strong>, I work on Atom Educator, where I cut
+              GraphQL response times by <strong>80% (7 s → 1.4 s)</strong> for
+              10K+ concurrent users and migrated
+              <strong>600K+ live test sessions with zero downtime</strong>.
+              Before that, at <strong>eMudhra</strong>, I worked in
+              <strong>regulated fintech and digital identity</strong>: I
+              architected emSign S/MIME plugin and worked on Aadhaar eSign SDK 
+              and Remote Signing Service processing <strong>10M+ digital 
+              signatures a month</strong>, and built SEBI-compliant KYC 
+              onboarding.
+            </p>
+            <blockquote class="pull-quote">
+              <p>
+                “…a software engineer who consistently performs at a senior
+                level.”
+              </p>
+              <footer>
+                — Karthik KM, Lead Software Engineer at Kaplan ·
+                <a href="#kind-words">Kind Words</a>
+              </footer>
+            </blockquote>
+            <p>
+              <strong>Stack:</strong> TypeScript, Node.js, Java, Spring Boot, MongoDB,
+              PostgreSQL, Redis, AWS and GraphQL.
+            </p>
+            <p>
+              <strong>Open to:</strong> SDE-2 / Senior backend or full-stack
+              roles in Glasgow, Edinburgh or remote.
+            </p>
+            <p>
+              <a href="#case-migration">Read a case study</a>
+              ·
+              <a href="mailto:mayurcaariappa10@gmail.com" class="contact-link"
+                >Email me</a
+              >
+              ·
+              <a
+                href="docs/MayurCaariappa_Resume.pdf"
+                target="_blank"
+                rel="noopener noreferrer"
+                class="contact-link"
+                >Résumé (PDF)</a
+              >
+              ·
+              <a
+                href="https://www.linkedin.com/in/MayurCaariappa"
+                target="_blank"
+                rel="noopener noreferrer"
+                class="contact-link"
+                >LinkedIn</a
+              >
+            </p>
+          </article>
+          </div>
           <footer class="window-footer" id="contact-footer">
             © 2026 Mayur Caariappa · Glasgow, Scotland
           </footer>
         </main>
+        <section
+          class="gallery-view"
+          aria-label="Notes gallery"
+          hidden
+        ></section>
       </div>
+      <div class="toast" role="status" aria-live="polite"></div>
       <div class="resize-handle" aria-hidden="true"></div>
     </div>
 
@@ -297,65 +567,8 @@
       </button>
     </div>
 
-    <template id="section-about">
-      <div class="note-timestamp" data-time="21 October 2026 at 16:45"></div>
-      <h1>About</h1>
-      <p>
-        Hi, I'm <strong>Mayur Caariappa</strong> — a full-stack
-        <strong>Software Engineer</strong> with <strong>4+ years</strong> of
-        experience building products used by
-        <strong>200+ institutions</strong> and handling
-        <strong>1M+ onboardings a year</strong>.
-      </p>
-      <p>
-        <strong>Based in Glasgow, Scotland</strong>
-      </p>
-      <p>
-        At <strong>Kaplan</strong>, I work on Atom Educator, where I cut GraphQL
-        response times by <strong>80% (7 s → 1.4 s)</strong> for 10K+ concurrent
-        users and migrated
-        <strong>600K+ live test sessions with zero downtime</strong>. Before
-        that, at <strong>eMudhra</strong>, I architected an Aadhaar eSign SDK
-        and remote signing service processing
-        <strong>10M+ digital signatures a month</strong>, and built
-        SEBI-compliant digital onboarding.
-      </p>
-      <p>
-        <strong>Stack:</strong> TypeScript, Node.js, GraphQL, MongoDB,
-        PostgreSQL, Redis, AWS, Java and Spring Boot.
-      </p>
-      <p>
-        <strong>Open to:</strong> SDE-2 / Senior backend or full-stack roles in
-        Glasgow, Edinburgh or remote.
-      </p>
-      <p>
-        <a href="mailto:mayurcaariappa10@gmail.com" class="contact-link"
-          >Email me</a
-        >
-        ·
-        <a
-          href="docs/MayurCaariappa_Resume.pdf"
-          target="_blank"
-          rel="noopener noreferrer"
-          class="contact-link"
-          >Résumé (PDF)</a
-        >
-        ·
-        <a
-          href="https://www.linkedin.com/in/MayurCaariappa"
-          target="_blank"
-          rel="noopener noreferrer"
-          class="contact-link"
-          >LinkedIn</a
-        >
-      </p>
-      <p class="note-aside" data-preview-skip>
-        psst — try searching <em>easter</em>.
-      </p>
-    </template>
-
     <template id="section-resume">
-      <div class="note-timestamp" data-time="21 October 2026 at 16:45"></div>
+      <div class="note-timestamp" data-time="22 October 2026 at 21:55"></div>
       <h1>Experience</h1>
       <p class="note-actions" data-preview-skip>
         <a
@@ -374,6 +587,10 @@
           >Node.js · TypeScript · AWS · GraphQL · PostgreSQL · Redis ·
           Elasticsearch</span
         >
+      </p>
+      <p class="role-scope">
+        Atom Educator, Kaplan's assessment platform for nursing and healthcare
+        educators, serving 10K+ concurrent users.
       </p>
       <ol>
         <li>
@@ -397,6 +614,7 @@
               <strong>7 s → 1.4 s</strong> (80% latency drop) for 10K+
               concurrent users by architecting field-level lazy loading,
               Redis-backed caching and optimized MongoDB aggregation pipelines.
+              <a class="case-link" href="#case-graphql">Case study →</a>
             </li>
             <li>
               Owned the end-to-end
@@ -406,21 +624,18 @@
               >
               using batched processing, idempotency guards and selective Redis
               backfill, with no student data lost during the platform cutover.
+              <a class="case-link" href="#case-migration">Case study →</a>
             </li>
             <li>
               Designed and delivered an <strong>Engagement Dashboard</strong>
               with cohort-level performance insights, real-time KPIs and
-              advanced filters, helping MCAT educators make data-driven
+              advanced filters, helping MCAT and PPI educators make data-driven
               decisions at scale.
             </li>
             <li>
-              Designed and built <strong>faculty tools</strong> for nursing and
-              healthcare educators: a custom quiz builder, test scheduler and
-              reporting suite.
-            </li>
-            <li>
-              <strong>Interviewer:</strong> conducted technical interviews for
-              Software Engineer 1 hiring at Kaplan.
+              <strong>Hiring &amp; mentoring:</strong> conducted technical
+              interviews for Software Engineer 1 hiring and mentored junior
+              engineers.
             </li>
           </ul>
         </li>
@@ -435,6 +650,11 @@
           >Java · Spring Boot · Node.js · REST APIs · AWS · MongoDB ·
           React.js</span
         >
+      </p>
+      <p class="role-scope">
+        Regulated fintech and digital identity: KYC onboarding, PKI and digital
+        signatures for SEBI-regulated brokerages, Aadhaar eSign and cross-border
+        signing.
       </p>
       <ol>
         <li>
@@ -501,6 +721,7 @@
               Signing Service, processing
               <strong>10M+ digital signatures a month</strong> and reducing
               client integration time from months to days.
+              <a class="case-link" href="#case-signatures">Case study →</a>
             </li>
             <li>
               Built a Spring Boot backend for cross-border digital signature
@@ -575,35 +796,51 @@
     </template>
 
     <template id="section-projects">
-      <div class="note-timestamp" data-time="21 October 2026 at 16:45"></div>
+      <div class="note-timestamp" data-time="22 October 2026 at 22:05"></div>
       <h1>Projects</h1>
       <p>
         Products I've built on my own, followed by the products I've worked on.
       </p>
 
       <h2>Freelance &amp; personal</h2>
+      <a
+        class="link-card"
+        href="https://wisebin.in/"
+        target="_blank"
+        rel="noopener noreferrer"
+      >
+        <img
+          class="link-card-image"
+          src="images/projects/wisebin.jpg"
+          alt="WiseBin homepage"
+          width="900"
+          height="750"
+          loading="lazy"
+        />
+        <span class="link-card-body">
+          <span class="link-card-title"
+            >WiseBin — Intelligent Waste Management</span
+          >
+          <span class="link-card-domain"
+            ><img
+              src="images/projects/wisebin-icon.png"
+              alt=""
+              width="16"
+              height="16"
+            />wisebin.in</span
+          >
+        </span>
+      </a>
       <p>
-        <a
-          href="https://wisebin.in/"
-          target="_blank"
-          rel="noopener noreferrer"
-          class="contact-link"
-          >WiseBin</a
-        >
+        <strong>WiseBin</strong>
         <span class="project-meta">Freelance · sole backend engineer</span>
         A multi-tenant <strong>waste-management SaaS</strong> serving 65+
         enterprise clients: order lifecycle, truck logistics and audit
         workflows. Automating pickup scheduling, driver workflows and CSV/PDF
         reports cut manual operations by 80%.
-      </p>
+      </p><br />
       <p>
-        <a
-          href="https://beliving-health.in/"
-          target="_blank"
-          rel="noopener noreferrer"
-          class="contact-link"
-          >Be Living</a
-        >
+        <strong>Be Living</strong>
         <span class="project-meta"
           >Node.js · TypeScript · Express · Prisma · PostgreSQL · AWS EC2 ·
           Docker</span
@@ -612,15 +849,26 @@
         covering nutrition, workouts, health metrics and wellness goals. Built
         the REST APIs with JWT authentication, OTP verification, user onboarding
         and reward points, and deployed it on AWS EC2 with Docker.
-      </p>
+      </p><br />
+      <a
+        class="link-card"
+        href="https://github.com/MayurCaariappa/Office-Metaverse"
+        target="_blank"
+        rel="noopener noreferrer"
+      >
+        <span class="link-card-body">
+          <span class="link-card-title">MayurCaariappa/Office-Metaverse</span>
+          <span class="link-card-domain"
+            ><svg viewBox="0 0 16 16" aria-hidden="true" focusable="false">
+              <path
+                d="M8 0C3.58 0 0 3.58 0 8c0 3.54 2.29 6.53 5.47 7.59.4.07.55-.17.55-.38 0-.19-.01-.82-.01-1.49-2.01.37-2.53-.49-2.69-.94-.09-.23-.48-.94-.82-1.13-.28-.15-.68-.52-.01-.53.63-.01 1.08.58 1.23.82.72 1.21 1.87.87 2.33.66.07-.52.28-.87.51-1.07-1.78-.2-3.64-.89-3.64-3.95 0-.87.31-1.59.82-2.15-.08-.2-.36-1.02.08-2.12 0 0 .67-.21 2.2.82.64-.18 1.32-.27 2-.27.68 0 1.36.09 2 .27 1.53-1.04 2.2-.82 2.2-.82.44 1.1.16 1.92.08 2.12.51.56.82 1.27.82 2.15 0 3.07-1.87 3.75-3.65 3.95.29.25.54.73.54 1.48 0 1.07-.01 1.93-.01 2.2 0 .21.15.46.55.38A8.013 8.013 0 0 0 16 8c0-4.42-3.58-8-8-8Z"
+              /></svg
+            >github.com</span
+          >
+        </span>
+      </a>
       <p>
-        <a
-          href="https://github.com/MayurCaariappa/Office-Metaverse"
-          target="_blank"
-          rel="noopener noreferrer"
-          class="contact-link"
-          >Office-Metaverse</a
-        >
+        <strong>Office-Metaverse</strong>
         <span class="project-meta">Phaser · MERN stack</span>
         A <strong>2D virtual workspace</strong> where people move around as
         avatars and talk over text, video and voice chat, with real-time status
@@ -781,6 +1029,409 @@
       </p>
     </template>
 
+    <template id="section-case-migration">
+      <div class="note-timestamp" data-time="22 October 2026 at 22:10"></div>
+      <h1>Migrating 600K live test sessions with zero downtime</h1>
+      <p class="case-meta">
+        Case study · Kaplan · Atom Educator · My role: owned it end to end
+      </p>
+
+      <h2>Context</h2>
+      <p>
+        Atom Educator was moving students' testing sessions out of a legacy
+        product and into a new system with a completely different schema. More
+        than <strong>600,000 sessions</strong> had to move, and they were live:
+        students were part-way through tests while it happened.
+      </p>
+
+      <h2>Constraints</h2>
+      <ul>
+        <li>
+          <strong>Zero downtime.</strong> Students had to keep testing through
+          the cutover.
+        </li>
+        <li>
+          <strong>Zero data loss.</strong> Every in-progress session had to
+          arrive intact.
+        </li>
+        <li>
+          <strong>Different schemas.</strong> The old and new data models
+          didn't map one-to-one.
+        </li>
+        <li>
+          <strong>A short cutover window.</strong> The switch had to finish
+          quickly to keep risk low.
+        </li>
+      </ul>
+
+      <h2>Approach</h2>
+      <p>
+        <strong>1. Schema mapping.</strong> A migration script translated each
+        legacy session into the new data model.
+      </p>
+      <p>
+        <strong>2. Batched processing.</strong> Sessions moved in bounded
+        batches instead of one huge job, keeping load on the live databases
+        predictable and progress easy to track and resume.
+      </p>
+      <p>
+        <strong>3. Idempotency guards.</strong> Every batch was safe to run
+        more than once, so a retried or overlapping batch could never duplicate
+        or overwrite a session. Failures became simple retries.
+      </p>
+      <p>
+        <strong>4. Selective Redis backfill.</strong> Rather than rebuilding
+        the whole cache, only the data live sessions needed was backfilled into
+        Redis, so students already mid-test carried on without noticing.
+      </p>
+
+      <h2>Results</h2>
+      <table class="note-table">
+        <thead>
+          <tr>
+            <th scope="col">Metric</th>
+            <th scope="col">Result</th>
+          </tr>
+        </thead>
+        <tbody>
+          <tr>
+            <td>Sessions migrated</td>
+            <td>600,000+</td>
+          </tr>
+          <tr>
+            <td>Cutover time</td>
+            <td>Under 55 minutes</td>
+          </tr>
+          <tr>
+            <td>Downtime</td>
+            <td>None</td>
+          </tr>
+          <tr>
+            <td>Student data lost</td>
+            <td>None</td>
+          </tr>
+        </tbody>
+      </table>
+
+      <blockquote class="pull-quote">
+        <p>
+          “…he designed and implemented a migration script to move data from a
+          legacy product into a new system with a completely different schema.
+          This required deep technical understanding, careful planning, and
+          meticulous execution, and he delivered it reliably and on time.”
+        </p>
+        <footer>— Karthik KM, Lead Software Engineer at Kaplan</footer>
+      </blockquote>
+
+      <h2>Takeaways</h2>
+      <ul>
+        <li>Design for re-runs first: idempotency made every failure recoverable.</li>
+        <li>Move only what's hot: selective caching kept the cutover fast.</li>
+      </ul>
+    </template>
+
+    <template id="section-case-graphql">
+      <div class="note-timestamp" data-time="22 October 2026 at 22:20"></div>
+      <h1>Cutting GraphQL latency from 7 s to 1.4 s</h1>
+      <p class="case-meta">
+        Case study · Kaplan · Atom Educator · GraphQL, Redis, MongoDB
+      </p>
+
+      <h2>Context</h2>
+      <p>
+        Atom Educator's GraphQL API serves <strong>10K+ concurrent users</strong>.
+        Some responses were taking around <strong>7 seconds</strong>.
+      </p>
+
+      <h2>What was slow</h2>
+      <ul>
+        <li>
+          Expensive fields were resolved on every request, even when the client
+          didn't ask for them.
+        </li>
+        <li>The same frequently read data was fetched from the database again and again.</li>
+        <li>
+          Some query work happened in application code that MongoDB could do
+          faster.
+        </li>
+      </ul>
+
+      <h2>What I changed</h2>
+      <p>
+        <strong>Field-level lazy loading.</strong> Expensive fields are only
+        resolved when a query actually asks for them.
+      </p>
+      <p>
+        <strong>Redis-backed caching.</strong> Frequently read data is served
+        from Redis instead of hitting MongoDB every time.
+      </p>
+      <p>
+        <strong>Optimized aggregation pipelines.</strong> Filtering and shaping
+        moved into MongoDB aggregation pipelines, so less data travels to the
+        API.
+      </p>
+
+      <h2>Results</h2>
+      <table class="note-table">
+        <thead>
+          <tr>
+            <th scope="col">Metric</th>
+            <th scope="col">Before</th>
+            <th scope="col">After</th>
+          </tr>
+        </thead>
+        <tbody>
+          <tr>
+            <td>Response time</td>
+            <td>~7 s</td>
+            <td><strong>1.4 s (−80%)</strong></td>
+          </tr>
+          <tr>
+            <td>Concurrent users</td>
+            <td colspan="2">10K+</td>
+          </tr>
+        </tbody>
+      </table>
+
+      <h2>Takeaways</h2>
+      <ul>
+        <li>In GraphQL, cost hides in fields: measure per resolver, not per endpoint.</li>
+        <li>Cache the reads you repeat, not everything.</li>
+      </ul>
+    </template>
+
+    <template id="section-case-signatures">
+      <div class="note-timestamp" data-time="22 October 2026 at 22:30"></div>
+      <h1>Digital signatures at 10M+ a month</h1>
+      <p class="case-meta">
+        Case study · eMudhra · Java, Spring Boot · Aadhaar eSign, PKI
+      </p>
+
+      <h2>Context</h2>
+      <p>
+        Aadhaar eSign lets people in India sign documents digitally after
+        authenticating with Aadhaar. Businesses integrate it to add signing to
+        their own apps, and integrating used to take
+        <strong>months</strong>.
+      </p>
+
+      <h2>What I built</h2>
+      <p>
+        <strong>Aadhaar eSign Java SDK.</strong> A client library that wraps
+        the protocol details (building requests, signing them and verifying
+        responses) behind a small Java API.
+      </p>
+      <p>
+        <strong>Remote Signing Service.</strong> The service behind it,
+        handling signing requests at volume.
+      </p>
+      <p>
+        <strong>Cross-border recognition.</strong> A Spring Boot backend that
+        recognises digital signatures across borders, built with Trust Service
+        Providers from India, Japan and the EU.
+      </p>
+      <p>
+        <strong>White-label branding.</strong> Customization features that let
+        Application Service Providers apply their own branding.
+      </p>
+
+      <h2>Results</h2>
+      <table class="note-table">
+        <thead>
+          <tr>
+            <th scope="col">Metric</th>
+            <th scope="col">Result</th>
+          </tr>
+        </thead>
+        <tbody>
+          <tr>
+            <td>Signatures processed</td>
+            <td><strong>10M+ a month</strong></td>
+          </tr>
+          <tr>
+            <td>Client integration time</td>
+            <td>Months → days</td>
+          </tr>
+          <tr>
+            <td>Signature partners</td>
+            <td>TSPs in India, Japan and the EU</td>
+          </tr>
+        </tbody>
+      </table>
+    </template>
+
+    <template id="section-kind-words">
+      <div class="note-timestamp" data-time="22 October 2026 at 21:45"></div>
+      <h1>Kind Words</h1>
+      <p>
+        Recommendations from people I've worked with. The originals are on
+        <a
+          href="https://www.linkedin.com/in/MayurCaariappa/details/recommendations/"
+          target="_blank"
+          rel="noopener noreferrer"
+          class="contact-link"
+          >LinkedIn</a
+        >.
+      </p>
+
+      <figure class="recommendation">
+        <p class="recommendation-lead">
+          “Mayur is ready for the next step in his career, whether as a senior
+          engineer or a tech lead…”
+        </p>
+        <blockquote>
+          <p>
+            I’m delighted to recommend Mayur, a software engineer who
+            consistently performs at a senior level. I had the pleasure of
+            guiding Mayur on our team, and he quickly proved himself to be
+            someone who can own complex, high-impact work end to end.
+          </p>
+          <p>
+            Mayur doesn’t wait for requirements to be handed to him—he
+            proactively connects with the product team, clarifies expectations,
+            and delivers high-quality solutions independently. One standout
+            example was when he designed and implemented a migration script to
+            move data from a legacy product into a new system with a completely
+            different schema. This required deep technical understanding,
+            careful planning, and meticulous execution, and he delivered it
+            reliably and on time.
+          </p>
+          <p>
+            He thrives on complex problems and is an excellent problem solver,
+            often taking on challenges that others find daunting. Beyond his
+            individual contributions, Mayur actively helps the team grow by
+            mentoring junior engineers, sharing knowledge, and raising the
+            overall quality of our work. He’s also a great human
+            being—collaborative, humble, and always willing to support others.
+            (On a personal note, he’s even a champion chess player, which speaks
+            to his strategic thinking and patience.)
+          </p>
+          <p>
+            Mayur is ready for the next step in his career, whether as a senior
+            engineer or a tech lead, and I would welcome the opportunity to work
+            with him again in the future. Any team would be lucky to have him.
+          </p>
+        </blockquote>
+        <figcaption>
+          <span class="recommendation-avatar" aria-hidden="true">KK</span>
+          <span>
+            <strong>Karthik KM</strong><br />
+            Lead Software Engineer, Kaplan · managed Mayur directly ·
+            1 October 2026
+          </span>
+        </figcaption>
+      </figure>
+
+      <figure class="recommendation">
+        <p class="recommendation-lead">
+          “Mayur takes ownership of features end to end, from understanding
+          requirements to delivering well-tested, production-ready code.”
+        </p>
+        <blockquote>
+          <p>
+            I had the pleasure of working with Mayur, and he's an outstanding
+            full stack developer. He is equally comfortable building clean,
+            responsive front-end interfaces and designing robust, scalable
+            back-end services and APIs. Mayur takes ownership of features end to
+            end, from understanding requirements to delivering well-tested,
+            production-ready code. He's a quick learner, a strong problem solver,
+            and always willing to help teammates when they're stuck. His
+            communication is clear and his work is dependable, even under tight
+            deadlines. Any team would be lucky to have him, and I recommend him
+            without hesitation.
+          </p>
+        </blockquote>
+        <figcaption>
+          <span class="recommendation-avatar" aria-hidden="true">BA</span>
+          <span>
+            <strong>B S Abhishek</strong><br />
+            Senior Software Developer, eMudhra · worked with Mayur on the same
+            team · 19 October 2026
+          </span>
+        </figcaption>
+      </figure>
+    </template>
+
+    <template id="section-now">
+      <div class="note-timestamp" data-time="22 October 2026 at 22:00"></div>
+      <h1>Now</h1>
+      <p class="case-meta">
+        What I'm focused on at the moment, in the spirit of a
+        <a
+          href="https://nownownow.com/about"
+          target="_blank"
+          rel="noopener noreferrer"
+          class="contact-link"
+          >/now page</a
+        >.
+      </p>
+      <ul>
+        <li>
+          <strong>Looking for</strong> my next role: SDE-2 / Senior backend or
+          full-stack, in Glasgow, Edinburgh or remote.
+        </li>
+        <li><strong>Working on</strong> Atom Educator at Kaplan.</li>
+        <li>
+          <strong>Writing</strong> case studies about systems I've built. Start
+          with <a href="#case-migration">the 600K-session migration</a>.
+        </li>
+        <li><strong>Living in</strong> Glasgow, Scotland.</li>
+      </ul>
+
+      <h2>Public GitHub activity</h2>
+      <div class="github-activity" data-github-user="mayurcaariappa">
+        <a
+          href="https://github.com/mayurcaariappa"
+          target="_blank"
+          rel="noopener noreferrer"
+          class="contact-link"
+          >github.com/mayurcaariappa</a
+        >
+      </div>
+    </template>
+
+    <template id="section-private">
+      <div class="note-timestamp" data-time="22 October 2026 at 22:40"></div>
+      <h1>Private</h1>
+      <p>You cracked it. Here are the off-the-clock notes:</p>
+      <ul>
+        <li><a href="#easter">Fun Facts</a>: football, films and chess.</li>
+        <li>
+          <a href="#journal">Journal</a>: zines I've made, as a flip-through
+          book.
+        </li>
+      </ul>
+      <p class="note-aside">
+        They'll stay in your notes list until you reload the page.
+      </p>
+    </template>
+
+    <template id="section-deleted-website">
+      <div class="note-timestamp" data-time="14 March 2019 at 02:13"></div>
+      <h1>my-first-website.html</h1>
+      <p>
+        A visitor counter, three fonts and a background GIF of a spinning
+        globe. Peak engineering.
+      </p>
+      <p class="note-aside">Deleted for everyone's sake.</p>
+    </template>
+
+    <template id="section-deleted-todo">
+      <div class="note-timestamp" data-time="11 January 2022 at 18:20"></div>
+      <h1>// TODO: fix later</h1>
+      <p><code>// TODO: fix later</code></p>
+      <p>Written in 2022. Fixed in 2024. Character development.</p>
+    </template>
+
+    <template id="section-deleted-console">
+      <div class="note-timestamp" data-time="6 September 2023 at 23:58"></div>
+      <h1>console.log("here")</h1>
+      <pre><code>console.log("here");
+console.log("here 2");
+console.log("HERE?!");</code></pre>
+      <p>Found the bug. It was a missing <code>await</code>.</p>
+    </template>
+
     <template id="section-easter">
       <div class="note-timestamp" data-time="25 January 2026 at 13:30"></div>
       <h1>Fun Facts</h1>
@@ -856,15 +1507,16 @@
           competitions, including:
           <ul>
             <li>
+              Inter-Department Football Tournament,
               <a
                 href="images/Football.jpg"
                 target="_blank"
                 rel="noopener noreferrer"
                 class="contact-link"
               >
-                Inter-Department Football Tournament
+                PES College of Engineering
               </a>
-              , PES College of Engineering (2019)
+              (2019)
             </li>
             <li>
               Chess Tournament,
@@ -877,6 +1529,18 @@
                 eMudhra Limited
               </a>
               (2024) and Kaplan (2025 & 2026)
+            </li>
+            <li>
+              Table Tennis Tournament,
+              <a
+                href="images/TableTennis.jpg"
+                target="_blank"
+                rel="noopener noreferrer"
+                class="contact-link"
+              >
+                Kaplan
+              </a>
+              (2026)
             </li>
           </ul>
         </li>

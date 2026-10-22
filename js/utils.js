@@ -78,17 +78,47 @@ const MONTHS = [
 ];
 
 /**
- * Formats a note timestamp like "25 January 2026 at 13:30" as "25/01/2026",
- * the way Apple Notes shows dates in its note list.
+ * Parses a note timestamp like "25 January 2026 at 13:30".
  * @param {string} timestamp - Long-form timestamp.
- * @returns {string} Short date, or "" if it can't be parsed.
+ * @returns {Date|null} Local date, or null if it can't be parsed.
  */
-export function formatShortDate(timestamp) {
-  const match = /(\d{1,2})\s+([A-Za-z]+)\s+(\d{4})/.exec(timestamp || "");
-  if (!match) return "";
-  const month = MONTHS.indexOf(match[2].toLowerCase()) + 1;
-  if (!month) return "";
-  return `${match[1].padStart(2, "0")}/${String(month).padStart(2, "0")}/${match[3]}`;
+export function parseTimestamp(timestamp) {
+  const match =
+    /(\d{1,2})\s+([A-Za-z]+)\s+(\d{4})(?:\s+at\s+(\d{1,2}):(\d{2}))?/.exec(
+      timestamp || "",
+    );
+  if (!match) return null;
+  const month = MONTHS.indexOf(match[2].toLowerCase());
+  if (month === -1) return null;
+  return new Date(
+    Number(match[3]),
+    month,
+    Number(match[1]),
+    Number(match[4] ?? 0),
+    Number(match[5] ?? 0),
+  );
+}
+
+/**
+ * Formats a date the way Apple Notes does in its list: the time for today,
+ * "Yesterday", the weekday within the last week, otherwise dd/mm/yyyy.
+ * @param {Date|null} date - Note date.
+ * @param {Date} now - Reference time.
+ * @returns {string} Short label, or "".
+ */
+export function formatListDate(date, now = new Date()) {
+  if (!date) return "";
+  const startOfDay = (value) =>
+    new Date(value.getFullYear(), value.getMonth(), value.getDate());
+  const days = Math.round((startOfDay(now) - startOfDay(date)) / 86400000);
+  const pad = (value) => String(value).padStart(2, "0");
+
+  if (days === 0) return `${pad(date.getHours())}:${pad(date.getMinutes())}`;
+  if (days === 1) return "Yesterday";
+  if (days > 1 && days < 7) {
+    return date.toLocaleDateString("en-GB", { weekday: "long" });
+  }
+  return `${pad(date.getDate())}/${pad(date.getMonth() + 1)}/${date.getFullYear()}`;
 }
 
 /**
@@ -123,7 +153,7 @@ export function createNoteEntry(
     plainContent: plain,
     lowerContent: plain.toLowerCase(),
     excerpt,
-    date: formatShortDate(timestamp),
+    dateValue: parseTimestamp(timestamp),
     template,
   };
 }
