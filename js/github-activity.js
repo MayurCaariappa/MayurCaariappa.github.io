@@ -46,7 +46,8 @@ export async function renderGithubActivity(container, isCurrent = () => true) {
   const days = [...data.contributions].sort((a, b) =>
     a.date.localeCompare(b.date),
   );
-  const total = data.total?.lastYear ?? days.reduce((sum, d) => sum + d.count, 0);
+  const total =
+    data.total?.lastYear ?? days.reduce((sum, d) => sum + d.count, 0);
 
   const grid = document.createElement("div");
   grid.className = "gh-grid";

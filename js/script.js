@@ -351,7 +351,8 @@ document.addEventListener("DOMContentLoaded", () => {
       if (
         event.target.closest(
           ".controls, .title-actions, .back-button, .gallery-toggle",
-        ) || isMobile()
+        ) ||
+        isMobile()
       ) {
         return;
       }
@@ -1168,7 +1169,8 @@ document.addEventListener("DOMContentLoaded", () => {
       const isActive = !searching && !activeTag && activeFolder === folder.id;
       return `<button type="button" class="scope-chip${isActive ? " is-active" : ""}" data-folder="${folder.id}" aria-pressed="${isActive}">${escapeHtml(folder.id === "all" ? "All" : folder.label)}</button>`;
     }).join("");
-    scopeBar.innerHTML = chips + tagButtons.replaceAll("tag-pill", "scope-chip tag-chip");
+    scopeBar.innerHTML =
+      chips + tagButtons.replaceAll("tag-pill", "scope-chip tag-chip");
   }
 
   function handleScopeClick(event) {
