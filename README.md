@@ -13,6 +13,11 @@ A static portfolio inspired by the Apple Notes app on macOS and iPhone.
 
 Open `index.html` in a browser, or serve the folder with any simple static server. Because the site uses JavaScript modules, a local static server is recommended for consistent browser behavior.
 
+Run `npm install` once to get the dev tools (nothing here is needed to deploy; GitHub Pages serves the files as they are):
+
+- `npm run format` formats everything with Prettier (VS Code also does this on save).
+- `npm run images:webp -- <file|folder>` converts images to WebP (see the Journal notes below).
+
 ## Keyboard Shortcuts
 
 - `/` focuses the search field
@@ -32,7 +37,7 @@ Open `index.html` in a browser, or serve the folder with any simple static serve
 - **Case Studies** is a single index note (`section-case-studies`) that links to each write-up (`section-case-*` templates). The write-ups' sidebar `<li>`s carry `data-parent="case-studies"`: they stay out of the list and folder counts, highlight the Case Studies row while open and get a "‹ Case Studies" link at the top, but search and tags still list them. To add one, add an `<li>` with `data-parent`, a template, and a link card in `section-case-studies`. Any note can have sub-notes this way.
 - **Kind Words** holds LinkedIn recommendations, copied in as text (LinkedIn has no public API for recommendations). Keep the wording exact and link to the originals.
 - **Now** is a [/now page](https://nownownow.com/about): update it when your focus changes. Its public GitHub activity graph is loaded on demand from `github-contributions-api.jogruber.de` (`js/github-activity.js`) and falls back to a plain link.
-- **Life** holds the personal notes: **Journal** and **Fun Facts** (`section-fun-facts`).
+- **Life** holds the personal notes: **Journal** and **Fun Facts** (`section-fun-facts`). Like Recently Deleted, Life notes appear only in their own folder (`OWN_FOLDER_ONLY` in `js/script.js`).
 - **Recently Deleted** holds a few joke notes (`section-deleted-*`).
 - About is written directly into `#note-content` in `index.html` (not a `<template>`) so search engines and visitors without JavaScript can read it; the script turns it into a template at start-up.
 - Printing (⌘P) prints only the open note, with a contact header, so Experience prints as a one-page résumé.
@@ -42,7 +47,7 @@ Open `index.html` in a browser, or serve the folder with any simple static serve
 - Skills are shown ticked by default; visitors can untick them (remembered in `localStorage`).
 - Links that open in a new tab get a small ↗ marker (`#note-content a[target="_blank"]::after` in `css/style.css`).
 - The Journal is a read-only image viewer. Journal pages are static images committed to this repository; there is no backend, database, or journal editor. The viewer's code (`js/journal.js`) is only downloaded when the Journal is opened.
-- Add cover images to `images/journals/covers/` and page images to `images/journals/pages/`. Keep them web-sized: JPEG or WebP, around 1400px on the long side for pages and 800px for covers (`sips -s format jpeg -s formatOptions 82 -Z 1400 page.png --out page.jpg` on macOS).
+- Add cover images to `images/journals/covers/` and page images to `images/journals/pages/`. Keep them web-sized (around 1400px on the long side for pages, 800px for covers; `sips -Z 1400 page.jpg` resizes in place on macOS), then convert them to WebP, about 60% smaller than JPEG: `npm run images:webp -- --replace images/journals/pages/my-zine` (drop `--replace` to keep the originals for comparison).
 - Register journals and their page image paths in `js/journal-data.js`. Image paths are relative to `index.html`.
 - Optional journal fields: `titleColor` (colour of the title over the cover), `showCoverTitle: false` (hide it when the cover already shows the title) and `pageRatio` (page width ÷ height; defaults to the first page's ratio). Pages fill the book edge to edge at that ratio.
 

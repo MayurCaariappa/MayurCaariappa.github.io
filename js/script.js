@@ -17,6 +17,10 @@ const FOLDERS = [
   { id: "deleted", label: "Recently Deleted", icon: "trash" },
 ];
 
+// Folders whose notes only show inside their own folder, keeping All Notes
+// strictly professional. Search still finds their notes.
+const OWN_FOLDER_ONLY = new Set(["life", "deleted"]);
+
 const FOLDER_ICONS = {
   folder:
     '<svg viewBox="0 0 24 24" aria-hidden="true" focusable="false"><path d="M3.5 7.5A1.5 1.5 0 0 1 5 6h4.2l1.8 2H19a1.5 1.5 0 0 1 1.5 1.5v8A1.5 1.5 0 0 1 19 19H5a1.5 1.5 0 0 1-1.5-1.5Z"/></svg>',
@@ -30,8 +34,6 @@ document.addEventListener("DOMContentLoaded", () => {
   const MIN_WINDOW_HEIGHT = 440;
   const VIEWPORT_MARGIN = 12;
   const ARROW_SCROLL_STEP = 56;
-  // The folders column appears once the window is wide enough for three panes.
-  const FOLDERS_PANE_MIN_WIDTH = 1020;
 
   const windowEl = document.querySelector(".notes-window");
   const titleBar = document.querySelector(".title-bar");
@@ -123,7 +125,6 @@ document.addEventListener("DOMContentLoaded", () => {
   initWindowDragging();
   initWindowResizing();
   initWindowControls();
-  initFoldersPane();
   updateList("");
 
   if (!isMobile()) centerWindow();
@@ -560,7 +561,7 @@ document.addEventListener("DOMContentLoaded", () => {
       searchInput.value = "";
       activeTag = "";
       activeFolder =
-        folder === "deleted" || folder === activeFolder ? folder : "all";
+        OWN_FOLDER_ONLY.has(folder) || folder === activeFolder ? folder : "all";
       updateList("");
     }
     return activateSection(key, options);
@@ -748,9 +749,9 @@ document.addEventListener("DOMContentLoaded", () => {
     // Sub-notes are listed by search and tags, not by folders.
     if (item.dataset.parent && !activeTag) return false;
     if (activeTag) {
-      return folder !== "deleted" && getTags(item).includes(activeTag);
+      return !OWN_FOLDER_ONLY.has(folder) && getTags(item).includes(activeTag);
     }
-    if (activeFolder === "all") return folder !== "deleted";
+    if (activeFolder === "all") return !OWN_FOLDER_ONLY.has(folder);
     return folder === activeFolder;
   }
 
@@ -820,17 +821,18 @@ document.addEventListener("DOMContentLoaded", () => {
     unmountJournal();
     contentDiv.replaceChildren();
     delete contentDiv.dataset.term;
-    contentDiv.classList.remove("fade-in", "slide-in");
+    contentDiv.classList.remove("is-entering");
     footer.classList.remove("visible");
     mainContent.style.paddingBottom = "0";
   }
 
   function fadeInContent() {
-    contentDiv.classList.remove("fade-in", "slide-in");
+    if (reducedMotion.matches) return;
+    contentDiv.classList.add("is-entering");
     // Flush styles so the transition starts from the hidden state.
     void contentDiv.offsetWidth;
     requestAnimationFrame(() => {
-      contentDiv.classList.add("fade-in", "slide-in");
+      contentDiv.classList.remove("is-entering");
     });
   }
 
@@ -858,6 +860,12 @@ document.addEventListener("DOMContentLoaded", () => {
 
     const data = noteData[key];
     if (!data?.template) return;
+
+    // The first render swaps out the pre-rendered copy of the same note; skip
+    // the fade so the text that's already on screen doesn't blink.
+    if (contentDiv.querySelector(`[data-prerendered="${CSS.escape(key)}"]`)) {
+      animate = false;
+    }
 
     unmountJournal();
 
@@ -1059,21 +1067,13 @@ document.addEventListener("DOMContentLoaded", () => {
   /* Folders and tags                                                   */
   /* ------------------------------------------------------------------ */
 
-  function initFoldersPane() {
-    const update = () => {
-      const wide =
-        !isMobile() && windowEl.offsetWidth >= FOLDERS_PANE_MIN_WIDTH;
-      windowEl.classList.toggle("has-folders", wide);
-    };
-    new ResizeObserver(update).observe(windowEl);
-    update();
-  }
-
   function countInFolder(folderId) {
     return Array.from(notesList.querySelectorAll(NOTE_ITEM)).filter((item) => {
       if (item.dataset.parent) return false;
       const folder = item.dataset.folder || "notes";
-      return folderId === "all" ? folder !== "deleted" : folder === folderId;
+      return folderId === "all"
+        ? !OWN_FOLDER_ONLY.has(folder)
+        : folder === folderId;
     }).length;
   }
 

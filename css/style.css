@@ -540,25 +540,24 @@ body {
   user-select: text;
 }
 
+/* Visible by default so the pre-rendered About note paints before any JS
+   runs. Switching notes adds .is-entering for one frame, then removes it, so
+   the new note fades and slides in. */
 #note-content {
-  opacity: 0;
-  transform: translateX(20px); /* For slide-in */
   transition:
     opacity 0.18s ease,
     transform 0.18s ease;
   user-select: text;
 }
 
+#note-content.is-entering {
+  opacity: 0;
+  transform: translateX(20px);
+  transition: none;
+}
+
 #note-content:focus {
   outline: none;
-}
-
-#note-content.fade-in {
-  opacity: 1;
-}
-
-#note-content.slide-in {
-  transform: translateX(0);
 }
 
 #note-content h1 {
@@ -1287,10 +1286,6 @@ button.toolbar-button {
   background: var(--bg-folders);
 }
 
-.notes-window.has-folders .folders-pane {
-  display: flex;
-}
-
 .folders-title {
   padding: 10px 8px 6px;
   color: var(--text-quaternary);
@@ -1417,8 +1412,16 @@ button.toolbar-button {
   display: none;
 }
 
-.notes-window.has-folders .scope-bar {
-  display: none;
+/* Wide windows get the folders column instead of chips. A container query
+   (not JS) so the layout is right from the first paint, with no jump. */
+@container (min-width: 1020px) {
+  .folders-pane {
+    display: flex;
+  }
+
+  .scope-bar {
+    display: none;
+  }
 }
 
 /* Note list extras */
