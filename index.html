@@ -137,8 +137,9 @@
     </script>
   </head>
   <body>
-    <div class="notes-window" data-view="list">
-      <div class="title-bar">
+    <!-- Starts in the note view so phones paint About first, not the list. -->
+    <div class="notes-window" data-view="content">
+      <div class="title-bar content-view">
         <button
           class="back-button"
           type="button"
@@ -306,16 +307,27 @@
               <div class="note-preview"></div>
             </li>
             <li
-              class="list-group-header"
-              data-group-header="case-studies"
-              aria-hidden="true"
+              data-section="case-studies"
+              data-group="pinned"
+              data-folder="notes"
+              role="option"
+              aria-selected="false"
+              tabindex="-1"
             >
-              Case Studies
+              <div class="note-title">Case Studies</div>
+              <div class="note-preview"></div>
             </li>
+            <!--
+              Sub-notes: data-parent keeps them out of the list (they're opened
+              from the Case Studies note), but search and tags still find them.
+              To add a case study: add an <li> here and a section-case-* template,
+              then link it from the section-case-studies template.
+            -->
             <li
               data-section="case-migration"
-              data-group="case-studies"
-              data-folder="case-studies"
+              data-parent="case-studies"
+              data-group="pinned"
+              data-folder="notes"
               data-tags="migrations redis edtech"
               role="option"
               aria-selected="false"
@@ -326,8 +338,9 @@
             </li>
             <li
               data-section="case-graphql"
-              data-group="case-studies"
-              data-folder="case-studies"
+              data-parent="case-studies"
+              data-group="pinned"
+              data-folder="notes"
               data-tags="performance redis edtech"
               role="option"
               aria-selected="false"
@@ -338,8 +351,9 @@
             </li>
             <li
               data-section="case-signatures"
-              data-group="case-studies"
-              data-folder="case-studies"
+              data-parent="case-studies"
+              data-group="pinned"
+              data-folder="notes"
               data-tags="fintech backend"
               role="option"
               aria-selected="false"
@@ -403,15 +417,32 @@
               <div class="note-preview"></div>
             </li>
             <li
-              data-section="private"
-              data-group="notes"
-              data-folder="notes"
-              data-locked
+              class="list-group-header"
+              data-group-header="life"
+              aria-hidden="true"
+            >
+              Life
+            </li>
+            <li
+              data-section="journal"
+              data-group="life"
+              data-folder="life"
               role="option"
               aria-selected="false"
               tabindex="-1"
             >
-              <div class="note-title">Private</div>
+              <div class="note-title">Journal</div>
+              <div class="note-preview"></div>
+            </li>
+            <li
+              data-section="fun-facts"
+              data-group="life"
+              data-folder="life"
+              role="option"
+              aria-selected="false"
+              tabindex="-1"
+            >
+              <div class="note-title">Fun Facts</div>
               <div class="note-preview"></div>
             </li>
             <li
@@ -1089,6 +1120,42 @@
         Redis, so students already mid-test carried on without noticing.
       </p>
 
+      <figure class="flow" aria-label="Migration pipeline">
+        <ol class="flow-steps">
+          <li><strong>Legacy store</strong><span>600K+ sessions</span></li>
+          <li>
+            <strong>Read a batch</strong><span>bounded size, resumable</span>
+          </li>
+          <li><strong>Map schema</strong><span>legacy → new model</span></li>
+          <li><strong>Idempotent write</strong><span>safe to re-run</span></li>
+          <li><strong>New system</strong><span>students keep testing</span></li>
+        </ol>
+        <p class="flow-branch">
+          <strong>In parallel:</strong> backfill Redis only for sessions that
+          are live right now.
+        </p>
+        <figcaption>How the migration fits together.</figcaption>
+      </figure>
+
+      <h2>Trade-offs</h2>
+      <ul>
+        <li>
+          <strong>Batches over one big job.</strong> The run takes longer end to
+          end, but load on the live databases stays predictable, and a failure
+          only costs one batch.
+        </li>
+        <li>
+          <strong>Idempotency on every write.</strong> Each batch does a little
+          more work, but in return any failure is just a retry, with no manual
+          clean-up.
+        </li>
+        <li>
+          <strong>Selective backfill over a full cache rebuild.</strong> I had
+          to work out exactly which data live sessions needed, but the cutover
+          didn't have to wait for the whole cache to warm up.
+        </li>
+      </ul>
+
       <h2>Results</h2>
       <table class="note-table">
         <thead>
@@ -1180,6 +1247,19 @@
         moved into MongoDB aggregation pipelines, so less data travels to the
         API.
       </p>
+
+      <h2>Trade-offs</h2>
+      <ul>
+        <li>
+          <strong>Caching trades freshness for speed.</strong> That's why the
+          cache holds only frequently read data, not everything.
+        </li>
+        <li>
+          <strong>Aggregation pipelines are faster but harder to read.</strong>
+          Logic in MongoDB is quicker to run than in application code, but it
+          takes more care to test and change.
+        </li>
+      </ul>
 
       <h2>Results</h2>
       <table class="note-table">
@@ -1403,20 +1483,49 @@
       </div>
     </template>
 
-    <template id="section-private">
-      <div class="note-timestamp" data-time="22 October 2026 at 22:40"></div>
-      <h1>Private</h1>
-      <p>You cracked it. Here are the off-the-clock notes:</p>
-      <ul>
-        <li><a href="#easter">Fun Facts</a>: football, films and chess.</li>
-        <li>
-          <a href="#journal">Journal</a>: zines I've made, as a flip-through
-          book.
-        </li>
-      </ul>
-      <p class="note-aside">
-        They'll stay in your notes list until you reload the page.
+    <template id="section-case-studies">
+      <div class="note-timestamp" data-time="5 November 2026 at 11:00"></div>
+      <h1>Case Studies</h1>
+      <p>
+        Write-ups of the systems behind my strongest résumé points: the problem,
+        the constraints, what I built and what came out of it.
       </p>
+
+      <a class="link-card case-card" href="#case-migration">
+        <span class="link-card-body">
+          <span class="link-card-title"
+            >Migrating 600K live test sessions with zero downtime</span
+          >
+          <span class="case-card-result"
+            >600K+ sessions · under 55 min · no downtime, no data lost</span
+          >
+          <span class="link-card-domain"
+            >Kaplan · Node.js, MongoDB, Redis · owned end to end</span
+          >
+        </span>
+      </a>
+      <a class="link-card case-card" href="#case-graphql">
+        <span class="link-card-body">
+          <span class="link-card-title"
+            >Cutting GraphQL latency from 7 s to 1.4 s</span
+          >
+          <span class="case-card-result"
+            >80% faster responses for 10K+ concurrent users</span
+          >
+          <span class="link-card-domain">Kaplan · GraphQL, Redis, MongoDB</span>
+        </span>
+      </a>
+      <a class="link-card case-card" href="#case-signatures">
+        <span class="link-card-body">
+          <span class="link-card-title"
+            >Digital signatures at 10M+ a month</span
+          >
+          <span class="case-card-result"
+            >Client integration time cut from months to days</span
+          >
+          <span class="link-card-domain">eMudhra · Java, Spring Boot, PKI</span>
+        </span>
+      </a>
     </template>
 
     <template id="section-deleted-website">
@@ -1445,14 +1554,11 @@ console.log("HERE?!");</code></pre>
       <p>Found the bug. It was a missing <code>await</code>.</p>
     </template>
 
-    <template id="section-easter">
+    <template id="section-fun-facts">
       <div class="note-timestamp" data-time="25 January 2026 at 13:30"></div>
       <h1>Fun Facts</h1>
 
-      <p>
-        Well… you weren’t supposed to be here. But since you are, here are a few
-        fun facts:
-      </p>
+      <p>A few things about me when I’m not at a keyboard:</p>
 
       <ol>
         <li>
@@ -1543,18 +1649,8 @@ console.log("HERE?!");</code></pre>
               </a>
               (2024) and Kaplan (2025 & 2026)
             </li>
-            <li>
-              Table Tennis Tournament,
-              <a
-                href="images/TableTennis.jpg"
-                target="_blank"
-                rel="noopener noreferrer"
-                class="contact-link"
-              >
-                Kaplan
-              </a>
-              (2026)
-            </li>
+            <!-- Link "Kaplan" to images/TableTennis.jpg once the photo is added. -->
+            <li>Table Tennis Tournament, Kaplan (2026)</li>
           </ul>
         </li>
       </ol>

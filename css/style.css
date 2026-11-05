@@ -1238,7 +1238,7 @@ ul.checklist li:hover::before {
 }
 
 /* -------------------------------------------------------------------------- */
-/* Folders, tags, rich note content, locked note, gallery and toast           */
+/* Folders, tags, rich note content, gallery and toast                      */
 /* -------------------------------------------------------------------------- */
 .toolbar-button.icon-only {
   width: 30px;
@@ -1430,21 +1430,6 @@ button.toolbar-button {
   cursor: default;
 }
 
-li[data-locked] .note-title::after {
-  content: "";
-  display: inline-block;
-  width: 12px;
-  height: 12px;
-  margin-left: 6px;
-  vertical-align: -1px;
-  background: currentColor;
-  opacity: 0.7;
-  -webkit-mask: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' fill='none' stroke='black' stroke-width='2.2'%3E%3Crect x='5.5' y='10.5' width='13' height='9.5' rx='2'/%3E%3Cpath d='M8.5 10.5V8a3.5 3.5 0 0 1 7 0v2.5'/%3E%3C/svg%3E")
-    center / contain no-repeat;
-  mask: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' fill='none' stroke='black' stroke-width='2.2'%3E%3Crect x='5.5' y='10.5' width='13' height='9.5' rx='2'/%3E%3Cpath d='M8.5 10.5V8a3.5 3.5 0 0 1 7 0v2.5'/%3E%3C/svg%3E")
-    center / contain no-repeat;
-}
-
 /* Rich note content */
 #note-content .case-meta {
   margin-top: -8px;
@@ -1462,6 +1447,107 @@ li[data-locked] .note-title::after {
   margin-left: 4px;
   font-size: 13px;
   white-space: nowrap;
+}
+
+/* "‹ Case Studies" link above a sub-note */
+#note-content .note-breadcrumb {
+  margin: 0 0 6px;
+  font-size: 13px;
+}
+
+/* Case Studies index: one link card per write-up */
+#note-content a.case-card {
+  max-width: 560px;
+}
+
+.case-card-result {
+  color: var(--text-body);
+  font-size: 13px;
+}
+
+/* Step-by-step pipeline diagram inside a case study */
+#note-content .flow {
+  margin: 18px 0 22px;
+  container-type: inline-size;
+}
+
+#note-content .flow-steps {
+  display: flex;
+  align-items: stretch;
+  gap: 18px;
+  margin: 0;
+  padding: 0;
+  list-style: none;
+}
+
+#note-content .flow-steps li {
+  position: relative;
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+  flex: 1 1 0;
+  min-width: 0;
+  margin: 0;
+  padding: 8px 10px;
+  border: 1px solid var(--border);
+  border-radius: 10px;
+  background: var(--card-bg);
+  font-size: 13px;
+  line-height: 1.35;
+}
+
+.flow-steps li strong {
+  color: var(--text-primary);
+}
+
+.flow-steps li span {
+  color: var(--text-tertiary);
+  font-size: 12px;
+}
+
+.flow-steps li:not(:last-child)::after {
+  content: "→";
+  position: absolute;
+  top: 50%;
+  right: -15px;
+  color: var(--accent);
+  transform: translateY(-50%);
+}
+
+#note-content .flow-branch {
+  margin: 10px 0 0;
+  padding-left: 10px;
+  border-left: 2px solid var(--accent);
+  color: var(--text-secondary);
+  font-size: 13px;
+}
+
+.flow figcaption {
+  margin-top: 8px;
+  color: var(--text-tertiary);
+  font-size: 12px;
+}
+
+/* When the note is too narrow for one row, the pipeline reads top to bottom. */
+@container (max-width: 500px) {
+  #note-content .flow-steps {
+    flex-direction: column;
+    align-items: flex-start;
+    gap: 18px;
+  }
+
+  #note-content .flow-steps li {
+    min-width: 200px;
+  }
+
+  .flow-steps li:not(:last-child)::after {
+    content: "↓";
+    top: auto;
+    right: auto;
+    bottom: -17px;
+    left: 16px;
+    transform: none;
+  }
 }
 
 .note-table {
@@ -1726,103 +1812,6 @@ li[data-locked] .note-title::after {
   font-size: 13px;
 }
 
-/* Locked note */
-.lock-screen {
-  display: flex;
-  flex-direction: column;
-  align-items: center;
-  padding: 12vh 16px 24px;
-  text-align: center;
-}
-
-.lock-icon svg {
-  width: 54px;
-  height: 54px;
-  fill: none;
-  stroke: var(--text-tertiary);
-  stroke-width: 1.4;
-}
-
-#note-content .lock-screen h2 {
-  margin: 16px 0 6px;
-  color: var(--text-primary);
-  font-size: 20px;
-}
-
-#note-content .lock-screen p {
-  margin: 0 0 16px;
-  color: var(--text-secondary);
-  font-size: 14px;
-}
-
-.lock-form {
-  display: flex;
-  gap: 8px;
-}
-
-.lock-input {
-  width: 200px;
-  padding: 7px 12px;
-  border: 1px solid var(--search-border);
-  border-radius: 8px;
-  background: var(--search-bg);
-  color: var(--text-primary);
-  font: inherit;
-  font-size: 16px;
-}
-
-.lock-input:focus {
-  border-color: var(--accent);
-  outline: none;
-  box-shadow: 0 0 0 3px var(--search-focus-ring);
-}
-
-.lock-submit {
-  padding: 7px 14px;
-  border: 0;
-  border-radius: 8px;
-  background: var(--accent);
-  color: var(--bg-main);
-  font: inherit;
-  font-size: 14px;
-  font-weight: 600;
-  cursor: pointer;
-}
-
-.lock-submit:focus-visible {
-  outline: 2px solid var(--focus-ring);
-  outline-offset: 2px;
-}
-
-.lock-form.is-wrong {
-  animation: lock-shake 0.35s ease;
-}
-
-#note-content .lock-screen .lock-hint {
-  margin: 14px 0 0;
-  color: var(--text-tertiary);
-  font-size: 13px;
-}
-
-@keyframes lock-shake {
-  0%,
-  100% {
-    transform: translateX(0);
-  }
-  20% {
-    transform: translateX(-8px);
-  }
-  40% {
-    transform: translateX(7px);
-  }
-  60% {
-    transform: translateX(-5px);
-  }
-  80% {
-    transform: translateX(3px);
-  }
-}
-
 /* Gallery view */
 .gallery-view {
   flex: 1;
@@ -1900,20 +1889,6 @@ li[data-locked] .note-title::after {
   line-height: 1.45;
   -webkit-box-orient: vertical;
   -webkit-line-clamp: 12;
-}
-
-.gallery-lock {
-  display: grid;
-  flex: 1;
-  place-items: center;
-}
-
-.gallery-lock svg {
-  width: 34px;
-  height: 34px;
-  fill: none;
-  stroke: var(--text-tertiary);
-  stroke-width: 1.5;
 }
 
 .gallery-title {
@@ -2013,10 +1988,6 @@ li[data-locked] .note-title::after {
 }
 
 @media (prefers-reduced-motion: reduce) {
-  .lock-form.is-wrong {
-    animation: none;
-  }
-
   #note-content a.link-card,
   .gallery-thumb,
   .toast {
@@ -2485,7 +2456,7 @@ li[data-locked] .note-title::after {
   .copy-button,
   .case-link,
   .link-card-image,
-  .lock-form {
+  .note-breadcrumb {
     display: none !important;
   }
 

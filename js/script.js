@@ -11,14 +11,9 @@ import { journals, journalsUpdatedAt } from "./journal-data.js";
 
 const NOTE_ITEM = "li[data-section]";
 
-const HIDDEN_NOTE_PREVIEWS = {
-  easter: "Easter egg unlocked!",
-  journal: "Your journal shelf",
-};
-
 const FOLDERS = [
   { id: "all", label: "All Notes", icon: "folder" },
-  { id: "case-studies", label: "Case Studies", icon: "folder" },
+  { id: "life", label: "Life", icon: "folder" },
   { id: "deleted", label: "Recently Deleted", icon: "trash" },
 ];
 
@@ -27,12 +22,7 @@ const FOLDER_ICONS = {
     '<svg viewBox="0 0 24 24" aria-hidden="true" focusable="false"><path d="M3.5 7.5A1.5 1.5 0 0 1 5 6h4.2l1.8 2H19a1.5 1.5 0 0 1 1.5 1.5v8A1.5 1.5 0 0 1 19 19H5a1.5 1.5 0 0 1-1.5-1.5Z"/></svg>',
   trash:
     '<svg viewBox="0 0 24 24" aria-hidden="true" focusable="false"><path d="M5 7h14M10 7V5h4v2M7 7l1 12h8l1-12"/></svg>',
-  lock: '<svg viewBox="0 0 24 24" aria-hidden="true" focusable="false"><rect x="5.5" y="10.5" width="13" height="9.5" rx="2"/><path d="M8.5 10.5V8a3.5 3.5 0 0 1 7 0v2.5"/></svg>',
 };
-
-// A playful easter egg, not a secret: the same word also works in search.
-const LOCK_ANSWER = "easter";
-const LOCKED_PREVIEW = "Locked";
 
 document.addEventListener("DOMContentLoaded", () => {
   const MOBILE_BREAKPOINT = 800;
@@ -74,17 +64,19 @@ document.addEventListener("DOMContentLoaded", () => {
   const isMobile = () => window.innerWidth <= MOBILE_BREAKPOINT;
   adoptPrerenderedNotes();
   const noteData = buildNoteData(notesList.querySelectorAll(NOTE_ITEM));
+  // The Journal has no template (journal.js renders it), so its search text
+  // and date come from journal-data.js.
+  noteData.journal = createNoteEntry("Journal", null, {
+    text: [
+      "Zines I've made, as a flip-through book.",
+      ...journals.flatMap((journal) => [
+        journal?.title ?? "",
+        journal?.description ?? "",
+      ]),
+    ].join(" "),
+    timestamp: journalsUpdatedAt,
+  });
   const allTags = collectTags();
-  // The locked note's text stays out of previews and search until unlocked.
-  const lockedEntry = noteData.private;
-  if (lockedEntry) {
-    noteData.private = {
-      ...lockedEntry,
-      plainContent: "",
-      lowerContent: "",
-      excerpt: LOCKED_PREVIEW,
-    };
-  }
 
   let activeSection = "";
   // Last note opened; restored when a blank mobile list view widens to desktop.
@@ -92,8 +84,6 @@ document.addEventListener("DOMContentLoaded", () => {
   // Last note the user picked (not one search auto-selected); restored when
   // the search is cleared.
   let chosenSection = "";
-  let hiddenNotesRevealed = false;
-  let privateUnlocked = false;
   let activeFolder = "all";
   let activeTag = "";
   let galleryMode = false;
@@ -564,15 +554,13 @@ document.addEventListener("DOMContentLoaded", () => {
     const item = findItem(key);
     if (!item) return false;
 
-    if (!isItemVisible(item)) {
-      const folder = item.dataset.folder || "notes";
+    const row = listItemFor(key);
+    if (!isItemVisible(row)) {
+      const folder = row.dataset.folder || "notes";
       searchInput.value = "";
       activeTag = "";
       activeFolder =
-        folder === "deleted" ||
-        (folder === "case-studies" && activeFolder === "case-studies")
-          ? folder
-          : "all";
+        folder === "deleted" || folder === activeFolder ? folder : "all";
       updateList("");
     }
     return activateSection(key, options);
@@ -586,10 +574,8 @@ document.addEventListener("DOMContentLoaded", () => {
     const visibleItems = getVisibleItems();
     if (!visibleItems.length) return;
 
-    const currentKey = activeSection || lastSection;
-    const currentIndex = visibleItems.findIndex(
-      (item) => item.dataset.section === currentKey,
-    );
+    const currentRow = listItemFor(activeSection || lastSection);
+    const currentIndex = visibleItems.indexOf(currentRow);
     const nextIndex =
       currentIndex === -1
         ? 0
@@ -610,7 +596,9 @@ document.addEventListener("DOMContentLoaded", () => {
     key,
     { updateHash = true, forceLoad = false, fromSearch = false } = {},
   ) {
-    const item = findItem(key);
+    // A sub-note (e.g. one case study) highlights its parent's row unless
+    // search or a tag is showing the sub-note itself.
+    const item = listItemFor(key);
     if (!item || !isItemVisible(item)) return false;
 
     const changed = activeSection !== key;
@@ -619,7 +607,7 @@ document.addEventListener("DOMContentLoaded", () => {
     if (!fromSearch) chosenSection = key;
 
     notesList.querySelectorAll(NOTE_ITEM).forEach((entry) => {
-      const isSelected = entry.dataset.section === key;
+      const isSelected = entry === item;
       entry.classList.toggle("active", isSelected);
       entry.setAttribute("aria-selected", isSelected ? "true" : "false");
       entry.tabIndex = isSelected ? 0 : -1;
@@ -668,11 +656,13 @@ document.addEventListener("DOMContentLoaded", () => {
 
     // Desktop always shows a note; the mobile list view may have none open.
     if (!activeSection) {
-      const lastItem = findItem(lastSection);
+      const lastItem = listItemFor(lastSection);
       const fallback =
-        lastItem && isItemVisible(lastItem) ? lastItem : getVisibleItems()[0];
+        lastItem && isItemVisible(lastItem)
+          ? lastSection
+          : getVisibleItems()[0]?.dataset.section;
       if (fallback) {
-        activateSection(fallback.dataset.section, {
+        activateSection(fallback, {
           updateHash: false,
           forceLoad: true,
         });
@@ -697,11 +687,7 @@ document.addEventListener("DOMContentLoaded", () => {
   function updateList(rawTerm) {
     const term = rawTerm.trim();
     const lowerTerm = term.toLowerCase();
-    const isEasterQuery = lowerTerm === "easter";
     let visibleCount = 0;
-
-    // Once revealed, the hidden notes stay for the rest of the visit.
-    if (isEasterQuery) revealHiddenNotes();
 
     notesList.querySelectorAll(NOTE_ITEM).forEach((item) => {
       const key = item.dataset.section;
@@ -710,15 +696,6 @@ document.addEventListener("DOMContentLoaded", () => {
 
       const titleEl = item.querySelector(".note-title");
       const previewEl = item.querySelector(".note-preview");
-
-      if (isEasterQuery) {
-        const preview = HIDDEN_NOTE_PREVIEWS[key] || "";
-        item.style.display = preview ? "" : "none";
-        titleEl.innerHTML = highlight(data.title, "");
-        renderPreview(previewEl, data, escapeHtml(preview));
-        if (preview) visibleCount++;
-        return;
-      }
 
       // Search looks across every folder, like Notes; otherwise the current
       // folder or tag decides what's listed.
@@ -768,6 +745,8 @@ document.addEventListener("DOMContentLoaded", () => {
 
   function isInScope(item) {
     const folder = item.dataset.folder || "notes";
+    // Sub-notes are listed by search and tags, not by folders.
+    if (item.dataset.parent && !activeTag) return false;
     if (activeTag) {
       return folder !== "deleted" && getTags(item).includes(activeTag);
     }
@@ -798,14 +777,14 @@ document.addEventListener("DOMContentLoaded", () => {
     }
 
     if (!term && chosenSection && chosenSection !== activeSection) {
-      const chosenItem = findItem(chosenSection);
+      const chosenItem = listItemFor(chosenSection);
       if (chosenItem && isItemVisible(chosenItem)) {
         activateSection(chosenSection, { forceLoad: true, fromSearch: true });
         return;
       }
     }
 
-    const activeItem = findItem(activeSection);
+    const activeItem = listItemFor(activeSection);
     if (!activeItem || !isItemVisible(activeItem)) {
       const firstVisible = getVisibleItems()[0];
       activateSection(firstVisible.dataset.section, {
@@ -882,11 +861,6 @@ document.addEventListener("DOMContentLoaded", () => {
 
     unmountJournal();
 
-    if (key === "private" && !privateUnlocked) {
-      renderLockScreen();
-      return;
-    }
-
     const scrollTop = mainContent.scrollTop;
     const fragment = data.template.content.cloneNode(true);
     const term = searchInput.value.trim();
@@ -896,7 +870,13 @@ document.addEventListener("DOMContentLoaded", () => {
       timestampEl.textContent = timestampEl.dataset.time;
     }
 
-    const tags = getTags(findItem(key));
+    const item = findItem(key);
+    const parentKey = item?.dataset.parent;
+    if (parentKey && noteData[parentKey]) {
+      fragment.prepend(createBreadcrumb(parentKey));
+    }
+
+    const tags = getTags(item);
     if (tags.length) fragment.append(createTagRow(tags));
 
     if (term) highlightFragment(fragment, term);
@@ -1020,69 +1000,6 @@ document.addEventListener("DOMContentLoaded", () => {
   }
 
   /* ------------------------------------------------------------------ */
-  /* Hidden notes (Fun Facts + Journal)                                 */
-  /* ------------------------------------------------------------------ */
-
-  function revealHiddenNotes() {
-    if (hiddenNotesRevealed) return;
-
-    const easterTemplate = document.getElementById("section-easter");
-    if (!easterTemplate) return;
-    hiddenNotesRevealed = true;
-
-    // Revealed notes join the regular "Notes" group, above Recently Deleted.
-    const deletedHeader = notesList.querySelector(
-      '[data-group-header="deleted"]',
-    );
-    deletedHeader.before(
-      createNoteItem("easter", "Fun Facts"),
-      createNoteItem("journal", "Journal"),
-    );
-
-    noteData.easter = createNoteEntry(
-      "Fun Facts",
-      easterTemplate.content.cloneNode(true),
-      {
-        template: easterTemplate,
-        timestamp:
-          easterTemplate.content.querySelector(".note-timestamp")?.dataset
-            .time ?? "",
-      },
-    );
-
-    const journalText = [
-      "A quiet place for notes, sketches, and moments worth keeping.",
-      ...journals.flatMap((journal) => [
-        journal?.title ?? "",
-        journal?.description ?? "",
-      ]),
-    ].join(" ");
-    noteData.journal = createNoteEntry("Journal", null, {
-      text: journalText,
-      timestamp: journalsUpdatedAt,
-    });
-  }
-
-  function createNoteItem(section, title) {
-    const item = document.createElement("li");
-    item.dataset.section = section;
-    item.dataset.group = "notes";
-    item.dataset.folder = "notes";
-    item.setAttribute("role", "option");
-    item.setAttribute("aria-selected", "false");
-    item.tabIndex = -1;
-
-    const titleEl = document.createElement("div");
-    titleEl.className = "note-title";
-    titleEl.textContent = title;
-    const previewEl = document.createElement("div");
-    previewEl.className = "note-preview";
-
-    item.append(titleEl, previewEl);
-    return item;
-  }
-
-  /* ------------------------------------------------------------------ */
   /* Helpers                                                            */
   /* ------------------------------------------------------------------ */
 
@@ -1109,6 +1026,17 @@ document.addEventListener("DOMContentLoaded", () => {
       .querySelectorAll(`${NOTE_ITEM}[data-tags]`)
       .forEach((item) => getTags(item).forEach((tag) => tags.add(tag)));
     return [...tags].sort();
+  }
+
+  /** "‹ Case Studies" link at the top of a sub-note. */
+  function createBreadcrumb(parentKey) {
+    const row = document.createElement("p");
+    row.className = "note-breadcrumb";
+    const link = document.createElement("a");
+    link.href = `#${encodeURIComponent(parentKey)}`;
+    link.textContent = `‹ ${noteData[parentKey].title}`;
+    row.append(link);
+    return row;
   }
 
   function createTagRow(tags) {
@@ -1143,6 +1071,7 @@ document.addEventListener("DOMContentLoaded", () => {
 
   function countInFolder(folderId) {
     return Array.from(notesList.querySelectorAll(NOTE_ITEM)).filter((item) => {
+      if (item.dataset.parent) return false;
       const folder = item.dataset.folder || "notes";
       return folderId === "all" ? folder !== "deleted" : folder === folderId;
     }).length;
@@ -1202,7 +1131,7 @@ document.addEventListener("DOMContentLoaded", () => {
     track("filter_notes", { folder, tag });
 
     if (isMobile() || galleryMode) return;
-    const activeItem = findItem(activeSection);
+    const activeItem = listItemFor(activeSection);
     if (!activeItem || !isItemVisible(activeItem)) {
       const first = getVisibleItems()[0];
       if (first) {
@@ -1240,12 +1169,9 @@ document.addEventListener("DOMContentLoaded", () => {
     const cards = getVisibleItems().map((item) => {
       const key = item.dataset.section;
       const data = noteData[key];
-      const isLocked = key === "private" && !privateUnlocked;
-      const preview = isLocked
-        ? `<span class="gallery-lock">${FOLDER_ICONS.lock}</span>`
-        : `<span class="gallery-thumb-title">${escapeHtml(data.title)}</span><span class="gallery-thumb-text">${escapeHtml(data.excerpt)}</span>`;
+      const preview = `<span class="gallery-thumb-title">${escapeHtml(data.title)}</span><span class="gallery-thumb-text">${escapeHtml(data.excerpt)}</span>`;
       const date = formatListDate(data.dateValue);
-      return `<button type="button" class="gallery-card${key === activeSection ? " is-active" : ""}" data-section="${escapeHtml(key)}"><span class="gallery-thumb">${preview}</span><span class="gallery-title">${escapeHtml(data.title)}</span><span class="gallery-date">${escapeHtml(date)}</span></button>`;
+      return `<button type="button" class="gallery-card${item === listItemFor(activeSection) ? " is-active" : ""}" data-section="${escapeHtml(key)}"><span class="gallery-thumb">${preview}</span><span class="gallery-title">${escapeHtml(data.title)}</span><span class="gallery-date">${escapeHtml(date)}</span></button>`;
     });
     galleryView.innerHTML = cards.length
       ? `<div class="gallery-grid">${cards.join("")}</div>`
@@ -1257,57 +1183,6 @@ document.addEventListener("DOMContentLoaded", () => {
     if (!card) return;
     setGalleryMode(false);
     openNote(card.dataset.section, { forceLoad: true });
-  }
-
-  /* ------------------------------------------------------------------ */
-  /* Locked note                                                        */
-  /* ------------------------------------------------------------------ */
-
-  function renderLockScreen() {
-    contentDiv.dataset.term = "";
-    footer.classList.remove("visible");
-    mainContent.style.paddingBottom = "0";
-    contentDiv.innerHTML = `
-      <div class="lock-screen">
-        <span class="lock-icon">${FOLDER_ICONS.lock}</span>
-        <h2>This note is locked.</h2>
-        <p>Enter the note's password to view it.</p>
-        <form class="lock-form">
-          <input type="password" class="lock-input" placeholder="Password" aria-label="Note password" autocomplete="off" required />
-          <button type="submit" class="lock-submit">OK</button>
-        </form>
-        <p class="lock-hint" hidden>Hint: 🥚 What do you hunt for in spring?</p>
-      </div>`;
-
-    const form = contentDiv.querySelector(".lock-form");
-    const input = contentDiv.querySelector(".lock-input");
-    form.addEventListener("submit", (event) => {
-      event.preventDefault();
-      if (input.value.trim().toLowerCase() === LOCK_ANSWER) {
-        unlockPrivateNote();
-        return;
-      }
-      input.value = "";
-      contentDiv.querySelector(".lock-hint").hidden = false;
-      form.classList.remove("is-wrong");
-      void form.offsetWidth;
-      form.classList.add("is-wrong");
-      track("unlock_attempt", { success: false });
-    });
-
-    mainContent.scrollTop = 0;
-    fadeInContent();
-    if (!isMobile()) input.focus({ preventScroll: true });
-  }
-
-  function unlockPrivateNote() {
-    privateUnlocked = true;
-    if (lockedEntry) noteData.private = lockedEntry;
-    findItem("private")?.removeAttribute("data-locked");
-    revealHiddenNotes();
-    updateList(searchInput.value);
-    loadNote("private");
-    track("unlock_attempt", { success: true });
   }
 
   /* ------------------------------------------------------------------ */
@@ -1370,6 +1245,13 @@ document.addEventListener("DOMContentLoaded", () => {
   function findItem(key) {
     if (!key) return null;
     return notesList.querySelector(`li[data-section="${CSS.escape(key)}"]`);
+  }
+
+  /** The list row that stands for a note: itself, or its parent if hidden. */
+  function listItemFor(key) {
+    const item = findItem(key);
+    if (!item?.dataset.parent || isItemVisible(item)) return item;
+    return findItem(item.dataset.parent) || item;
   }
 
   function isItemVisible(item) {
